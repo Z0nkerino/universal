@@ -3,12 +3,16 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
+const preview = process.env.UP_PREVIEW === '1';
+
 export default defineConfig({
+  base: preview ? './' : '/',
   define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0') },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     react(),
-    VitePWA({
+    !preview &&
+      VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['brand/*.svg', 'brand/*.png', 'favicon.svg'],
       manifest: {
