@@ -82,7 +82,7 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
     stopAmbient();
     setAmbient('off');
     close();
-    if (mins >= 1) toast(`${t('Focused for')} ${Math.round(mins)} min${markDone ? ` · ${t('task done')}` : ''}`);
+    if (mins >= 1) toast(`${t('Focused for')} ${Math.round(mins)} ${t('min')}${markDone ? ` · ${t('task done')}` : ''}`);
   };
 
   const startPhase = (p: 'focus' | 'break', min: number) => {

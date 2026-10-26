@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { tNow } from '@/lib/i18n';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
@@ -47,7 +48,7 @@ export function Toaster() {
               t.tone === 'error' ? 'bg-[#E5484D] text-white' : 'bg-ink text-white dark:bg-white dark:text-ink',
             )}
           >
-            <span className="py-1.5">{t.message}</span>
+            <span className="py-1.5">{tNow(t.message)}</span>
             {t.action ? (
               <button
                 type="button"

@@ -5,3 +5,5 @@ dist
 dist-desktop
 release
 *.tsbuildinfo
+dist-android
+android-signing/

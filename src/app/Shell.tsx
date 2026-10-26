@@ -1,11 +1,12 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { MotionConfig, motion } from 'framer-motion';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TabBar } from './TabBar';
 import { CommandBar, useCommand } from './CommandBar';
 import { UpdateToast } from './UpdateToast';
 import { useRouter, type Route } from './router';
 import { NAV } from './nav';
+import { tNow } from '@/lib/i18n';
 import { useIsDark, useIsDesktop, useReducedMotion } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
 import { pageVariants } from '@/lib/motion';
@@ -20,19 +21,23 @@ import { Toaster } from '@/ui/Toast';
 import { ChoiceHost, ConfirmHost, PromptHost } from '@/ui/Confirm';
 import { DragGhost } from '@/ui/dnd';
 import { startReminders } from '@/lib/reminders';
+const Onboarding = lazy(() => import('@/features/onboarding/Onboarding').then((m) => ({ default: m.Onboarding })));
 import { db, getKV, setKV } from '@/lib/db';
-import { seedDemoData } from '@/lib/demo';
 
-/** First launch: fill the app with removable sample data so it doesn't open empty. */
-let firstRunPromise: Promise<void> | null = null;
-function firstRun() {
-  // Once per page load, even if effects run twice (React StrictMode) or several tabs race.
+/**
+ * Decides whether to show onboarding. Installs from before onboarding existed (they have
+ * 'initialized') skip it. Runs once per page load even if effects run twice.
+ */
+let firstRunPromise: Promise<boolean> | null = null;
+function needsOnboarding() {
   firstRunPromise ??= db.transaction('rw', db.kv, async () => {
-    if (await getKV('initialized')) return false;
+    if (await getKV('onboarded')) return false;
+    if (await getKV('initialized')) {
+      await setKV('onboarded', Date.now());
+      return false;
+    }
     await setKV('initialized', Date.now());
     return true;
-  }).then(async (fresh) => {
-    if (fresh && (await db.tasks.count()) === 0 && (await db.events.count()) === 0) await seedDemoData();
   });
   return firstRunPromise;
 }
@@ -106,16 +111,20 @@ function useGlobalEffects() {
     return () => removeEventListener('keydown', onKey);
   }, []);
 
-  useEffect(() => {
-    void firstRun();
-    return startReminders();
-  }, []);
+  useEffect(() => startReminders(), []);
 
   return reduced;
 }
 
 export function Shell() {
   const reduced = useGlobalEffects();
+  const [onboarding, setOnboarding] = useState(false);
+  useEffect(() => void needsOnboarding().then(setOnboarding), []);
+  useEffect(() => {
+    const replay = () => setOnboarding(true);
+    addEventListener('up:onboarding', replay);
+    return () => removeEventListener('up:onboarding', replay);
+  }, []);
   const desktop = useIsDesktop();
   const route = useRouter((s) => s.route);
   const Page = pages[route];
@@ -128,7 +137,7 @@ export function Shell() {
   return (
     <MotionConfig reducedMotion={reduced ? 'always' : 'never'} transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
       <a href="#main" className="sr-only-focusable fixed left-4 top-4 z-[60] rounded-xl bg-fg px-4 py-2 text-bg">
-        Skip to content
+        {tNow('Skip to content')}
       </a>
       <div className="titlebar-drag" aria-hidden />
       <div className="ambient" aria-hidden>
@@ -164,6 +173,9 @@ export function Shell() {
       <PromptHost />
       <DragGhost />
       <Toaster />
+      <Suspense fallback={null}>
+        <AnimatePresence>{onboarding && <Onboarding onDone={() => setOnboarding(false)} />}</AnimatePresence>
+      </Suspense>
     </MotionConfig>
   );
 }

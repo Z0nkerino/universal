@@ -5,7 +5,7 @@ import { parseQuickAdd } from '@/lib/nlp';
 import { quickAdd } from '@/lib/actions';
 import { fmt, fmtTime, todayKey } from '@/lib/dates';
 import { toast } from '@/ui/Toast';
-import { useT } from '@/lib/i18n';
+import { useT, tNow } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
 import type { Task, TaskStatus } from '@/lib/types';
@@ -37,7 +37,7 @@ export function QuickAdd({ kind, status, placeholder, className, autoFocus }: { 
       const date = fmt(parsed.start, 'EEE d MMM');
       chips.push({ icon: CalendarPlus, text: parsed.hasTime ? `${date}, ${fmtTime(parsed.start)}${parsed.end && parsed.kind === 'event' ? `–${fmtTime(parsed.end)}` : ''}` : date });
     }
-    if (parsed.estimate) chips.push({ icon: Timer, text: `${parsed.estimate} min` });
+    if (parsed.estimate) chips.push({ icon: Timer, text: `${parsed.estimate} ${tNow('min')}` });
     if (parsed.rrule) chips.push({ icon: Repeat, text: t(parsed.rrule.byDay?.length === 5 ? 'Weekdays' : parsed.rrule.freq === 'daily' ? 'Daily' : parsed.rrule.freq === 'weekly' ? 'Weekly' : parsed.rrule.freq === 'monthly' ? 'Monthly' : 'Yearly') });
     if (parsed.priority) chips.push({ icon: Flag, text: t(['', 'Low', 'Medium', 'High'][parsed.priority]), tone: parsed.priority === 3 ? 'text-pink' : 'text-blue' });
     for (const tag of parsed.tags) chips.push({ icon: Hash, text: tag });

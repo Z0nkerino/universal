@@ -115,11 +115,11 @@ function SleepCard() {
   return (
     <Card icon={Moon} title={t('Sleep')}>
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <Stat label={t('Last night')} value={today ? today.hours : '—'} unit="h" sub={avg !== null ? `${t('2-week average')} ${avg.toFixed(1)} h · ${t('goal')} ${target} h` : undefined} />
+        <Stat label={t('Last night')} value={today ? today.hours : '—'} unit={t('h')} sub={avg !== null ? `${t('2-week average')} ${avg.toFixed(1)} ${t('h')} · ${t('goal')} ${target} h` : undefined} />
         <div className="flex items-center gap-2">
           <input type="range" min={3} max={12} step={0.25} value={hours} onChange={(e) => setHours(Number(e.target.value))} aria-label={t('Hours slept')} className="w-28 accent-[#2F6BFF]" />
           <span className="w-12 text-right text-[15px] font-bold tabular-nums">{hours}h</span>
-          <Button onClick={async () => (await logSleep(hours), toast(`${t('Sleep logged')} · ${hours} h`))}>{t('Log')}</Button>
+          <Button onClick={async () => (await logSleep(hours), toast(`${t('Sleep logged')} · ${hours} ${t('h')}`))}>{t('Log')}</Button>
         </div>
       </div>
       <div className="mt-4 h-36" role="img" aria-label={t('Hours of sleep over the last two weeks')}>
@@ -134,7 +134,7 @@ function SleepCard() {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-2"><Legend items={[{ label: t('Hours slept'), color: c.blue }, { label: `${t('Goal')} ${target} h`, color: c.target, dashed: true }]} /></div>
+      <div className="mt-2"><Legend items={[{ label: t('Hours slept'), color: c.blue }, { label: `${t('Goal')} ${target} ${t('h')}`, color: c.target, dashed: true }]} /></div>
     </Card>
   );
 }

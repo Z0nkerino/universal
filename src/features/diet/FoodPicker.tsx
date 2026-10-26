@@ -10,7 +10,7 @@ import { Button, IconButton } from '@/ui/Button';
 import { Field, Input } from '@/ui/Field';
 import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/Toast';
-import { useT } from '@/lib/i18n';
+import { tNow, useT } from '@/lib/i18n';
 import { todayKey } from '@/lib/dates';
 import { BUILTIN_FOODS, searchFoods } from './foods';
 
@@ -40,7 +40,7 @@ function FoodRow({ f, onPick, lang }: { f: Food; onPick: () => void; lang: 'en' 
             {f.custom ? ' · custom' : ''}
           </span>
         </span>
-        <span className="shrink-0 text-[14px] font-bold tabular-nums">{f.kcal}<span className="ml-0.5 text-[11px] font-semibold text-fg/45">kcal</span></span>
+        <span className="shrink-0 text-[14px] font-bold tabular-nums">{f.kcal}<span className="ml-0.5 text-[11px] font-semibold text-fg/45">{tNow('kcal')}</span></span>
       </button>
     </li>
   );
@@ -66,7 +66,7 @@ function CustomFoodForm({ onDone }: { onDone: (f: Food) => void }) {
       <Field label={t('Serving')} htmlFor="cf-serving"><Input id="cf-serving" value={f.serving} onChange={(e) => setF({ ...f, serving: e.target.value })} /></Field>
       <div className="grid grid-cols-4 gap-2">
         {(['kcal', 'protein', 'carbs', 'fat'] as const).map((k) => (
-          <Field key={k} label={k === 'kcal' ? 'kcal' : t(k[0].toUpperCase() + k.slice(1)) + ' g'} htmlFor={`cf-${k}`}>
+          <Field key={k} label={k === 'kcal' ? t('kcal') : t(k[0].toUpperCase() + k.slice(1)) + ' ' + t('g')} htmlFor={`cf-${k}`}>
             <Input id={`cf-${k}`} inputMode="decimal" value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} placeholder="0" />
           </Field>
         ))}
@@ -146,7 +146,7 @@ export function FoodPicker() {
             </div>
             <div className="mt-5 grid grid-cols-4 gap-2 text-center">
               {[
-                ['kcal', Math.round(chosen.kcal * servings)],
+                [t('kcal'), Math.round(chosen.kcal * servings)],
                 [t('Protein'), `${Math.round(chosen.protein * servings)} g`],
                 [t('Carbs'), `${Math.round(chosen.carbs * servings)} g`],
                 [t('Fat'), `${Math.round(chosen.fat * servings)} g`],
@@ -220,7 +220,7 @@ export function FoodPicker() {
                             <span className="block truncate text-[15px] font-semibold">{m.name}</span>
                             <span className="block truncate text-[12px] text-fg/50">{m.items.map((i) => i.name).join(', ')}</span>
                           </span>
-                          <span className="text-[14px] font-bold tabular-nums">{Math.round(m.items.reduce((a, i) => a + i.kcal, 0))} kcal</span>
+                          <span className="text-[14px] font-bold tabular-nums">{Math.round(m.items.reduce((a, i) => a + i.kcal, 0))} {t('kcal')}</span>
                         </button>
                       </li>
                     ))}

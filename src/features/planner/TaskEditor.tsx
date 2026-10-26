@@ -12,7 +12,7 @@ import { Segmented } from '@/ui/Segmented';
 import { Checkbox } from '@/ui/Checkbox';
 import { confirm } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
-import { useT } from '@/lib/i18n';
+import { useT, tNow } from '@/lib/i18n';
 import { fromDayKey, todayKey } from '@/lib/dates';
 import { breakDownTask } from './breakdown';
 import { useFocusMode, useTaskEditor } from './store';
@@ -128,7 +128,7 @@ export function TaskEditor() {
               >
                 <option value="">{t('No estimate')}</option>
                 {ESTIMATES.map((m) => (
-                  <option key={m} value={m}>{m >= 60 ? `${m / 60} h` : `${m} min`}</option>
+                  <option key={m} value={m}>{m >= 60 ? `${m / 60} ${tNow('h')}` : `${m} ${tNow('min')}`}</option>
                 ))}
               </Select>
             </Field>

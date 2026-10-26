@@ -11,7 +11,7 @@ import { useSettings } from '@/lib/settings';
 import { useT } from '@/lib/i18n';
 import { downloadBackup, importBackup, wipeAllData } from '@/lib/backup';
 import { useInstall, platform } from '@/lib/install';
-import { desktop, useUpdates } from '@/lib/desktop';
+import { appUpdater, useUpdates } from '@/lib/desktop';
 import { useRouter } from '@/app/router';
 import { hasDemoData, removeDemoData, seedDemoData } from '@/lib/demo';
 import { requestNotificationPermission } from '@/lib/reminders';
@@ -20,9 +20,10 @@ import { confirm } from '@/ui/Confirm';
 import { itemVariants } from '@/lib/motion';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  const t = useT();
   return (
     <motion.section variants={itemVariants} className="mb-6">
-      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{title}</h2>
+      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{t(title)}</h2>
       <Glass shimmer={false} className="divide-y divide-fg/[0.06] overflow-hidden">
         {children}
       </Glass>
@@ -31,11 +32,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
       <div className="min-w-0">
-        <p className="text-[15px] font-semibold">{label}</p>
-        {hint && <p className="mt-0.5 text-[13px] text-fg/50">{hint}</p>}
+        <p className="text-[15px] font-semibold">{t(label)}</p>
+        {hint && <p className="mt-0.5 text-[13px] text-fg/50">{t(hint)}</p>}
       </div>
       {children}
     </div>
@@ -50,13 +52,13 @@ const installHelp: Record<string, string> = {
   other: 'Use your browser’s “Install app” option.',
 };
 
-function updateHint(s: ReturnType<typeof useUpdates.getState>['status']) {
+function updateHint(s: ReturnType<typeof useUpdates.getState>['status'], t: (k: string) => string) {
   switch (s.state) {
     case 'checking': return 'Checking…';
-    case 'downloading': return `Downloading version ${s.version}…`;
-    case 'ready': return `Version ${s.version} is downloaded and ready.`;
-    case 'installer': return `Version ${s.version} needs a fresh download of the app.`;
-    case 'current': return `You’re on the newest version (${s.version}). Checks automatically every few hours.`;
+    case 'downloading': return `${t('Downloading version')} ${s.version}…`;
+    case 'ready': return `${t('Version')} ${s.version}. ${t('Downloaded and ready.')}`;
+    case 'installer': return `${t('Version')} ${s.version}. ${t('Needs a fresh download of the app.')}`;
+    case 'current': return `${t('You’re on the newest version')} (${s.version}). ${t('Checks automatically every few hours.')}`;
     case 'unavailable': case 'error': return s.message;
     default: return 'Checks automatically when the app opens and every few hours.';
   }
@@ -95,12 +97,31 @@ export default function SettingsPage() {
               step={0.05}
               value={s.accent}
               onChange={(e) => s.set({ accent: Number(e.target.value) })}
-              aria-label="Accent intensity"
+              aria-label={t('Accent intensity')}
               className="w-40 accent-[#2F6BFF]"
             />
           </Row>
           <Row label="Reduce motion" hint="Follows your system setting unless you override it.">
             <Segmented label="Motion" value={s.motion} onChange={(motion) => s.set({ motion })} options={[{ value: 'system', label: 'Auto' }, { value: 'reduced', label: 'Reduced' }, { value: 'full', label: 'Full' }]} />
+          </Row>
+        </Section>
+
+        <Section title="Sections">
+          {(
+            [
+              ['calendar', 'Calendar'],
+              ['notes', 'Notes'],
+              ['ideas', 'Ideas'],
+              ['health', 'Health'],
+              ['insights', 'Insights'],
+            ] as const
+          ).map(([id, label]) => (
+            <Row key={id} label={t(label)}>
+              <Switch label={`${t('Show')} ${t(label)}`} checked={s.features.includes(id)} onChange={(on) => s.set({ features: on ? [...s.features, id] : s.features.filter((f) => f !== id) })} />
+            </Row>
+          ))}
+          <Row label="Welcome screens" hint="See the introduction again.">
+            <Button variant="glass" size="sm" icon={Sparkles} onClick={() => dispatchEvent(new Event('up:onboarding'))}>Show again</Button>
           </Row>
         </Section>
 
@@ -119,11 +140,11 @@ export default function SettingsPage() {
         <Section title="Planning & reminders">
           <Row label="Planning hours" hint="“Plan my day” only schedules tasks inside these hours.">
             <div className="flex items-center gap-2">
-              <select aria-label="Day starts" value={s.dayStartH} onChange={(e) => s.set({ dayStartH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
+              <select aria-label={t('Day starts')} value={s.dayStartH} onChange={(e) => s.set({ dayStartH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
                 {Array.from({ length: 13 }, (_, h) => h + 5).map((h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}
               </select>
               <span className="text-fg/40">–</span>
-              <select aria-label="Day ends" value={s.dayEndH} onChange={(e) => s.set({ dayEndH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
+              <select aria-label={t('Day ends')} value={s.dayEndH} onChange={(e) => s.set({ dayEndH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
                 {Array.from({ length: 12 }, (_, h) => h + 13).map((h) => <option key={h} value={h}>{String(h % 24).padStart(2, '0')}:00</option>)}
               </select>
             </div>
@@ -141,9 +162,9 @@ export default function SettingsPage() {
         </Section>
 
         <Section title="Afina">
-          <Row label="On-device model" hint={llm.status === 'unsupported' ? `${llm.reason ?? ''} Afina uses her built-in engine.` : llm.installed ? 'Downloaded to this device. Works offline.' : 'Not downloaded. Install it from the Afina screen for free-form chat.'}>
+          <Row label="On-device model" hint={llm.status === 'unsupported' ? `${t(llm.reason ?? '')} ${t('Afina uses her built-in engine.')}` : llm.installed ? 'Downloaded to this device. Works offline.' : 'Not downloaded. Install it from the Afina screen for free-form chat.'}>
             <select
-              aria-label="Afina model"
+              aria-label={t('Afina model')}
               value={(MODELS.find((m) => s.model.startsWith(m.id)) ?? MODELS[0]).id}
               onChange={(e) => void switchModel(e.target.value)}
               className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold"
@@ -184,7 +205,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  aria-label={`${label} target`}
+                  aria-label={`${t(label)} · ${t('target')}`}
                   min={min}
                   max={max}
                   step={step}
@@ -195,7 +216,7 @@ export default function SettingsPage() {
                   }}
                   className="h-9 w-24 rounded-xl bg-fg/[0.06] px-3 text-right text-[15px] font-semibold tabular-nums focus:shadow-[0_0_0_2px_rgb(47_107_255/0.5)] focus-visible:outline-none"
                 />
-                <span className="w-9 text-[13px] text-fg/50">{unit}</span>
+                <span className="w-9 text-[13px] text-fg/50">{t(unit)}</span>
               </div>
             </Row>
           ))}
@@ -233,27 +254,27 @@ export default function SettingsPage() {
               />
             </div>
           </Row>
-          {msg && <p role="status" className="px-5 py-3 text-[14px] text-blue">{msg}</p>}
+          {msg && <p role="status" className="px-5 py-3 text-[14px] text-blue">{t(msg)}</p>}
           <Row label="Erase everything" hint="Deletes all local data. This can’t be undone.">
             <Button variant="ghost" size="sm" icon={Trash2} className="text-[#E5484D] hover:text-[#E5484D]" onClick={() => setConfirmWipe(true)}>Erase…</Button>
           </Row>
         </Section>
 
         <Section title="App">
-          {desktop && (
-            <Row label="Updates" hint={updateHint(update)}>
+          {appUpdater && (
+            <Row label="Updates" hint={updateHint(update, t)}>
               {update.state === 'ready' ? (
-                <Button variant="brand" size="sm" icon={RefreshCw} onClick={() => void desktop!.updates.apply()}>Restart to update</Button>
+                <Button variant="brand" size="sm" icon={RefreshCw} onClick={() => void appUpdater!.apply()}>Restart to update</Button>
               ) : update.state === 'installer' ? (
-                <Button variant="brand" size="sm" icon={Download} onClick={() => void desktop!.updates.download(update.url)}>Download</Button>
+                <Button variant="brand" size="sm" icon={Download} onClick={() => void appUpdater!.download(update.url)}>Download</Button>
               ) : (
-                <Button variant="glass" size="sm" icon={RefreshCw} disabled={update.state === 'checking' || update.state === 'downloading'} onClick={() => void desktop!.updates.check()}>
-                  Check now
+                <Button variant="glass" size="sm" icon={RefreshCw} disabled={update.state === 'checking' || update.state === 'downloading'} onClick={() => void appUpdater!.check()}>
+                  {t('Check now')}
                 </Button>
               )}
             </Row>
           )}
-          {!desktop && <Row label={install.installed ? 'Installed as an app' : 'Install as an app'} hint={install.installed ? 'You’re running the installed app. It works offline.' : installHelp[platform]}>
+          {!appUpdater && <Row label={install.installed ? 'Installed as an app' : 'Install as an app'} hint={install.installed ? 'You’re running the installed app. It works offline.' : installHelp[platform]}>
             {install.event && !install.installed && (
               <Button variant="brand" size="sm" icon={MonitorDown} onClick={() => void install.prompt()}>Install</Button>
             )}
@@ -268,15 +289,15 @@ export default function SettingsPage() {
             <AppIcon size={72} />
             <div>
               <p className="text-[19px] font-bold tracking-[-0.02em]">Universal Planner</p>
-              <p className="text-[13px] text-fg/55">Version {__APP_VERSION__}</p>
+              <p className="text-[13px] text-fg/55">{t('Version')} {__APP_VERSION__}</p>
             </div>
           </div>
           <div className="flex flex-col items-center gap-2">
             <EternalMark size={56} className="text-fg" title="Eternal Inc." />
             <p className="text-[14px] text-fg/60">
-              Designed and built by <span className="font-semibold text-fg">Eternal Inc.</span>
+              {t('Designed and built by')} <span className="font-semibold text-fg">Eternal Inc.</span>
             </p>
-            <p className="text-[12px] text-fg/40">© {new Date().getFullYear()} Eternal Inc. All rights reserved.</p>
+            <p className="text-[12px] text-fg/40">© {new Date().getFullYear()} Eternal Inc. {t('All rights reserved.')}</p>
           </div>
           <PlannerMark size={18} gradient className="opacity-80" />
         </motion.section>
@@ -285,7 +306,7 @@ export default function SettingsPage() {
       <Sheet open={confirmWipe} onClose={() => setConfirmWipe(false)} label="Confirm erase" className="max-w-md">
         <div className="p-6">
           <h2 className="text-[20px] font-bold tracking-[-0.02em]">Erase all data?</h2>
-          <p className="mt-2 text-[15px] text-fg/60">Every task, event, note, idea and log on this device will be deleted. Export a backup first if you might want it back.</p>
+          <p className="mt-2 text-[15px] text-fg/60">{t('Every task, event, note, idea and log on this device will be deleted. Export a backup first if you might want it back.')}</p>
           <div className="mt-6 flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setConfirmWipe(false)}>Cancel</Button>
             <Button variant="danger" icon={Trash2} onClick={() => void wipeAllData()}>Erase everything</Button>

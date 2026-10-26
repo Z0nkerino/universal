@@ -74,7 +74,7 @@ export function FoodLog({ date }: { date: string }) {
               </div>
               <div>
                 <p className="text-[34px] font-bold leading-none tabular-nums tracking-[-0.03em]">{r0(totals.kcal)}</p>
-                <p className="mt-1 text-[13px] font-semibold text-fg/50">/ {targets.kcal} kcal</p>
+                <p className="mt-1 text-[13px] font-semibold text-fg/50">/ {targets.kcal} {t('kcal')}</p>
                 <p className={`mt-2 text-[14px] font-semibold ${left < 0 ? 'text-pink' : 'text-blue'}`}>{left >= 0 ? `${r0(left)} ${t('left')}` : `${r0(-left)} ${t('over')}`}</p>
               </div>
             </div>
@@ -90,7 +90,7 @@ export function FoodLog({ date }: { date: string }) {
             <div className="flex items-center gap-2">
               <Droplets size={16} className="text-blue" aria-hidden />
               <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{t('Water')}</h2>
-              <span className="text-[13px] font-semibold tabular-nums text-fg/60">{ml} / {targets.waterMl} ml</span>
+              <span className="text-[13px] font-semibold tabular-nums text-fg/60">{ml} / {targets.waterMl} {t('ml')}</span>
             </div>
             <div className="mt-4 flex flex-wrap gap-1.5" role="img" aria-label={`${Math.round(ml / 250)} ${t('glasses')}`}>
               {Array.from({ length: Math.max(Math.ceil(targets.waterMl / 250), Math.ceil(ml / 250)) }, (_, i) => (
@@ -125,7 +125,7 @@ export function FoodLog({ date }: { date: string }) {
             <Glass key={s.id} shimmer={false} className="p-4">
               <header className="flex items-center gap-2">
                 <h3 className="flex-1 text-[16px] font-bold tracking-[-0.01em]">{t(s.label)}</h3>
-                {kcal > 0 && <span className="text-[13px] font-semibold tabular-nums text-fg/55">{r0(kcal)} kcal</span>}
+                {kcal > 0 && <span className="text-[13px] font-semibold tabular-nums text-fg/55">{r0(kcal)} {t('kcal')}</span>}
                 {items.length > 0 && <IconButton icon={Star} size={32} label={t('Save this meal')} onClick={() => void saveMeal(items, t(s.label))} />}
                 <Button size="sm" variant="glass" icon={Plus} onClick={() => showPicker(s.id, date)}>{t('Add')}</Button>
               </header>

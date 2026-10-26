@@ -8,7 +8,7 @@ import { setTaskDone } from '@/lib/actions';
 import { fmt, fmtTime, todayKey, fromDayKey } from '@/lib/dates';
 import { useTaskEditor } from './store';
 import { toast } from '@/ui/Toast';
-import { useT } from '@/lib/i18n';
+import { useT, tNow } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
 
@@ -94,7 +94,7 @@ export const TaskRow = forwardRef<HTMLLIElement, { task: Task; goal?: Goal; drag
                   {due}
                 </span>
               )}
-              {task.estimate && <span>{task.estimate >= 60 ? `${Math.round((task.estimate / 60) * 10) / 10} h` : `${task.estimate} min`}</span>}
+              {task.estimate && <span>{task.estimate >= 60 ? `${Math.round((task.estimate / 60) * 10) / 10} ${tNow('h')}` : `${task.estimate} ${tNow('min')}`}</span>}
               {task.energy && (
                 <span className="inline-flex items-center gap-0.5" title={`${t('Energy')}: ${task.energy}`}>
                   <Zap size={12} aria-hidden className={task.energy === 'high' ? 'text-pink' : task.energy === 'med' ? 'text-blue' : 'text-fg/40'} />

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { Search, Settings2 } from 'lucide-react';
-import { NAV } from './nav';
+import { visibleNav } from './nav';
+import { useSettings } from '@/lib/settings';
 import { useRouter } from './router';
 import { useCommand } from './CommandBar';
 import { Glass } from '@/ui/Glass';
@@ -14,13 +15,14 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 export function Sidebar() {
   const t = useT();
   const { route, go } = useRouter();
+  const NAV = visibleNav(useSettings((s) => s.features));
   const openCommand = useCommand((s) => s.show);
   const listRef = useRef<HTMLUListElement>(null);
   const items = [...NAV.map((n) => n.id), 'settings' as const];
   const rect = useActiveRect(listRef, items.indexOf(route as never));
 
   return (
-    <Glass shimmer={false} radius="xl" role="navigation" aria-label="Main" className="sidebar sticky top-4 m-4 mr-0 flex h-[calc(100dvh-2rem)] w-[248px] shrink-0 flex-col p-3">
+    <Glass shimmer={false} radius="xl" role="navigation" aria-label={t('Main navigation')} className="sidebar sticky top-4 m-4 mr-0 flex h-[calc(100dvh-2rem)] w-[248px] shrink-0 flex-col p-3">
       <a href="#/today" onClick={(e) => (e.preventDefault(), go('today'))} className="mb-5 mt-1 rounded-2xl px-2 py-1">
         <Wordmark />
       </a>

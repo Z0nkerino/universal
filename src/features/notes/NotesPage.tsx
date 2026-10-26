@@ -12,7 +12,7 @@ import { EmptyState } from '@/ui/EmptyState';
 import { confirm, promptText } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
 import { useIsDesktop } from '@/lib/hooks';
-import { useT } from '@/lib/i18n';
+import { useT, tNow } from '@/lib/i18n';
 import { fmt } from '@/lib/dates';
 import { cn } from '@/lib/cn';
 import { itemVariants, spring } from '@/lib/motion';
@@ -24,7 +24,7 @@ import { useNotesState, type Filter } from './store';
 function relTime(t: number, tr: (s: string) => string) {
   const diff = Date.now() - t;
   if (diff < 60_000) return tr('just now');
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min`;
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} ${tNow('min')}`;
   if (diff < 86_400_000) return fmt(t, 'p');
   if (diff < 7 * 86_400_000) return fmt(t, 'EEE');
   return fmt(t, 'd MMM');

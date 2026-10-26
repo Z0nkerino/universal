@@ -1,7 +1,7 @@
-name: Desktop apps
+name: Apps
 
 # When package.json's version has no GitHub Release yet, this builds the Mac .dmg, the
-# Windows installer and the self-update bundle, uploads them to a draft release, then
+# Windows installer, the Android .apk and the self-update bundle, uploads them to a draft release, then
 # publishes it. Installed apps pick the new release up automatically.
 # Files go straight to the release (not Actions artifacts), so artifact storage quotas don't apply.
 on:
@@ -14,7 +14,7 @@ permissions:
 
 # One release build at a time, so two quick pushes can't both publish the same version.
 concurrency:
-  group: desktop-${{ github.ref }}
+  group: apps-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -41,7 +41,7 @@ jobs:
             gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes 2>/dev/null || true
             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
               --title "Universal Planner ${TAG#v}" \
-              --notes "Download the .dmg for Mac or the setup .exe for Windows. Installed apps update themselves."
+              --notes "Mac: the .dmg · Windows: the setup .exe · Android: the .apk · iPhone: install the web app from Safari. Installed apps check for updates themselves."
           fi
 
   update-bundle:
@@ -95,8 +95,70 @@ jobs:
       - run: npx electron-builder --win nsis
       - run: gh release upload "${{ needs.version.outputs.tag }}" release/*.exe --repo "$GITHUB_REPOSITORY" --clobber
 
+  android:
+    needs: version
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npm run android
+      # The signing key lives in repository secrets, never in the repo (see README → Android signing).
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/up.keystore"
+            echo "UP_KEYSTORE=$RUNNER_TEMP/up.keystore" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No ANDROID_KEYSTORE secret: this APK is signed with a temporary key, so it can't update an earlier install."
+          fi
+      - run: ./gradlew assembleRelease --no-daemon
+        working-directory: android
+        env:
+          UP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      - run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/release/app-release.apk "release/Universal-Planner-${TAG#v}-android.apk"
+          gh release upload "$TAG" release/*.apk --repo "$GITHUB_REPOSITORY" --clobber
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+
+  # The installable web app (iPhone, iPad, any browser) at https://<owner>.github.io/<repo>/.
+  web:
+    needs: version
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          UP_BASE: /${{ github.event.repository.name }}/
+      - run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+          cd dist
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Web app ${{ needs.version.outputs.tag }}"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
   publish:
-    needs: [version, update-bundle, mac, windows]
+    needs: [version, update-bundle, mac, windows, android]
     if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:

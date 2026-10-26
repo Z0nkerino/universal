@@ -27,15 +27,15 @@ export function ConfirmHost() {
     useConfirmStore.setState({ req: null });
   };
   return (
-    <Sheet open={!!req} onClose={() => close(false)} label={req?.title ?? ''} className="max-w-md">
+    <Sheet open={!!req} onClose={() => close(false)} label={t(req?.title ?? '')} className="max-w-md">
       {req && (
         <div className="p-6">
-          <h2 className="text-[20px] font-bold tracking-[-0.02em]">{req.title}</h2>
-          {req.body && <p className="mt-2 text-[15px] text-fg/60">{req.body}</p>}
+          <h2 className="text-[20px] font-bold tracking-[-0.02em]">{t(req.title)}</h2>
+          {req.body && <p className="mt-2 text-[15px] text-fg/60">{t(req.body)}</p>}
           <div className="mt-6 flex justify-end gap-2">
             <Button variant="ghost" onClick={() => close(false)}>{t('Cancel')}</Button>
             <Button autoFocus variant={req.danger ? 'danger' : 'primary'} icon={req.danger ? Trash2 : undefined} onClick={() => close(true)}>
-              {req.confirmLabel}
+              {t(req.confirmLabel)}
             </Button>
           </div>
         </div>

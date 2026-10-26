@@ -2,6 +2,7 @@
 // contrast) for both themes; pink sits just under 3:1 in light mode, so charts always
 // carry direct labels or a legend + table rather than relying on color alone.
 import type { ReactNode } from 'react';
+import { useT } from '@/lib/i18n';
 import { useIsDark } from '@/lib/hooks';
 
 export function useChartColors() {
@@ -49,8 +50,9 @@ export function ChartTooltip({ active, payload, label, unit = '', format }: { ac
 }
 
 export function Legend({ items }: { items: { label: string; color: string; dashed?: boolean }[] }) {
+  const t = useT();
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] font-medium text-fg/65" aria-label="Legend">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] font-medium text-fg/65" aria-label={t('Legend')}>
       {items.map((i) => (
         <li key={i.label} className="flex items-center gap-1.5">
           {i.dashed ? <span className="h-0 w-4 border-t-2 border-dashed" style={{ borderColor: i.color }} /> : <span className="h-2.5 w-2.5 rounded-full" style={{ background: i.color }} />}
@@ -77,9 +79,10 @@ export function Stat({ label, value, unit, sub, tone }: { label: string; value: 
 
 /** Accessible data table behind a chart, collapsed by default. */
 export function DataTable({ caption, columns, rows }: { caption: string; columns: string[]; rows: (string | number)[][] }) {
+  const t = useT();
   return (
     <details className="mt-3 text-[13px]">
-      <summary className="cursor-pointer select-none text-[12px] font-semibold text-fg/50 hover:text-fg/80">Show as table</summary>
+      <summary className="cursor-pointer select-none text-[12px] font-semibold text-fg/50 hover:text-fg/80">{t('Show as table')}</summary>
       <div className="mt-2 max-h-56 overflow-auto rounded-xl ring-1 ring-fg/[0.08]">
         <table className="w-full tabular-nums">
           <caption className="sr-only">{caption}</caption>

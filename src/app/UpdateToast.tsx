@@ -3,13 +3,15 @@ import { Download, RefreshCw, X } from 'lucide-react';
 import { Glass } from '@/ui/Glass';
 import { Button, IconButton } from '@/ui/Button';
 import { AppIcon } from '@/ui/Logo';
-import { desktop, useUpdates } from '@/lib/desktop';
+import { appUpdater, useUpdates } from '@/lib/desktop';
 import { spring } from '@/lib/motion';
+import { useT } from '@/lib/i18n';
 
 /** Desktop app only: offers a downloaded update, or a new installer when the shell itself changed. */
 export function UpdateToast() {
+  const t = useT();
   const { status, dismissed, dismiss } = useUpdates();
-  const show = desktop && (status.state === 'ready' || status.state === 'installer') && dismissed !== status.version;
+  const show = !!appUpdater && (status.state === 'ready' || status.state === 'installer') && dismissed !== status.version;
 
   return (
     <AnimatePresence>
@@ -25,17 +27,17 @@ export function UpdateToast() {
         >
           <AppIcon size={40} />
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold tracking-[-0.01em]">{status.state === 'ready' ? 'Update ready' : 'New version available'}</p>
+            <p className="text-[15px] font-semibold tracking-[-0.01em]">{t(status.state === 'ready' ? 'Update ready' : 'New version available')}</p>
             <p className="truncate text-[13px] text-fg/55">
-              Version {status.version}. {status.state === 'ready' ? 'Restart to switch.' : 'Needs a fresh download.'}
+              {t('Version')} {status.version}. {t(status.state === 'ready' ? 'Restart to switch.' : 'Needs a fresh download.')}
             </p>
           </div>
           {status.state === 'ready' ? (
-            <Button size="sm" variant="brand" icon={RefreshCw} onClick={() => void desktop!.updates.apply()}>
+            <Button size="sm" variant="brand" icon={RefreshCw} onClick={() => void appUpdater!.apply()}>
               Restart
             </Button>
           ) : (
-            <Button size="sm" variant="brand" icon={Download} onClick={() => void desktop!.updates.download(status.url)}>
+            <Button size="sm" variant="brand" icon={Download} onClick={() => void appUpdater!.download(status.url)}>
               Download
             </Button>
           )}

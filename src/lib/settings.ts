@@ -19,6 +19,8 @@ export interface Settings {
   reminders: boolean;
   /** Afina's on-device model; '' = local engine only. */
   model: string;
+  /** Sections the user chose to use; hidden ones leave the navigation. */
+  features: string[];
 }
 
 const defaults: Settings = {
@@ -33,6 +35,7 @@ const defaults: Settings = {
   dayEndH: 21,
   reminders: true,
   model: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
+  features: ['calendar', 'notes', 'ideas', 'health', 'insights'],
 };
 
 interface SettingsState extends Settings {

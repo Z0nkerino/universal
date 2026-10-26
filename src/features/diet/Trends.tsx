@@ -62,7 +62,7 @@ export function Trends() {
             </ResponsiveContainer>
           </div>
           <div className="mt-2"><Legend items={[{ label: t('Calories eaten'), color: c.blue }, { label: t('Daily target'), color: c.target, dashed: true }]} /></div>
-          <DataTable caption={t('Calories per day')} columns={[t('Day'), 'kcal', t('Protein'), t('Carbs'), t('Fat')]} rows={data.filter((d) => d.kcal !== null).reverse().map((d) => [d.full, d.kcal!, `${d.protein} g`, `${d.carbs} g`, `${d.fat} g`])} />
+          <DataTable caption={t('Calories per day')} columns={[t('Day'), t('kcal'), t('Protein'), t('Carbs'), t('Fat')]} rows={data.filter((d) => d.kcal !== null).reverse().map((d) => [d.full, d.kcal!, `${d.protein} g`, `${d.carbs} g`, `${d.fat} g`])} />
         </ChartCard>
       </div>
       <ChartCard title={t('Macros')} sub={t('Grams per day')}>
@@ -81,7 +81,7 @@ export function Trends() {
         </div>
         <div className="mt-2"><Legend items={[{ label: t('Protein'), color: c.blue }, { label: t('Carbs'), color: c.violet }, { label: t('Fat'), color: c.pink }]} /></div>
       </ChartCard>
-      <ChartCard title={t('Water')} sub={`${t('Goal')} ${targets.waterMl} ml`}>
+      <ChartCard title={t('Water')} sub={`${t('Goal')} ${targets.waterMl} ${t('ml')}`}>
         <div className="h-48" role="img" aria-label={t('Water per day')}>
           <ResponsiveContainer>
             <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>

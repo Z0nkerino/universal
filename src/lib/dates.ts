@@ -1,3 +1,4 @@
+import { tNow } from './i18n';
 import { addDays, format, startOfDay, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { DayKey } from './types';
@@ -52,10 +53,10 @@ export function fmtHour(h: number) {
 }
 
 export function fmtDuration(min: number) {
-  if (min < 60) return `${Math.round(min)} min`;
+  if (min < 60) return `${Math.round(min)} ${tNow('min')}`;
   const h = Math.floor(min / 60);
   const m = Math.round(min % 60);
-  return m ? `${h} h ${m} min` : `${h} h`;
+  return m ? `${h} ${tNow('h')} ${m} ${tNow('min')}` : `${h} ${tNow('h')}`;
 }
 
 export const minutesOfDay = (t: number) => {

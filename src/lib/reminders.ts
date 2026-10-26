@@ -29,7 +29,7 @@ function saveFired(s: Set<string>) {
 export function notify(title: string, body: string, tag: string) {
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     try {
-      new Notification(title, { body, tag, icon: '/brand/icon-192.png', silent: false });
+      new Notification(title, { body, tag, icon: `${import.meta.env.BASE_URL}brand/icon-192.png`, silent: false });
       return;
     } catch {
       /* some platforms only allow notifications from a service worker */

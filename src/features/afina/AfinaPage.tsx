@@ -13,16 +13,13 @@ import { Glass } from '@/ui/Glass';
 import { Button, IconButton } from '@/ui/Button';
 import { confirm } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
-import { useRouter } from '@/app/router';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
 import { AfinaOrb } from './AfinaOrb';
-import { think } from './brain';
-import { runConfirmed, type AfinaReply, type ConfirmAction } from './engine';
+import { runConfirmed, type ConfirmAction } from './engine';
+import { postReply, sendToAfina, undos, useAfinaBusy } from './chat';
 import { MODELS, checkSupport, loadModel, switchModel, useLlm } from './llm';
 
-// Undo callbacks live only for this session (they close over in-memory state).
-const undos = new Map<string, () => Promise<unknown>>();
 
 type SpeechRec = { lang: string; interimResults: boolean; continuous: boolean; start: () => void; stop: () => void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
 const SpeechRecognitionCtor = (window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
@@ -47,7 +44,7 @@ function ModelCard() {
         <div className="flex gap-3">
           <Cpu size={20} className="mt-0.5 shrink-0 text-fg/50" aria-hidden />
           <p className="text-[14px] text-fg/70">
-            <strong className="text-fg">{t('Running on Afina’s built-in engine.')}</strong> {reason} {t('She can still plan, log, schedule and answer questions about your data. Free-form chat needs WebGPU (Chrome or Edge 113+, Safari 18+, or the desktop app).')}
+            <strong className="text-fg">{t('Running on Afina’s built-in engine.')}</strong> {t(reason ?? '')} {t('She can still plan, log, schedule and answer questions about your data. Free-form chat needs WebGPU (Chrome or Edge 113+, Safari 18+, or the desktop app).')}
           </p>
         </div>
       ) : status === 'downloading' ? (
@@ -67,7 +64,7 @@ function ModelCard() {
             <Cpu size={20} className="shrink-0 text-blue" aria-hidden />
             <p className="min-w-0 flex-1 text-[14px] text-fg/70">
               {status === 'error' ? (
-                <><strong className="text-fg">{t('The model couldn’t load.')}</strong> {reason}</>
+                <><strong className="text-fg">{t('The model couldn’t load.')}</strong> {t(reason ?? '')}</>
               ) : (
                 <><strong className="text-fg">{t('Give Afina an on-device brain for free-form chat.')}</strong> {model.label} · {model.size}. {t('Downloads once, runs offline, private.')}</>
               )}
@@ -149,10 +146,9 @@ function Bubble({ m, last, onChip, onConfirm }: { m: ChatMessage; last: boolean;
 export default function AfinaPage() {
   const t = useT();
   const language = useSettings((s) => s.language);
-  const go = useRouter((s) => s.go);
   const messages = useLiveQuery(() => db.chat.orderBy('at').toArray(), []) ?? [];
   const [text, setText] = useState('');
-  const [thinking, setThinking] = useState(false);
+  const thinking = useAfinaBusy((s) => s.thinking);
   const [listening, setListening] = useState(false);
   const recRef = useRef<SpeechRec | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -172,40 +168,18 @@ export default function AfinaPage() {
     listRef.current?.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages.length, thinking]);
 
-  const post = async (reply: AfinaReply) => {
-    const id = uid();
-    if (reply.undo) undos.set(id, reply.undo);
-    await db.chat.add({ id, role: 'afina', text: reply.text, at: Date.now(), chips: reply.chips, confirm: reply.confirm ? { label: reply.confirm.title, action: reply.confirm.kind, payload: reply.confirm } : undefined });
-    if (reply.navigate) setTimeout(() => go(reply.navigate!), 500);
-  };
-
   const send = async (value: string) => {
-    const msg = value.trim();
-    if (!msg || thinking) return;
+    if (!value.trim() || thinking) return;
     setText('');
-    const history = messages.slice(-8).map((m) => ({ role: m.role, text: m.text }));
-    await db.chat.add({ id: uid(), role: 'user', text: msg, at: Date.now() });
-    setThinking(true);
-    try {
-      const started = Date.now();
-      const reply = await think(msg, history);
-      // A beat of "thinking" so instant answers don't feel abrupt.
-      const wait = 450 - (Date.now() - started);
-      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-      await post(reply);
-    } catch (e) {
-      await post({ handled: true, text: `${t('Something went wrong')}: ${(e as Error).message}` });
-    } finally {
-      setThinking(false);
-      inputRef.current?.focus();
-    }
+    await sendToAfina(value);
+    inputRef.current?.focus();
   };
 
   const onConfirm = async (m: ChatMessage, ok: boolean) => {
     const action = m.confirm!.payload as ConfirmAction;
     await db.chat.update(m.id, { confirm: undefined });
-    if (ok) await post(await runConfirmed(action, detectLang(m.text)));
-    else await post({ handled: true, text: t('Okay, I’ll leave it.') });
+    if (ok) await postReply(await runConfirmed(action, detectLang(m.text)));
+    else await postReply({ handled: true, text: t('Okay, I’ll leave it.') });
   };
 
   const toggleMic = () => {

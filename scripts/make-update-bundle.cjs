@@ -21,6 +21,7 @@ const feed = {
   downloads: {
     mac: `${base}/Universal-Planner-${pkg.version}-mac.dmg`,
     win: `${base}/Universal-Planner-${pkg.version}-windows-setup.exe`,
+    android: `${base}/Universal-Planner-${pkg.version}-android.apk`,
   },
 };
 fs.writeFileSync('release/latest.json', JSON.stringify(feed, null, 2));

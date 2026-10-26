@@ -3,6 +3,7 @@ import { motion, type HTMLMotionProps } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { springSnappy } from '@/lib/motion';
+import { useT } from '@/lib/i18n';
 
 type Variant = 'primary' | 'brand' | 'glass' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
@@ -31,6 +32,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   { variant = 'primary', size = 'md', icon: Icon, iconRight: IconRight, className, children, type = 'button', ...rest },
   ref,
 ) {
+  const t = useT();
   const is = size === 'sm' ? 15 : size === 'md' ? 17 : 19;
   return (
     <motion.button
@@ -47,18 +49,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {...rest}
     >
       {Icon && <Icon size={is} strokeWidth={2.2} aria-hidden />}
-      {children as React.ReactNode}
+      {typeof children === 'string' ? t(children) : (children as React.ReactNode)}
       {IconRight && <IconRight size={is} strokeWidth={2.2} aria-hidden />}
     </motion.button>
   );
 });
 
 export function IconButton({ icon: Icon, label, className, size = 40, ...rest }: Omit<HTMLMotionProps<'button'>, 'children'> & { icon: LucideIcon; label: string; size?: number }) {
+  const t = useT();
   return (
     <motion.button
       type="button"
-      aria-label={label}
-      title={label}
+      aria-label={t(label)}
+      title={t(label)}
       whileTap={{ scale: 0.9 }}
       transition={springSnappy}
       className={cn('inline-flex shrink-0 items-center justify-center rounded-full text-fg/70 transition-colors hover:bg-fg/[0.06] hover:text-fg', className)}

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { NAV } from './nav';
+import { visibleNav } from './nav';
+import { useSettings } from '@/lib/settings';
 import { useRouter } from './router';
 import { Glass } from '@/ui/Glass';
 import { LiquidIndicator, useActiveRect } from '@/ui/LiquidIndicator';
@@ -11,13 +12,14 @@ import { springSnappy } from '@/lib/motion';
 export function TabBar() {
   const t = useT();
   const { route, go } = useRouter();
+  const NAV = visibleNav(useSettings((s) => s.features));
   const ref = useRef<HTMLDivElement>(null);
   const rect = useActiveRect(ref, NAV.findIndex((n) => n.id === route));
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(8px,env(safe-area-inset-bottom))]">
-      <Glass shimmer={false} radius="xl" role="navigation" aria-label="Main" className="pointer-events-auto mx-auto max-w-[560px] p-1.5">
-        <div ref={ref} className="relative grid grid-cols-7">
+      <Glass shimmer={false} radius="xl" role="navigation" aria-label={t('Main navigation')} className="pointer-events-auto mx-auto max-w-[560px] p-1.5">
+        <div ref={ref} className="relative grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           <LiquidIndicator rect={rect} axis="x" className="rounded-[20px] bg-fg/[0.08] dark:bg-white/[0.12]" />
           {NAV.map((n, i) => {
             const active = route === n.id;

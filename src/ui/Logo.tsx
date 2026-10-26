@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import up from './brand/up-path.json';
 import eternal from './brand/eternal-path.json';
+import { useT, tNow } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 
 interface MarkProps {
@@ -59,7 +60,7 @@ export function Wordmark({ className }: { className?: string }) {
       <span className="flex flex-col leading-none">
         <span className="text-[15px] font-bold tracking-[-0.02em]">Universal Planner</span>
         <span className="mt-1 flex items-center gap-1 text-[11px] font-medium text-fg/55">
-          by <EternalMark size={11} className="text-fg/70" /> Eternal Inc.
+          {tNow('by')} <EternalMark size={11} className="text-fg/70" /> Eternal Inc.
         </span>
       </span>
     </span>
@@ -67,6 +68,7 @@ export function Wordmark({ className }: { className?: string }) {
 }
 
 export function EternalCredit({ className }: { className?: string }) {
+  const t = useT();
   return (
     <a
       href="#/settings"
@@ -74,7 +76,7 @@ export function EternalCredit({ className }: { className?: string }) {
     >
       <EternalMark size={16} className="text-fg/80" />
       <span>
-        A product of <span className="font-semibold text-fg/70">Eternal Inc.</span>
+        {t('A product of')} <span className="font-semibold text-fg/70">Eternal Inc.</span>
       </span>
     </a>
   );

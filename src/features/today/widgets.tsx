@@ -8,7 +8,7 @@ import { addWater, toggleHabit, updateTask } from '@/lib/actions';
 import { dayKey, fmtTime, todayKey } from '@/lib/dates';
 import { useNow } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
-import { useT } from '@/lib/i18n';
+import { tNow, useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
 import { Rings, RING_PRESETS } from '@/ui/Rings';
@@ -32,12 +32,13 @@ function NowBar({ start, end }: { start: number; end: number }) {
   if (now < start || now >= end) return null;
   const p = (now - start) / (end - start);
   const left = Math.ceil((end - now) / 60_000);
+  const t = tNow;
   return (
-    <div className="mt-1.5 flex items-center gap-2" aria-label={`${left} min left`}>
+    <div className="mt-1.5 flex items-center gap-2" aria-label={`${left} ${t('min left')}`}>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-fg/[0.08]">
         <motion.div className="h-full rounded-full bg-brand" initial={false} animate={{ width: `${p * 100}%` }} transition={spring} />
       </div>
-      <span className="text-[11px] font-semibold tabular-nums text-pink">{left}m</span>
+      <span className="text-[11px] font-semibold tabular-nums text-pink">{left} {t('min')}</span>
     </div>
   );
 }
@@ -205,13 +206,13 @@ export function NutritionWidget() {
           ))}
         </div>
         <Button size="sm" variant="glass" icon={Droplets} className="mt-3" onClick={() => void addWater(250).then(() => toast(t('+1 glass of water')))}>
-          +250 ml
+          +250 {t('ml')}
         </Button>
       </div>
       <button type="button" onClick={() => go('health')} className="rounded-2xl text-left">
         <p className="flex items-baseline text-[28px] font-bold tabular-nums tracking-[-0.03em]">
           {Math.round(kcal)}
-          <span className="ml-1 text-[14px] font-semibold text-fg/45">/ {targets.kcal} kcal</span>
+          <span className="ml-1 text-[14px] font-semibold text-fg/45">/ {targets.kcal} {t('kcal')}</span>
         </p>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-pink/15">
           <motion.div className="h-full rounded-full bg-pink" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (kcal / targets.kcal) * 100)}%` }} transition={spring} />

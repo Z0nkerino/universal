@@ -184,7 +184,7 @@ export function EventEditor() {
                 <Select id="ev-rem" className="pl-10" value={d.reminder ?? ''} onChange={(e) => set({ reminder: e.target.value === '' ? undefined : Number(e.target.value) })}>
                   {REMINDERS.map((m) => (
                     <option key={String(m)} value={m ?? ''}>
-                      {m === undefined ? t('None') : m === 0 ? t('At start time') : m >= 1440 ? t('1 day before') : m >= 60 ? `${m / 60} h ${t('before')}` : `${m} min ${t('before')}`}
+                      {m === undefined ? t('None') : m === 0 ? t('At start time') : m >= 1440 ? t('1 day before') : m >= 60 ? `${m / 60} ${t('h')} ${t('before')}` : `${m} min ${t('before')}`}
                     </option>
                   ))}
                 </Select>

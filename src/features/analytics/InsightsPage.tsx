@@ -207,7 +207,7 @@ export default function InsightsPage() {
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
               <Stat label={t('Tasks done')} value={view.done} sub={`${(view.done / range).toFixed(1)} ${t('per day')}`} />
               <Stat label={t('Completion rate')} value={view.rate ? Math.round(view.rate.rate * 100) : '—'} unit={view.rate ? '%' : undefined} sub={view.rate ? `${t('of')} ${view.rate.n} ${t('tasks due')}` : t('No tasks were due')} />
-              <Stat label={t('Focus time')} value={Math.round(view.focus / 6) / 10} unit="h" sub={`${Math.round(view.focus / range)} min ${t('per day')}`} />
+              <Stat label={t('Focus time')} value={Math.round(view.focus / 6) / 10} unit={t('h')} sub={`${Math.round(view.focus / range)} ${t('min')} ${t('per day')}`} />
               <Stat label={t('Planned time')} value={Math.round(sum(view.days.map((d) => d.plannedMin)) / 6) / 10} unit="h" sub={t('time-blocked on your timeline')} />
             </div>
             <div className="mt-5 grid gap-6 lg:grid-cols-2">

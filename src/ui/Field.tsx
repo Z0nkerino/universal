@@ -1,5 +1,6 @@
 import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
+import { useT } from '@/lib/i18n';
 
 const base =
   'w-full rounded-[14px] bg-fg/[0.05] px-3.5 text-[15px] text-fg placeholder:text-fg/40 transition-[background,box-shadow] hover:bg-fg/[0.07] focus:bg-fg/[0.07] focus:shadow-[0_0_0_2px_rgb(47_107_255/0.55)] focus-visible:outline-none';
@@ -21,13 +22,14 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
 }
 
 export function Field({ label, htmlFor, hint, children, className }: { label: string; htmlFor?: string; hint?: string; children: ReactNode; className?: string }) {
+  const t = useT();
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={htmlFor} className="px-1 text-[13px] font-semibold text-fg/60">
-        {label}
+        {t(label)}
       </label>
       {children}
-      {hint && <p className="px-1 text-[12px] text-fg/45">{hint}</p>}
+      {hint && <p className="px-1 text-[12px] text-fg/45">{t(hint)}</p>}
     </div>
   );
 }

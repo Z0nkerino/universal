@@ -1,4 +1,5 @@
 import { useEffect, type PointerEvent as RPointerEvent } from 'react';
+import { tNow } from '@/lib/i18n';
 import { create } from 'zustand';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GripVertical } from 'lucide-react';
@@ -122,7 +123,7 @@ export function DragGhost() {
         >
           <GripVertical size={14} className="shrink-0 text-fg/40" aria-hidden />
           <span className="truncate">{item.label}</span>
-          {item.durationMin && <span className="shrink-0 text-[12px] font-medium text-fg/50">{item.durationMin}m</span>}
+          {item.durationMin && <span className="shrink-0 text-[12px] font-medium text-fg/50">{item.durationMin} {tNow('min')}</span>}
         </motion.div>
       )}
     </AnimatePresence>

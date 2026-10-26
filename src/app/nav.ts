@@ -16,3 +16,7 @@ export const NAV: NavItem[] = [
   { id: 'insights', icon: BarChart3, shortcut: '6' },
   { id: 'afina', icon: Sparkles, shortcut: '7' },
 ];
+
+/** Today and Afina are always shown; the rest follow the user's choice in onboarding/Settings. */
+export const OPTIONAL: Route[] = ['calendar', 'notes', 'ideas', 'health', 'insights'];
+export const visibleNav = (features: string[]) => NAV.filter((n) => !OPTIONAL.includes(n.id) || features.includes(n.id));

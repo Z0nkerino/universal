@@ -2,14 +2,21 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string; updates: { repo: string } };
 
 const preview = process.env.UP_PREVIEW === '1';
 // Desktop (Electron) builds ship their own files, so they skip the service worker.
 const desktop = process.env.UP_DESKTOP === '1';
 
 export default defineConfig({
-  base: preview ? './' : '/',
-  define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0') },
+  // UP_BASE serves the web app from a sub-path, e.g. /universal/ on GitHub Pages.
+  base: process.env.UP_BASE ?? (preview ? './' : '/'),
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? pkg.version),
+    __UPDATE_REPO__: JSON.stringify(pkg.updates.repo),
+  },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     react(),
@@ -27,8 +34,8 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'any',
-        start_url: '/',
-        scope: '/',
+        start_url: './',
+        scope: './',
         categories: ['productivity', 'health', 'lifestyle'],
         icons: [
           { src: 'brand/icon-192.png', sizes: '192x192', type: 'image/png' },
