@@ -38,7 +38,16 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // The language-model runtime is only needed once someone installs Afina's model.
+        globIgnores: ['**/llm.worker-*.js', '**/web-llm-*.js'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => /\/assets\/(llm\.worker|web-llm)-.*\.js$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'afina-runtime', expiration: { maxEntries: 6 } },
+          },
+        ],
       },
     }),
   ],
@@ -49,6 +58,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           motion: ['framer-motion'],
+          'web-llm': ['@mlc-ai/web-llm'],
         },
       },
     },

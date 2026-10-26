@@ -15,6 +15,8 @@ import { desktop, useUpdates } from '@/lib/desktop';
 import { useRouter } from '@/app/router';
 import { hasDemoData, removeDemoData, seedDemoData } from '@/lib/demo';
 import { requestNotificationPermission } from '@/lib/reminders';
+import { MODELS, checkSupport, removeModel, switchModel, useLlm } from '@/features/afina/llm';
+import { confirm } from '@/ui/Confirm';
 import { itemVariants } from '@/lib/motion';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -69,6 +71,8 @@ export default function SettingsPage() {
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const update = useUpdates((u) => u.status);
+  const llm = useLlm();
+  useEffect(() => void checkSupport(), []);
   const [demo, setDemo] = useState(false);
   const [perm, setPerm] = useState(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission);
   useEffect(() => void hasDemoData().then(setDemo), []);
@@ -133,6 +137,35 @@ export default function SettingsPage() {
                 if (v) setPerm(String(await requestNotificationPermission()));
               }}
             />
+          </Row>
+        </Section>
+
+        <Section title="Afina">
+          <Row label="On-device model" hint={llm.status === 'unsupported' ? `${llm.reason ?? ''} Afina uses her built-in engine.` : llm.installed ? 'Downloaded to this device. Works offline.' : 'Not downloaded. Install it from the Afina screen for free-form chat.'}>
+            <select
+              aria-label="Afina model"
+              value={(MODELS.find((m) => s.model.startsWith(m.id)) ?? MODELS[0]).id}
+              onChange={(e) => void switchModel(e.target.value)}
+              className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold"
+            >
+              {MODELS.map((m) => <option key={m.id} value={m.id}>{m.label} · {m.size}</option>)}
+            </select>
+          </Row>
+          <Row label="Remove downloaded model" hint="Frees the space it uses. You can download it again any time.">
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Trash2}
+              disabled={!llm.installed}
+              onClick={async () => {
+                if (await confirm({ title: 'Remove Afina’s model?', body: 'Afina keeps working with her built-in engine.', confirmLabel: 'Remove', danger: true })) {
+                  await removeModel();
+                  setMsg('Model removed from this device.');
+                }
+              }}
+            >
+              Remove
+            </Button>
           </Row>
         </Section>
 

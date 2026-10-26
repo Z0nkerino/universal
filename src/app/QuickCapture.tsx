@@ -10,6 +10,7 @@ import { createIdea, createNote, quickAdd } from '@/lib/actions';
 import { useIsDesktop } from '@/lib/hooks';
 import { useT } from '@/lib/i18n';
 import { springSnappy } from '@/lib/motion';
+import { useRouter } from './router';
 
 type Kind = 'idea' | 'task' | 'note';
 export const useCapture = create<{ open: boolean; kind: Kind; show: (kind?: Kind) => void; hide: () => void }>((set) => ({
@@ -24,6 +25,8 @@ export function QuickCapture() {
   const t = useT();
   const desktop = useIsDesktop();
   const { open, kind, show, hide } = useCapture();
+  // Afina has her own input; the floating + would sit on top of its send button.
+  const route = useRouter((r) => r.route);
   const [text, setText] = useState('');
   useEffect(() => {
     if (!open) setText('');
@@ -52,7 +55,7 @@ export function QuickCapture() {
 
   return (
     <>
-      {!desktop && (
+      {!desktop && route !== 'afina' && (
         <motion.button
           type="button"
           aria-label={t('Quick capture')}
