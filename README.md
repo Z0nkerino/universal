@@ -40,13 +40,30 @@ The desktop app wraps the same code in Electron, with native window controls, a 
 
 ```bash
 npm run desktop     # build and run the desktop app locally
-npm run dist:mac    # on a Mac: builds release/Universal Planner-<version>-universal.dmg (Apple Silicon + Intel)
-npm run dist:win    # on Windows: builds release/Universal Planner Setup <version>.exe
+npm run dist:mac    # on a Mac: release/Universal-Planner-<version>-mac.dmg (Apple Silicon + Intel)
+npm run dist:win    # on Windows: release/Universal-Planner-<version>-windows-setup.exe
 ```
 
-A `.dmg` can only be built on macOS. If you don't have a Mac handy, push the repo to GitHub and run the **Desktop apps** workflow (Actions tab → Desktop apps → Run workflow). It builds the `.dmg` and the Windows installer and attaches them to the run.
+### Publishing a release
 
-The app isn't notarized yet, which needs a paid Apple Developer account. The first time you open it, macOS will block it: open **System Settings → Privacy & Security** and click **Open Anyway**.
+```bash
+npm version patch          # e.g. 0.1.0 → 0.1.1 (commits and tags v0.1.1)
+git push --follow-tags
+```
+
+The **Desktop apps** GitHub workflow then builds the `.dmg`, the Windows installer and the update bundle, and publishes them as a GitHub Release. You can also build without publishing from the Actions tab (Desktop apps → Run workflow).
+
+### Automatic updates
+
+Installed apps check the latest GitHub Release when they open and every 4 hours. A new version downloads in the background and is verified against its SHA-256 checksum. Then the app shows **Restart** (also in Settings → Updates and in the app menu → Check for Updates…). If a new version fails to start, the app rolls back by itself.
+
+Updates replace the app's content, which holds every feature, while the installed shell stays put. Fully silent updates of the Mac binary itself need an Apple Developer ID. If a release ever changes the shell (`updates.shellVersion` in `package.json`), installed apps offer a download of the new installer instead.
+
+For apps to find updates, the release files must be downloadable without signing in, so the repository (or wherever releases are hosted) has to be public.
+
+### First launch on a Mac
+
+The app isn't notarized yet, which needs a paid Apple Developer account. The first time you open it, macOS blocks it: open **System Settings → Privacy & Security** and click **Open Anyway**. After that it opens normally.
 
 ## Keyboard
 

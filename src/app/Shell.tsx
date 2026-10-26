@@ -3,6 +3,7 @@ import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TabBar } from './TabBar';
 import { CommandBar, useCommand } from './CommandBar';
+import { UpdateToast } from './UpdateToast';
 import { useRouter, type Route } from './router';
 import { NAV } from './nav';
 import { useIsDark, useIsDesktop, useReducedMotion } from '@/lib/hooks';
@@ -117,6 +118,7 @@ export function Shell() {
       </div>
       {!desktop && <TabBar />}
       <CommandBar />
+      <UpdateToast />
     </MotionConfig>
   );
 }

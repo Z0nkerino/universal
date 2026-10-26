@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { Download, MonitorDown, Palette, Trash2, Upload } from 'lucide-react';
+import { Download, MonitorDown, Palette, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { PageHeader } from '@/ui/PageHeader';
 import { Glass } from '@/ui/Glass';
 import { Segmented, Switch } from '@/ui/Segmented';
@@ -11,6 +11,7 @@ import { useSettings } from '@/lib/settings';
 import { useT } from '@/lib/i18n';
 import { downloadBackup, importBackup, wipeAllData } from '@/lib/backup';
 import { useInstall, platform } from '@/lib/install';
+import { desktop, useUpdates } from '@/lib/desktop';
 import { useRouter } from '@/app/router';
 import { itemVariants } from '@/lib/motion';
 
@@ -45,6 +46,18 @@ const installHelp: Record<string, string> = {
   other: 'Use your browser’s “Install app” option.',
 };
 
+function updateHint(s: ReturnType<typeof useUpdates.getState>['status']) {
+  switch (s.state) {
+    case 'checking': return 'Checking…';
+    case 'downloading': return `Downloading version ${s.version}…`;
+    case 'ready': return `Version ${s.version} is downloaded and ready.`;
+    case 'installer': return `Version ${s.version} needs a fresh download of the app.`;
+    case 'current': return `You’re on the newest version (${s.version}). Checks automatically every few hours.`;
+    case 'unavailable': case 'error': return s.message;
+    default: return 'Checks automatically when the app opens and every few hours.';
+  }
+}
+
 export default function SettingsPage() {
   const t = useT();
   const s = useSettings();
@@ -53,6 +66,7 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const update = useUpdates((u) => u.status);
 
   return (
     <>
@@ -123,11 +137,24 @@ export default function SettingsPage() {
         </Section>
 
         <Section title="App">
-          <Row label={install.installed ? 'Installed as an app' : 'Install as an app'} hint={install.installed ? 'You’re running the installed app. It works offline.' : installHelp[platform]}>
+          {desktop && (
+            <Row label="Updates" hint={updateHint(update)}>
+              {update.state === 'ready' ? (
+                <Button variant="brand" size="sm" icon={RefreshCw} onClick={() => void desktop!.updates.apply()}>Restart to update</Button>
+              ) : update.state === 'installer' ? (
+                <Button variant="brand" size="sm" icon={Download} onClick={() => void desktop!.updates.download(update.url)}>Download</Button>
+              ) : (
+                <Button variant="glass" size="sm" icon={RefreshCw} disabled={update.state === 'checking' || update.state === 'downloading'} onClick={() => void desktop!.updates.check()}>
+                  Check now
+                </Button>
+              )}
+            </Row>
+          )}
+          {!desktop && <Row label={install.installed ? 'Installed as an app' : 'Install as an app'} hint={install.installed ? 'You’re running the installed app. It works offline.' : installHelp[platform]}>
             {install.event && !install.installed && (
               <Button variant="brand" size="sm" icon={MonitorDown} onClick={() => void install.prompt()}>Install</Button>
             )}
-          </Row>
+          </Row>}
           <Row label="Design system" hint="Colors, glass, motion and components.">
             <Button variant="glass" size="sm" icon={Palette} onClick={() => go('design')}>Open</Button>
           </Row>

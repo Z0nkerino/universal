@@ -5,10 +5,14 @@ import './index.css';
 import { Shell } from './app/Shell';
 import { useSettings } from './lib/settings';
 import './lib/install';
+import { desktop } from './lib/desktop';
 
 // Running inside the desktop app (Electron)? Lets CSS make room for the macOS window controls.
-const desktop = (window as Window & { desktop?: { platform: string } }).desktop;
-if (desktop) document.documentElement.dataset.shell = desktop.platform === 'darwin' ? 'mac' : 'desktop';
+if (desktop) {
+  document.documentElement.dataset.shell = desktop.platform === 'darwin' ? 'mac' : 'desktop';
+  // Confirms this version booted, so the updater doesn't roll it back.
+  requestAnimationFrame(() => desktop?.ready());
+}
 
 void useSettings.getState().hydrate();
 

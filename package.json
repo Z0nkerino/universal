@@ -12,7 +12,8 @@
     "build:desktop": "UP_DESKTOP=1 vite build --outDir dist-desktop",
     "desktop": "npm run build:desktop && electron .",
     "dist:mac": "npm run build:desktop && electron-builder --mac dmg --universal",
-    "dist:win": "npm run build:desktop && electron-builder --win nsis"
+    "dist:win": "npm run build:desktop && electron-builder --win nsis",
+    "bundle": "npm run build:desktop && node scripts/make-update-bundle.cjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.1",
@@ -66,7 +67,10 @@
         "dmg"
       ],
       "darkModeSupport": true,
-      "hardenedRuntime": true
+      "hardenedRuntime": true,
+      "artifactName": "Universal-Planner-${version}-mac.${ext}",
+      "identity": "-",
+      "notarize": false
     },
     "dmg": {
       "title": "Universal Planner",
@@ -92,12 +96,22 @@
       "icon": "build/icon.png",
       "target": [
         "nsis"
-      ]
+      ],
+      "artifactName": "Universal-Planner-${version}-windows-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "shortcutName": "Universal Planner"
-    }
+    },
+    "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Z0nkerino/universal.git"
+  },
+  "updates": {
+    "repo": "Z0nkerino/universal",
+    "shellVersion": 1
   }
 }
