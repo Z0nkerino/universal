@@ -1,6 +1,6 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { Download, MonitorDown, Palette, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { Download, MonitorDown, Palette, RefreshCw, Sparkles, Trash2, Upload } from 'lucide-react';
 import { PageHeader } from '@/ui/PageHeader';
 import { Glass } from '@/ui/Glass';
 import { Segmented, Switch } from '@/ui/Segmented';
@@ -13,6 +13,8 @@ import { downloadBackup, importBackup, wipeAllData } from '@/lib/backup';
 import { useInstall, platform } from '@/lib/install';
 import { desktop, useUpdates } from '@/lib/desktop';
 import { useRouter } from '@/app/router';
+import { hasDemoData, removeDemoData, seedDemoData } from '@/lib/demo';
+import { requestNotificationPermission } from '@/lib/reminders';
 import { itemVariants } from '@/lib/motion';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -67,6 +69,11 @@ export default function SettingsPage() {
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const update = useUpdates((u) => u.status);
+  const [demo, setDemo] = useState(false);
+  const [perm, setPerm] = useState(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission);
+  useEffect(() => void hasDemoData().then(setDemo), []);
+  const notifHint =
+    perm === 'granted' ? 'Gentle nudges for events and timed tasks, as system notifications.' : perm === 'denied' ? 'Notifications are blocked in your browser settings, so reminders appear inside the app.' : perm === 'unsupported' ? 'This browser can’t show notifications, so reminders appear inside the app.' : 'Turn on to allow notifications for events and timed tasks.';
 
   return (
     <>
@@ -105,7 +112,38 @@ export default function SettingsPage() {
           </Row>
         </Section>
 
+        <Section title="Planning & reminders">
+          <Row label="Planning hours" hint="“Plan my day” only schedules tasks inside these hours.">
+            <div className="flex items-center gap-2">
+              <select aria-label="Day starts" value={s.dayStartH} onChange={(e) => s.set({ dayStartH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
+                {Array.from({ length: 13 }, (_, h) => h + 5).map((h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}
+              </select>
+              <span className="text-fg/40">–</span>
+              <select aria-label="Day ends" value={s.dayEndH} onChange={(e) => s.set({ dayEndH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
+                {Array.from({ length: 12 }, (_, h) => h + 13).map((h) => <option key={h} value={h}>{String(h % 24).padStart(2, '0')}:00</option>)}
+              </select>
+            </div>
+          </Row>
+          <Row label="Reminders" hint={notifHint}>
+            <Switch
+              label="Reminders"
+              checked={s.reminders}
+              onChange={async (v) => {
+                s.set({ reminders: v });
+                if (v) setPerm(String(await requestNotificationPermission()));
+              }}
+            />
+          </Row>
+        </Section>
+
         <Section title="Your data">
+          <Row label="Sample data" hint={demo ? 'The app is showing example tasks, events and logs. Remove them when you’re ready.' : 'Add example data to explore the app. You can remove it in one click.'}>
+            {demo ? (
+              <Button variant="glass" size="sm" icon={Trash2} onClick={async () => { await removeDemoData(); setDemo(false); setMsg('Sample data removed. Everything you added is still here.'); }}>Remove sample data</Button>
+            ) : (
+              <Button variant="glass" size="sm" icon={Sparkles} onClick={async () => { await seedDemoData(); setDemo(true); setMsg('Sample data added.'); }}>Add sample data</Button>
+            )}
+          </Row>
           <Row label="Stored only on this device" hint="No account, no server, no tracking. Back up to move between devices.">
             <div className="flex gap-2">
               <Button variant="glass" size="sm" icon={Download} onClick={() => void downloadBackup()}>Export</Button>

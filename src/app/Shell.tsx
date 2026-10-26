@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import { MotionConfig, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TabBar } from './TabBar';
 import { CommandBar, useCommand } from './CommandBar';
@@ -10,6 +10,22 @@ import { useIsDark, useIsDesktop, useReducedMotion } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
 import { pageVariants } from '@/lib/motion';
 import TodayPage from '@/features/today/TodayPage';
+import { TaskEditor } from '@/features/planner/TaskEditor';
+import { EventEditor } from '@/features/calendar/EventEditor';
+import { FocusMode } from '@/features/planner/FocusMode';
+import { Toaster } from '@/ui/Toast';
+import { ChoiceHost, ConfirmHost } from '@/ui/Confirm';
+import { DragGhost } from '@/ui/dnd';
+import { startReminders } from '@/lib/reminders';
+import { db, getKV, setKV } from '@/lib/db';
+import { seedDemoData } from '@/lib/demo';
+
+/** First launch: fill the app with removable sample data so it doesn't open empty. */
+async function firstRun() {
+  if (await getKV('initialized')) return;
+  await setKV('initialized', Date.now());
+  if ((await db.tasks.count()) === 0 && (await db.events.count()) === 0) await seedDemoData();
+}
 
 const pages: Record<Route, React.ComponentType> = {
   today: TodayPage,
@@ -77,6 +93,11 @@ function useGlobalEffects() {
     return () => removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    void firstRun();
+    return startReminders();
+  }, []);
+
   return reduced;
 }
 
@@ -106,19 +127,26 @@ export function Shell() {
         {desktop && <Sidebar />}
         <main id="main" className="min-w-0 flex-1 px-4 pb-32 pt-[max(20px,env(safe-area-inset-top))] sm:px-8 lg:px-10 lg:pb-12 lg:pt-10">
           <div className="mx-auto w-full max-w-[1200px]">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={route} variants={pageVariants} initial="initial" animate="enter" exit="exit">
-                <Suspense fallback={<div className="h-[60vh]" />}>
-                  <Page />
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
+            {/* Enter-only page transition: the new page springs in, the old one leaves at once.
+                (Exit animations here could be held open by shared-layout elements inside pages.) */}
+            <motion.div key={route} variants={pageVariants} initial="initial" animate="enter">
+              <Suspense fallback={<div className="h-[60vh]" />}>
+                <Page />
+              </Suspense>
+            </motion.div>
           </div>
         </main>
       </div>
       {!desktop && <TabBar />}
       <CommandBar />
       <UpdateToast />
+      <TaskEditor />
+      <EventEditor />
+      <FocusMode />
+      <ConfirmHost />
+      <ChoiceHost />
+      <DragGhost />
+      <Toaster />
     </MotionConfig>
   );
 }

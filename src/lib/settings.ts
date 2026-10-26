@@ -12,6 +12,13 @@ export interface Settings {
   weekStart: 0 | 1; // 0 = Sunday, 1 = Monday
   clock: '12h' | '24h';
   language: LangPref;
+  targets: { kcal: number; protein: number; carbs: number; fat: number; waterMl: number; sleepH: number };
+  /** Hours the planner may schedule tasks in. */
+  dayStartH: number;
+  dayEndH: number;
+  reminders: boolean;
+  /** Afina's on-device model; '' = local engine only. */
+  model: string;
 }
 
 const defaults: Settings = {
@@ -21,6 +28,11 @@ const defaults: Settings = {
   weekStart: 1,
   clock: typeof Intl !== 'undefined' && new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hour12 ? '12h' : '24h',
   language: 'auto',
+  targets: { kcal: 2000, protein: 120, carbs: 230, fat: 70, waterMl: 2000, sleepH: 8 },
+  dayStartH: 9,
+  dayEndH: 21,
+  reminders: true,
+  model: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
 };
 
 interface SettingsState extends Settings {
@@ -47,7 +59,7 @@ export const useSettings = create<SettingsState>((set, get) => ({
   hydrate: async () => {
     try {
       const saved = await getKV<Partial<Settings>>('settings');
-      set({ ...defaults, ...saved, ready: true });
+      set({ ...defaults, ...saved, targets: { ...defaults.targets, ...saved?.targets }, ready: true });
     } catch {
       set({ ready: true });
     }

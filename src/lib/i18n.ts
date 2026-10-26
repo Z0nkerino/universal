@@ -1,4 +1,5 @@
 import { useSettings } from './settings';
+import { RU_STRINGS } from './i18n-ru';
 
 const en = {
   'nav.today': 'Today',
@@ -44,8 +45,19 @@ export function resolveLang(pref: 'auto' | 'en' | 'ru'): 'en' | 'ru' {
   return typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('ru') ? 'ru' : 'en';
 }
 
+/** Translates a known key, or any English UI string via the Russian dictionary (falls back to English). */
+export function translate(lang: 'en' | 'ru', k: Key | (string & {})): string {
+  if (k in en) return dicts[lang][k as Key] ?? en[k as Key];
+  return lang === 'ru' ? RU_STRINGS[k] ?? k : k;
+}
+
 export function useT() {
   const lang = resolveLang(useSettings((s) => s.language));
-  const t = (k: Key) => dicts[lang][k] ?? en[k];
+  const t = (k: Key | (string & {})) => translate(lang, k);
   return Object.assign(t, { lang, locale: lang === 'ru' ? 'ru-RU' : undefined });
+}
+
+/** Non-hook version for code outside components. */
+export function tNow(k: Key | (string & {})) {
+  return translate(resolveLang(useSettings.getState().language), k);
 }

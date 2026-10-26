@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { create } from 'zustand';
-import { motion } from 'framer-motion';
 import { CornerDownLeft, Download, Monitor, Moon, Palette, Search, Settings2, Sun, Wind, type LucideIcon } from 'lucide-react';
 import { NAV } from './nav';
 import { useRouter, type Route } from './router';
@@ -9,7 +8,6 @@ import { useT } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
 import { downloadBackup } from '@/lib/backup';
 import { cn } from '@/lib/cn';
-import { spring } from '@/lib/motion';
 
 export const useCommand = create<{ open: boolean; show: () => void; hide: () => void }>((set) => ({
   open: false,
@@ -145,7 +143,7 @@ export function CommandBar() {
                   onClick={() => run(c)}
                   className="relative flex h-12 w-full items-center gap-3 rounded-[14px] px-3 text-left text-[15px] font-medium"
                 >
-                  {i === sel && <motion.span layoutId="cmd-sel" transition={spring} className="absolute inset-0 rounded-[14px] bg-fg/[0.07]" />}
+                  {i === sel && <span className="absolute inset-0 rounded-[14px] bg-fg/[0.07]" />}
                   <span className={cn('relative flex h-8 w-8 items-center justify-center rounded-[10px]', i === sel ? 'bg-brand text-white' : 'bg-fg/[0.06] text-fg/70')}>
                     <c.icon size={16} strokeWidth={2.2} aria-hidden />
                   </span>

@@ -22,4 +22,6 @@ export const useRouter = create<RouterState>((set) => ({
   },
 }));
 
-addEventListener('popstate', () => useRouter.setState({ route: fromHash() }));
+const sync = () => useRouter.getState().route !== fromHash() && useRouter.setState({ route: fromHash() });
+addEventListener('popstate', sync);
+addEventListener('hashchange', sync);
