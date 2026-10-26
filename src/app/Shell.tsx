@@ -95,6 +95,7 @@ export function Shell() {
       <a href="#main" className="sr-only-focusable fixed left-4 top-4 z-[60] rounded-xl bg-fg px-4 py-2 text-bg">
         Skip to content
       </a>
+      <div className="titlebar-drag" aria-hidden />
       <div className="ambient" aria-hidden>
         <i />
         <i />

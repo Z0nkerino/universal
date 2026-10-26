@@ -6,6 +6,10 @@ import { Shell } from './app/Shell';
 import { useSettings } from './lib/settings';
 import './lib/install';
 
+// Running inside the desktop app (Electron)? Lets CSS make room for the macOS window controls.
+const desktop = (window as Window & { desktop?: { platform: string } }).desktop;
+if (desktop) document.documentElement.dataset.shell = desktop.platform === 'darwin' ? 'mac' : 'desktop';
+
 void useSettings.getState().hydrate();
 
 createRoot(document.getElementById('root')!).render(

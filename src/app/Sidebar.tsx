@@ -20,7 +20,7 @@ export function Sidebar() {
   const rect = useActiveRect(listRef, items.indexOf(route as never));
 
   return (
-    <Glass shimmer={false} radius="xl" role="navigation" aria-label="Main" className="sticky top-4 m-4 mr-0 flex h-[calc(100dvh-2rem)] w-[248px] shrink-0 flex-col p-3">
+    <Glass shimmer={false} radius="xl" role="navigation" aria-label="Main" className="sidebar sticky top-4 m-4 mr-0 flex h-[calc(100dvh-2rem)] w-[248px] shrink-0 flex-col p-3">
       <a href="#/today" onClick={(e) => (e.preventDefault(), go('today'))} className="mb-5 mt-1 rounded-2xl px-2 py-1">
         <Wordmark />
       </a>

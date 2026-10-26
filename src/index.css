@@ -136,3 +136,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ambient i { animation: none; }
 }
+
+/* ---------- Desktop app (Electron) ---------- */
+.titlebar-drag { display: none; }
+html[data-shell='mac'] .titlebar-drag {
+  display: block; position: fixed; inset: 0 0 auto; height: 32px; z-index: 30;
+  -webkit-app-region: drag;
+}
+html[data-shell='mac'] button, html[data-shell='mac'] a, html[data-shell='mac'] input { -webkit-app-region: no-drag; }
+/* Traffic lights sit inside the sidebar's top edge; push its content below them. */
+html[data-shell='mac'] .sidebar { padding-top: 44px; }
+@media (max-width: 1023px) {
+  html[data-shell='mac'] #main { padding-top: 52px; }
+}

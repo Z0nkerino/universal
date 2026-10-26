@@ -2,13 +2,17 @@
   "name": "universal-planner",
   "private": true,
   "version": "0.1.0",
-  "description": "Universal Planner by Eternal Inc. — an all-in-one, offline-first planner.",
+  "description": "Universal Planner by Eternal Inc. \u2014 an all-in-one, offline-first planner.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "build:desktop": "UP_DESKTOP=1 vite build --outDir dist-desktop",
+    "desktop": "npm run build:desktop && electron .",
+    "dist:mac": "npm run build:desktop && electron-builder --mac dmg --universal",
+    "dist:win": "npm run build:desktop && electron-builder --win nsis"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.1",
@@ -29,11 +33,71 @@
     "@types/three": "0.170.0",
     "@vitejs/plugin-react": "4.4.1",
     "autoprefixer": "10.4.20",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "postcss": "8.4.49",
     "potrace": "2.1.8",
     "tailwindcss": "3.4.17",
     "typescript": "5.7.3",
     "vite": "6.3.5",
     "vite-plugin-pwa": "0.21.1"
+  },
+  "main": "electron/main.cjs",
+  "author": {
+    "name": "Eternal Inc."
+  },
+  "build": {
+    "appId": "com.eternalinc.universalplanner",
+    "productName": "Universal Planner",
+    "copyright": "\u00a9 2026 Eternal Inc.",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "dist-desktop/**",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        "dmg"
+      ],
+      "darkModeSupport": true,
+      "hardenedRuntime": true
+    },
+    "dmg": {
+      "title": "Universal Planner",
+      "iconSize": 112,
+      "window": {
+        "width": 560,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 190
+        },
+        {
+          "x": 410,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Universal Planner"
+    }
   }
 }

@@ -4,6 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
 const preview = process.env.UP_PREVIEW === '1';
+// Desktop (Electron) builds ship their own files, so they skip the service worker.
+const desktop = process.env.UP_DESKTOP === '1';
 
 export default defineConfig({
   base: preview ? './' : '/',
@@ -12,6 +14,7 @@ export default defineConfig({
   plugins: [
     react(),
     !preview &&
+      !desktop &&
       VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['brand/*.svg', 'brand/*.png', 'favicon.svg'],

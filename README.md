@@ -34,6 +34,20 @@ Serve the production build over HTTPS (or `localhost`), open it, then:
 
 Settings → App also shows an **Install** button when the browser supports it.
 
+## Desktop app (Mac & Windows)
+
+The desktop app wraps the same code in Electron, with native window controls, a menu bar and an About panel credited to Eternal Inc. Data stays on your machine.
+
+```bash
+npm run desktop     # build and run the desktop app locally
+npm run dist:mac    # on a Mac: builds release/Universal Planner-<version>-universal.dmg (Apple Silicon + Intel)
+npm run dist:win    # on Windows: builds release/Universal Planner Setup <version>.exe
+```
+
+A `.dmg` can only be built on macOS. If you don't have a Mac handy, push the repo to GitHub and run the **Desktop apps** workflow (Actions tab → Desktop apps → Run workflow). It builds the `.dmg` and the Windows installer and attaches them to the run.
+
+The app isn't notarized yet, which needs a paid Apple Developer account. The first time you open it, macOS will block it: open **System Settings → Privacy & Security** and click **Open Anyway**.
+
 ## Keyboard
 
 | Shortcut | Action |
