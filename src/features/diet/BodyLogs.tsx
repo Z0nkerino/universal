@@ -31,8 +31,8 @@ function Card({ icon: Icon, title, children }: { icon: typeof Scale; title: stri
     <motion.section variants={itemVariants} aria-label={title}>
       <TiltCard max={2} className="h-full p-5">
         <header className="mb-4 flex items-center gap-2">
-          <Icon size={16} className="text-fg/50" aria-hidden />
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{title}</h2>
+          <Icon size={16} className="text-fg/60" aria-hidden />
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{title}</h2>
         </header>
         {children}
       </TiltCard>
@@ -164,7 +164,7 @@ function MoodCard() {
             className={cn('flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 transition-colors', today?.score === m.score ? 'bg-brand-soft ring-2 ring-blue' : 'hover:bg-fg/[0.05]')}
           >
             <span className="text-[28px]">{m.emoji}</span>
-            <span className="text-[11px] font-semibold text-fg/55">{t(m.label)}</span>
+            <span className="text-[11px] font-semibold text-fg/60">{t(m.label)}</span>
           </motion.button>
         ))}
       </div>
@@ -175,7 +175,7 @@ function MoodCard() {
           return (
             <div key={d} className="flex flex-col items-center gap-1" title={l?.note}>
               <span className="text-[16px]" aria-label={l ? t(MOODS[l.score - 1].label) : t('No entry')}>{l ? MOODS[l.score - 1].emoji : '·'}</span>
-              <span className="text-[10px] font-semibold text-fg/40">{fmt(fromDayKey(d), 'EEEEE')}</span>
+              <span className="text-[10px] font-semibold text-fg/60">{fmt(fromDayKey(d), 'EEEEE')}</span>
             </div>
           );
         })}

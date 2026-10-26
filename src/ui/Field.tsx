@@ -29,7 +29,7 @@ export function Field({ label, htmlFor, hint, children, className }: { label: st
         {t(label)}
       </label>
       {children}
-      {hint && <p className="px-1 text-[12px] text-fg/45">{t(hint)}</p>}
+      {hint && <p className="px-1 text-[12px] text-fg/60">{t(hint)}</p>}
     </div>
   );
 }

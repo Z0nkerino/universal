@@ -10,8 +10,8 @@ export function Widget({ title, icon: Icon, action, children, className }: { tit
     <motion.section variants={itemVariants} className={className} aria-label={title}>
       <TiltCard max={3} className="flex h-full flex-col p-5">
         <header className="mb-3 flex items-center gap-2">
-          {Icon && <Icon size={16} strokeWidth={2.3} className="text-fg/55" aria-hidden />}
-          <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/50">{title}</h2>
+          {Icon && <Icon size={16} strokeWidth={2.3} className="text-fg/60" aria-hidden />}
+          <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{title}</h2>
           {action}
         </header>
         <div className="flex-1">{children}</div>

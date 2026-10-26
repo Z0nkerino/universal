@@ -17,7 +17,14 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? pkg.version),
     __UPDATE_REPO__: JSON.stringify(pkg.updates.repo),
   },
-  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // Only the English and Russian date parsers, not every chrono locale.
+      'chrono-node/en': fileURLToPath(new URL('./node_modules/chrono-node/dist/esm/locales/en/index.js', import.meta.url)),
+      'chrono-node/ru': fileURLToPath(new URL('./node_modules/chrono-node/dist/esm/locales/ru/index.js', import.meta.url)),
+    },
+  },
   plugins: [
     react(),
     !preview &&

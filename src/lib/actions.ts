@@ -2,7 +2,7 @@
 import { db, stamp, uid } from './db';
 import { dayKey, todayKey } from './dates';
 import type { CalEvent, Food, Goal, Habit, Idea, IdeaColumn, MealEntry, MealSlot, MoodLog, Note, Task } from './types';
-import { parseQuickAdd, type QuickAdd } from './nlp';
+import { loadDateParsers, parseQuickAdd, type QuickAdd } from './nlp';
 
 /* ---------- Tasks ---------- */
 
@@ -62,6 +62,7 @@ export async function skipOccurrence(id: string, start: number) {
 
 /** Creates a task or event from a quick-add phrase. */
 export async function quickAdd(text: string, forceKind?: 'task' | 'event'): Promise<{ kind: 'task' | 'event'; parsed: QuickAdd; record: Task | CalEvent }> {
+  await loadDateParsers();
   const p = parseQuickAdd(text, new Date(), forceKind);
   if (p.kind === 'event' && p.start !== undefined) {
     const record = await createEvent({ title: p.title, start: p.start, end: p.end!, allDay: p.allDay, rrule: p.rrule, color: 'blue', reminder: p.allDay ? undefined : 10 });

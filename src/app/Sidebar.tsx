@@ -3,7 +3,7 @@ import { Search, Settings2 } from 'lucide-react';
 import { visibleNav } from './nav';
 import { useSettings } from '@/lib/settings';
 import { useRouter } from './router';
-import { useCommand } from './CommandBar';
+import { useCommand } from './commandStore';
 import { Glass } from '@/ui/Glass';
 import { LiquidIndicator, useActiveRect } from '@/ui/LiquidIndicator';
 import { EternalCredit, Wordmark } from '@/ui/Logo';
@@ -29,7 +29,7 @@ export function Sidebar() {
       <button
         type="button"
         onClick={openCommand}
-        className="mb-4 flex h-10 items-center gap-2.5 rounded-[14px] bg-fg/[0.05] px-3 text-[14px] text-fg/50 transition-colors hover:bg-fg/[0.08] hover:text-fg/70"
+        className="mb-4 flex h-10 items-center gap-2.5 rounded-[14px] bg-fg/[0.05] px-3 text-[14px] text-fg/60 transition-colors hover:bg-fg/[0.08] hover:text-fg/70"
       >
         <Search size={16} strokeWidth={2.2} aria-hidden />
         <span className="flex-1 text-left">{t('search.button')}</span>
@@ -46,7 +46,7 @@ export function Sidebar() {
                 type="button"
                 aria-current={active ? 'page' : undefined}
                 onClick={() => go(n.id)}
-                className={cn('relative flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-[15px] font-semibold tracking-[-0.01em] transition-colors', active ? 'text-fg' : 'text-fg/55 hover:text-fg/85')}
+                className={cn('relative flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-[15px] font-semibold tracking-[-0.01em] transition-colors', active ? 'text-fg' : 'text-fg/60 hover:text-fg/85')}
               >
                 <n.icon size={20} strokeWidth={active ? 2.3 : 2} className={cn(active && n.id === 'afina' && 'text-pink')} aria-hidden />
                 <span className="flex-1 text-left">{t(`nav.${n.id}`)}</span>
@@ -60,7 +60,7 @@ export function Sidebar() {
             type="button"
             aria-current={route === 'settings' ? 'page' : undefined}
             onClick={() => go('settings')}
-            className={cn('relative flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-[15px] font-semibold transition-colors', route === 'settings' ? 'text-fg' : 'text-fg/55 hover:text-fg/85')}
+            className={cn('relative flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-[15px] font-semibold transition-colors', route === 'settings' ? 'text-fg' : 'text-fg/60 hover:text-fg/85')}
           >
             <Settings2 size={20} strokeWidth={2} aria-hidden />
             {t('nav.settings')}

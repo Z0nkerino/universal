@@ -47,8 +47,8 @@ function Section({ title, icon: Icon, children, className }: { title: string; ic
     <motion.section variants={itemVariants} aria-label={title} className={className}>
       <TiltCard max={2} className="h-full p-5">
         <header className="mb-4 flex items-center gap-2">
-          <Icon size={16} className="text-fg/50" aria-hidden />
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{title}</h2>
+          <Icon size={16} className="text-fg/60" aria-hidden />
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{title}</h2>
         </header>
         {children}
       </TiltCard>
@@ -69,14 +69,14 @@ function Heatmap({ grid }: { grid: number[][] }) {
           <tr>
             <th className="w-10" />
             {hours.map((h) => (
-              <th key={h} scope="col" className="text-[10px] font-medium text-fg/45">{h % 3 === 0 ? `${h}` : ''}</th>
+              <th key={h} scope="col" className="text-[10px] font-medium text-fg/60">{h % 3 === 0 ? `${h}` : ''}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {grid.map((row, d) => (
             <tr key={d}>
-              <th scope="row" className="pr-1 text-left text-[11px] font-semibold text-fg/50">{t(WEEKDAYS[d])}</th>
+              <th scope="row" className="pr-1 text-left text-[11px] font-semibold text-fg/60">{t(WEEKDAYS[d])}</th>
               {hours.map((h) => {
                 const v = row[h];
                 return (
@@ -89,7 +89,7 @@ function Heatmap({ grid }: { grid: number[][] }) {
           ))}
         </tbody>
       </table>
-      <div className="mt-2 flex items-center gap-2 text-[11px] text-fg/50">
+      <div className="mt-2 flex items-center gap-2 text-[11px] text-fg/60">
         {t('Less')}
         {[0.12, 0.35, 0.6, 0.95].map((a) => <span key={a} className="h-3 w-5 rounded-[4px]" style={{ background: `rgb(47 107 255 / ${a})` }} />)}
         {t('More')}
@@ -123,7 +123,7 @@ function WeeklyReviewSheet({ open, onClose, records }: { open: boolean; onClose:
             <p className="text-[15px]"><strong>{t('Best day')}: {fmt(r.bestDay.date, 'EEEE')}</strong> — {r.bestDay.tasksDone} {t('tasks')}, {r.bestDay.focusMin} {t('min focused')}.</p>
           </div>
         )}
-        <h3 className="mt-6 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{t('For next week')}</h3>
+        <h3 className="mt-6 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t('For next week')}</h3>
         <ul className="mt-2 flex flex-col gap-2">
           {r.suggestions.map((s) => (
             <li key={s} className="flex gap-2.5 text-[15px]"><Sparkles size={16} className="mt-1 shrink-0 text-blue" aria-hidden />{s}</li>
@@ -195,7 +195,7 @@ export default function InsightsPage() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-[15px] font-semibold leading-snug">{i.title}</p>
-                      <p className="mt-1 text-[12px] text-fg/50">{i.detail}</p>
+                      <p className="mt-1 text-[12px] text-fg/60">{i.detail}</p>
                     </div>
                   </TiltCard>
                 ))}
@@ -256,7 +256,7 @@ export default function InsightsPage() {
                   <li key={habit.id}>
                     <div className="mb-1 flex items-center justify-between gap-2 text-[14px]">
                       <span className="truncate font-semibold">{habit.emoji} {habit.name}</span>
-                      <span className="shrink-0 text-[12px] text-fg/55">🔥 {streak} · {t('best')} {best}</span>
+                      <span className="shrink-0 text-[12px] text-fg/60">🔥 {streak} · {t('best')} {best}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-fg/[0.07]">
@@ -276,7 +276,7 @@ export default function InsightsPage() {
             {view.pairs.length >= 3 ? (
               <>
                 <p className="text-[15px] font-semibold">{Number.isNaN(view.r) ? t('Not enough variation yet') : `${t(describeCorrelation(view.r))} · r = ${view.r.toFixed(2)}`}</p>
-                <p className="text-[12px] text-fg/50">{view.pairs.length} {t('days with both logged')}</p>
+                <p className="text-[12px] text-fg/60">{view.pairs.length} {t('days with both logged')}</p>
                 <div className="mt-3 h-44" role="img" aria-label={t('Hours slept against mood for each day')}>
                   <ResponsiveContainer>
                     <ScatterChart margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
@@ -289,7 +289,7 @@ export default function InsightsPage() {
                     </ScatterChart>
                   </ResponsiveContainer>
                 </div>
-                <p className="mt-1 text-[11px] text-fg/45">{t('Each dot is one day: hours slept (across) and mood 1–5 (up).')}</p>
+                <p className="mt-1 text-[11px] text-fg/60">{t('Each dot is one day: hours slept (across) and mood 1–5 (up).')}</p>
               </>
             ) : (
               <EmptyState compact icon={Moon} title={t('Log sleep and mood')} body={t('After a few days with both, you’ll see how they relate.')} />

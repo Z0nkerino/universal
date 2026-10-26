@@ -16,7 +16,7 @@ function ChartCard({ title, sub, children }: { title: string; sub?: string; chil
     <motion.section variants={itemVariants} aria-label={title}>
       <TiltCard max={2} className="p-5">
         <h2 className="text-[17px] font-bold tracking-[-0.01em]">{title}</h2>
-        {sub && <p className="mt-0.5 text-[13px] text-fg/55">{sub}</p>}
+        {sub && <p className="mt-0.5 text-[13px] text-fg/60">{sub}</p>}
         <div className="mt-4">{children}</div>
       </TiltCard>
     </motion.section>

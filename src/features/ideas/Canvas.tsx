@@ -11,7 +11,8 @@ import { confirm } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
 import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
-import { useIdeaEditor, COLUMNS } from './IdeaEditor';
+import { COLUMNS } from './IdeaEditor';
+import { useIdeaEditor } from './editorStore';
 import { linkPath } from './geometry';
 
 const CARD_W = 220;
@@ -272,7 +273,7 @@ export function IdeaCanvas() {
                     onPointerDown={(e) => e.stopPropagation()}
                     onBlur={(e) => void db.ideaGroups.update(g.id, { title: e.target.value, updatedAt: Date.now() })}
                     aria-label={t('Group name')}
-                    className="min-w-0 flex-1 bg-transparent text-[14px] font-bold uppercase tracking-[0.06em] text-fg/55 focus-visible:outline-none"
+                    className="min-w-0 flex-1 bg-transparent text-[14px] font-bold uppercase tracking-[0.06em] text-fg/60 focus-visible:outline-none"
                   />
                   <button
                     type="button"
@@ -281,7 +282,7 @@ export function IdeaCanvas() {
                     onClick={async () => {
                       if (await confirm({ title: t('Delete this group?'), body: t('The ideas inside stay on the canvas.'), confirmLabel: t('Delete'), danger: true })) await db.ideaGroups.delete(g.id);
                     }}
-                    className="rounded-md p-1 text-fg/40 hover:bg-fg/[0.06] hover:text-fg"
+                    className="rounded-md p-1 text-fg/60 hover:bg-fg/[0.06] hover:text-fg"
                   >
                     <X size={14} />
                   </button>
@@ -323,7 +324,7 @@ export function IdeaCanvas() {
                   await db.ideaLinks.delete(l.id);
                   toast(t('Connection removed'), { action: { label: t('Undo'), run: () => void db.ideaLinks.add(l) } });
                 }}
-                className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-bg text-fg/50 opacity-0 shadow ring-1 ring-fg/10 transition-opacity hover:text-fg hover:opacity-100 focus-visible:opacity-100"
+                className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-bg text-fg/60 opacity-0 shadow ring-1 ring-fg/10 transition-opacity hover:text-fg hover:opacity-100 focus-visible:opacity-100"
                 style={{ left: mx, top: my }}
               >
                 <X size={12} />
@@ -358,7 +359,7 @@ export function IdeaCanvas() {
                   <h3 className="text-[15px] font-bold leading-snug tracking-[-0.01em]">{i.title}</h3>
                 </div>
                 {i.body && <p className="mt-1.5 line-clamp-3 text-[13px] leading-snug text-fg/60">{i.body}</p>}
-                <span className="mt-2.5 inline-block rounded-full bg-fg/[0.06] px-2 py-0.5 text-[11px] font-semibold text-fg/55">{t(col.label)}</span>
+                <span className="mt-2.5 inline-block rounded-full bg-fg/[0.06] px-2 py-0.5 text-[11px] font-semibold text-fg/60">{t(col.label)}</span>
               </motion.div>
             );
           })}
@@ -367,7 +368,7 @@ export function IdeaCanvas() {
         {ideas.length === 0 && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
             <Lightbulb size={32} className="text-fg/25" />
-            <p className="text-[15px] font-semibold text-fg/50">{t('Double-click anywhere to drop an idea')}</p>
+            <p className="text-[15px] font-semibold text-fg/60">{t('Double-click anywhere to drop an idea')}</p>
           </div>
         )}
 
@@ -394,7 +395,7 @@ export function IdeaCanvas() {
           <IconButton icon={Maximize} size={32} label={t('Fit everything')} onClick={fit} />
         </div>
       </div>
-      <p className="mt-2 hidden px-2 text-[12px] text-fg/40 lg:block">{t('Drag to pan · pinch or Ctrl+scroll to zoom · double-click to add · drag a group’s title to move it with its ideas')}</p>
+      <p className="mt-2 hidden px-2 text-[12px] text-fg/60 lg:block">{t('Drag to pan · pinch or Ctrl+scroll to zoom · double-click to add · drag a group’s title to move it with its ideas')}</p>
     </div>
   );
 }

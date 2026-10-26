@@ -86,13 +86,13 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         <div className="mt-5">
           <Segmented label={t('Language')} value={s.language} onChange={(language) => s.set({ language })} options={[{ value: 'auto', label: 'Auto' }, { value: 'en', label: 'English' }, { value: 'ru', label: 'Русский' }]} />
         </div>
-        <p className="mt-6 flex items-center gap-1.5 text-[12px] text-fg/45"><EternalMark size={14} className="text-fg/70" /> {t('A product of Eternal Inc.')}</p>
+        <p className="mt-6 flex items-center gap-1.5 text-[12px] text-fg/60"><EternalMark size={14} className="text-fg/70" /> {t('A product of Eternal Inc.')}</p>
       </motion.div>
     </div>,
     // 2. Pick features
     <div key="f" className="w-full">
       <h2 className="text-center text-[28px] font-bold tracking-[-0.03em]">{t('What do you want to use?')}</h2>
-      <p className="mt-1 text-center text-[15px] text-fg/55">{t('Today and Afina are always there. You can change this later in Settings.')}</p>
+      <p className="mt-1 text-center text-[15px] text-fg/60">{t('Today and Afina are always there. You can change this later in Settings.')}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {FEATURES.map((f, i) => {
           const on = features.includes(f.id);
@@ -109,12 +109,12 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               onClick={() => setFeatures((x) => (on ? x.filter((y) => y !== f.id) : [...x, f.id]))}
               className={cn('glass flex items-center gap-3 rounded-[20px] p-4 text-left transition-shadow', on && 'ring-2 ring-blue')}
             >
-              <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]', on ? 'bg-brand text-white' : 'bg-fg/[0.06] text-fg/50')}>
+              <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]', on ? 'bg-brand text-white' : 'bg-fg/[0.06] text-fg/60')}>
                 <f.icon size={20} aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[16px] font-bold">{t(f.title)}</span>
-                <span className="block text-[13px] text-fg/55">{t(f.body)}</span>
+                <span className="block text-[13px] text-fg/60">{t(f.body)}</span>
               </span>
               <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full', on ? 'bg-blue text-white' : 'ring-2 ring-fg/15')}>{on && <Check size={14} strokeWidth={3} />}</span>
             </motion.button>
@@ -125,10 +125,10 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     // 3. Goals & targets
     <div key="g" className="w-full">
       <h2 className="text-center text-[28px] font-bold tracking-[-0.03em]">{t('A few targets')}</h2>
-      <p className="mt-1 text-center text-[15px] text-fg/55">{t('Rough is fine — Insights will show you how it really goes.')}</p>
+      <p className="mt-1 text-center text-[15px] text-fg/60">{t('Rough is fine — Insights will show you how it really goes.')}</p>
       <div className="glass mt-6 flex flex-col divide-y divide-fg/[0.06] rounded-[24px]">
         <label className="flex flex-col gap-1.5 p-4">
-          <span className="text-[15px] font-semibold">{t('One goal you’re working toward')} <span className="font-normal text-fg/45">({t('optional')})</span></span>
+          <span className="text-[15px] font-semibold">{t('One goal you’re working toward')} <span className="font-normal text-fg/60">({t('optional')})</span></span>
           <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={t('Run a 10K, launch my site, learn Spanish…')} className="h-11 rounded-[14px] bg-fg/[0.05] px-3.5 text-[15px] focus:shadow-[0_0_0_2px_rgb(47_107_255/0.5)] focus-visible:outline-none" />
         </label>
         <div className="flex items-center justify-between gap-3 p-4">
@@ -170,7 +170,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
       <label className="glass mt-6 flex w-full max-w-md items-center justify-between gap-3 rounded-[20px] p-4 text-left">
         <span>
           <span className="block text-[15px] font-semibold">{t('Start with sample data')}</span>
-          <span className="block text-[13px] text-fg/55">{t('See the app alive right away. Remove it in Settings with one click.')}</span>
+          <span className="block text-[13px] text-fg/60">{t('See the app alive right away. Remove it in Settings with one click.')}</span>
         </span>
         <Switch label={t('Start with sample data')} checked={sample} onChange={setSample} />
       </label>
@@ -181,7 +181,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     <motion.div className="fixed inset-0 z-[90] flex flex-col overflow-y-auto bg-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label={t('Welcome to Universal Planner')}>
       <div className="ambient" aria-hidden><i /><i /><i /></div>
       <div className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))]">
-        <div className="flex gap-1.5" aria-label={`${t('Step')} ${step + 1} / 4`}>
+        <div className="flex gap-1.5" role="img" aria-label={`${t('Step')} ${step + 1} / 4`}>
           {screens.map((_, i) => (
             <motion.span key={i} className="h-1.5 rounded-full bg-fg/20" animate={{ width: i === step ? 28 : 8, background: i <= step ? '#2F6BFF' : 'rgba(127,127,127,0.25)' }} transition={spring} />
           ))}

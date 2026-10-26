@@ -16,7 +16,7 @@ export function EmptyState({ icon: Icon, title, body, action, className, compact
         <Icon size={compact ? 22 : 28} strokeWidth={1.8} className="text-blue dark:text-[#7DA2FF]" aria-hidden />
       </motion.div>
       <h3 className={cn('font-bold tracking-[-0.02em]', compact ? 'text-[15px]' : 'text-lg')}>{title}</h3>
-      <p className={cn('max-w-[34ch] text-fg/55', compact ? 'text-[13px]' : 'text-[15px]')}>{body}</p>
+      <p className={cn('max-w-[34ch] text-fg/60', compact ? 'text-[13px]' : 'text-[15px]')}>{body}</p>
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

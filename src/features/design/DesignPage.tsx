@@ -16,7 +16,7 @@ import { itemVariants, spring } from '@/lib/motion';
 function Block({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   return (
     <motion.section variants={itemVariants} className={className}>
-      <h2 className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{title}</h2>
+      <h2 className="mb-3 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{title}</h2>
       {children}
     </motion.section>
   );
@@ -67,7 +67,7 @@ function TaskDemo() {
           ))}
         </AnimatePresence>
       </ul>
-      {tasks.length === 0 && <p className="px-4 py-6 text-center text-[15px] text-fg/50">All done. Nicely handled.</p>}
+      {tasks.length === 0 && <p className="px-4 py-6 text-center text-[15px] text-fg/60">All done. Nicely handled.</p>}
       <div className="flex justify-end px-2 pb-1">
         <Button variant="ghost" size="sm" icon={RotateCcw} onClick={() => setTasks(DEMO_TASKS.map((title, i) => ({ id: i + Date.now(), title, done: false })))}>
           Reset
@@ -135,13 +135,13 @@ export default function DesignPage() {
               <div key={s.name}>
                 <div className={`h-20 rounded-[20px] ${s.cls}`} />
                 <p className="mt-2 text-[14px] font-semibold">{s.name}</p>
-                <p className="text-[12px] font-medium text-fg/55">{s.hex}</p>
+                <p className="text-[12px] font-medium text-fg/60">{s.hex}</p>
               </div>
             ))}
             <div className="col-span-2 sm:col-span-1">
               <div className="h-20 rounded-[20px] bg-brand" />
               <p className="mt-2 text-[14px] font-semibold">Accent gradient</p>
-              <p className="text-[12px] font-medium text-fg/55">Use sparingly</p>
+              <p className="text-[12px] font-medium text-fg/60">Use sparingly</p>
             </div>
           </div>
         </Block>
@@ -152,7 +152,7 @@ export default function DesignPage() {
             <p className="text-[28px] font-bold tracking-[-0.03em]">Title — <span className="text-brand">with accent</span></p>
             <p className="text-[19px] font-semibold tracking-[-0.015em]">Headline for cards and sections</p>
             <p className="text-[15px] text-fg/70">Body text is calm and readable, set on an 8pt grid with generous whitespace.</p>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">Section label</p>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">Section label</p>
           </Glass>
         </Block>
 
@@ -166,7 +166,7 @@ export default function DesignPage() {
             <div className="relative grid gap-4 sm:grid-cols-3">
               {['Hover me', 'Tilt me', 'Blur 24 · Saturate 180%'].map((t, i) => (
                 <TiltCard key={t} className="flex h-40 flex-col justify-between p-5" strong={i === 2}>
-                  <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{i === 2 ? 'Strong' : 'Regular'}</span>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{i === 2 ? 'Strong' : 'Regular'}</span>
                   <span className="text-[19px] font-bold tracking-[-0.02em]">{t}</span>
                 </TiltCard>
               ))}
@@ -193,7 +193,7 @@ export default function DesignPage() {
               <div className="flex-1">
                 <label htmlFor="ring" className="text-[15px] font-semibold">Progress</label>
                 <input id="ring" type="range" min={0} max={1} step={0.01} value={ring} onChange={(e) => setRing(Number(e.target.value))} className="mt-3 w-full accent-[#2F6BFF]" />
-                <p className="mt-1 text-[13px] text-fg/50">{Math.round(ring * 100)}%</p>
+                <p className="mt-1 text-[13px] text-fg/60">{Math.round(ring * 100)}%</p>
               </div>
             </Glass>
           </Block>
@@ -213,7 +213,7 @@ export default function DesignPage() {
           <Block title="Liquid indicator">
             <Glass className="flex flex-col items-start gap-3 p-6">
               <LiquidTabsDemo />
-              <p className="text-[13px] text-fg/50">Jump between distant tabs — the blob stretches with its speed, then settles.</p>
+              <p className="text-[13px] text-fg/60">Jump between distant tabs — the blob stretches with its speed, then settles.</p>
             </Glass>
           </Block>
         </div>

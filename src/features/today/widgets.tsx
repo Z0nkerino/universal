@@ -22,7 +22,7 @@ import { useHabitsData } from '@/features/planner/HabitsView';
 import { goalProgress } from '@/features/planner/GoalsView';
 import { useOccurrences } from '@/features/calendar/data';
 import { EVENT_HEX } from '@/features/calendar/colors';
-import { useEventEditor } from '@/features/calendar/EventEditor';
+import { useEventEditor } from '@/features/calendar/editorStore';
 import { classify } from '@/features/planner/TasksView';
 import { useTodayTab } from './store';
 
@@ -78,17 +78,17 @@ export function TimelineWidget() {
         {items.slice(0, 7).map((i) => (
           <li key={i.key}>
             <button type="button" onClick={i.open} className="flex w-full gap-3 rounded-xl px-1.5 py-2 text-left hover:bg-fg/[0.04]">
-              <span className="w-14 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-fg/50">{fmtTime(i.start)}</span>
+              <span className="w-14 shrink-0 pt-0.5 text-[12px] font-semibold tabular-nums text-fg/60">{fmtTime(i.start)}</span>
               <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ background: i.color, outline: i.task ? `1.5px dashed ${i.color}` : undefined, outlineOffset: 2 }} />
               <span className="min-w-0 flex-1">
-                <span className={cn('block truncate text-[14px] font-semibold', i.done && 'text-fg/40 line-through')}>{i.title}</span>
+                <span className={cn('block truncate text-[14px] font-semibold', i.done && 'text-fg/60 line-through')}>{i.title}</span>
                 <NowBar start={i.start} end={i.end} />
               </span>
             </button>
           </li>
         ))}
       </ol>
-      {items.length > 7 && <p className="px-2 text-[12px] text-fg/45">+{items.length - 7} {t('more')}</p>}
+      {items.length > 7 && <p className="px-2 text-[12px] text-fg/60">+{items.length - 7} {t('more')}</p>}
     </div>
   );
 }
@@ -111,13 +111,13 @@ export function Top3Widget() {
       )}
       {top.length < 3 && (
         <div className={cn(top.length > 0 && 'mt-2 border-t border-fg/[0.06] pt-2')}>
-          {top.length === 0 && <p className="mb-2 px-1 text-[14px] text-fg/55">{t('Pick up to three things that would make today a win.')}</p>}
+          {top.length === 0 && <p className="mb-2 px-1 text-[14px] text-fg/60">{t('Pick up to three things that would make today a win.')}</p>}
           {candidates.length ? (
             <ul>
               {candidates.slice(0, 3 - top.length).map((x) => (
                 <li key={x.id}>
                   <button type="button" onClick={() => void updateTask(x.id, { top: 1, status: 'today', due: x.due ?? today })} className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left text-[14px] text-fg/70 hover:bg-fg/[0.04] hover:text-fg">
-                    <Star size={16} className="shrink-0 text-fg/35" aria-hidden />
+                    <Star size={16} className="shrink-0 text-fg/60" aria-hidden />
                     <span className="truncate">{x.title}</span>
                     <span className="ml-auto shrink-0 text-[12px] font-semibold text-blue">{t('Make it a top 3')}</span>
                   </button>
@@ -198,7 +198,7 @@ export function NutritionWidget() {
       <div>
         <p className="text-[28px] font-bold tabular-nums tracking-[-0.03em]">
           {glasses}
-          <span className="ml-1 text-[14px] font-semibold text-fg/45">/ {target} {t('glasses')}</span>
+          <span className="ml-1 text-[14px] font-semibold text-fg/60">/ {target} {t('glasses')}</span>
         </p>
         <div className="mt-2 flex flex-wrap gap-1" aria-hidden>
           {Array.from({ length: target }, (_, i) => (
@@ -212,12 +212,12 @@ export function NutritionWidget() {
       <button type="button" onClick={() => go('health')} className="rounded-2xl text-left">
         <p className="flex items-baseline text-[28px] font-bold tabular-nums tracking-[-0.03em]">
           {Math.round(kcal)}
-          <span className="ml-1 text-[14px] font-semibold text-fg/45">/ {targets.kcal} {t('kcal')}</span>
+          <span className="ml-1 text-[14px] font-semibold text-fg/60">/ {targets.kcal} {t('kcal')}</span>
         </p>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-pink/15">
           <motion.div className="h-full rounded-full bg-pink" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (kcal / targets.kcal) * 100)}%` }} transition={spring} />
         </div>
-        <p className="mt-2 flex items-center gap-1 text-[12px] font-medium text-fg/50">
+        <p className="mt-2 flex items-center gap-1 text-[12px] font-medium text-fg/60">
           <Flame size={12} aria-hidden /> {meals.length} {t(meals.length === 1 ? 'item logged' : 'items logged')} · {t('Log food')} →
         </p>
       </button>
@@ -239,7 +239,7 @@ export function FocusWidget() {
     <div className="flex flex-col gap-3">
       <p className="text-[28px] font-bold tabular-nums tracking-[-0.03em]">
         {minutes}
-        <span className="ml-1 text-[14px] font-semibold text-fg/45">{t('min focused today')}</span>
+        <span className="ml-1 text-[14px] font-semibold text-fg/60">{t('min focused today')}</span>
       </p>
       {top && <p className="truncate text-[14px] text-fg/60">{t('Up next')}: <span className="font-semibold text-fg">{top.title}</span></p>}
       <div className="flex flex-wrap gap-2">
@@ -265,7 +265,7 @@ export function GoalsWidget() {
             <button type="button" onClick={() => setTab('goals')} className="w-full text-left">
               <div className="mb-1 flex items-center justify-between gap-2 text-[14px] font-semibold">
                 <span className="truncate">{g.title}</span>
-                <span className="shrink-0 tabular-nums text-fg/50">{Math.round(p.value * 100)}%</span>
+                <span className="shrink-0 tabular-nums text-fg/60">{Math.round(p.value * 100)}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-fg/[0.07]">
                 <motion.div className="h-full rounded-full bg-brand" initial={{ width: 0 }} animate={{ width: `${p.value * 100}%` }} transition={spring} />

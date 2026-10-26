@@ -33,7 +33,7 @@ export function TabBar() {
                 aria-current={active ? 'page' : undefined}
                 aria-label={t(`nav.${n.id}`)}
                 onClick={() => go(n.id)}
-                className={cn('relative flex h-[54px] flex-col items-center justify-center gap-[3px] rounded-[20px] transition-colors', active ? 'text-fg' : 'text-fg/55')}
+                className={cn('relative flex h-[54px] flex-col items-center justify-center gap-[3px] rounded-[20px] transition-colors', active ? 'text-fg' : 'text-fg/60')}
               >
                 <n.icon size={22} strokeWidth={active ? 2.3 : 1.9} className={cn(active && n.id === 'afina' && 'text-pink')} aria-hidden />
                 <span className="max-w-full truncate px-0.5 text-[10px] font-semibold tracking-[-0.01em]">{t(`nav.${n.id}`)}</span>

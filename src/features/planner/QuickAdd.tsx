@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarPlus, CornerDownLeft, Flag, Hash, ListPlus, Repeat, Timer } from 'lucide-react';
-import { parseQuickAdd } from '@/lib/nlp';
+import { parseQuickAdd, useDateParsers } from '@/lib/nlp';
 import { quickAdd } from '@/lib/actions';
 import { fmt, fmtTime, todayKey } from '@/lib/dates';
 import { toast } from '@/ui/Toast';
@@ -19,7 +19,9 @@ export function QuickAdd({ kind, status, placeholder, className, autoFocus }: { 
   const t = useT();
   const [text, setText] = useState('');
   const ref = useRef<HTMLInputElement>(null);
-  const parsed = useMemo(() => (text.trim().length > 1 ? parseQuickAdd(text, new Date(), kind) : null), [text, kind]);
+  // Date parsing loads once the user starts typing, keeping it off the startup path.
+  const datesReady = useDateParsers(text.length > 0);
+  const parsed = useMemo(() => (text.trim().length > 1 ? parseQuickAdd(text, new Date(), kind) : null), [text, kind, datesReady]);
 
   const submit = async () => {
     if (!text.trim()) return;

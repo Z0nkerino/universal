@@ -59,7 +59,7 @@ export function Wordmark({ className }: { className?: string }) {
       <AppIcon size={32} />
       <span className="flex flex-col leading-none">
         <span className="text-[15px] font-bold tracking-[-0.02em]">Universal Planner</span>
-        <span className="mt-1 flex items-center gap-1 text-[11px] font-medium text-fg/55">
+        <span className="mt-1 flex items-center gap-1 text-[11px] font-medium text-fg/60">
           {tNow('by')} <EternalMark size={11} className="text-fg/70" /> Eternal Inc.
         </span>
       </span>
@@ -72,7 +72,7 @@ export function EternalCredit({ className }: { className?: string }) {
   return (
     <a
       href="#/settings"
-      className={cn('inline-flex items-center gap-1.5 text-[12px] font-medium text-fg/55 transition-colors hover:text-fg/70', className)}
+      className={cn('inline-flex items-center gap-1.5 text-[12px] font-medium text-fg/60 transition-colors hover:text-fg/70', className)}
     >
       <EternalMark size={16} className="text-fg/80" />
       <span>

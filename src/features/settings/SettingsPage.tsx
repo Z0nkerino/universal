@@ -23,7 +23,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   const t = useT();
   return (
     <motion.section variants={itemVariants} className="mb-6">
-      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{t(title)}</h2>
+      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t(title)}</h2>
       <Glass shimmer={false} className="divide-y divide-fg/[0.06] overflow-hidden">
         {children}
       </Glass>
@@ -37,7 +37,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
       <div className="min-w-0">
         <p className="text-[15px] font-semibold">{t(label)}</p>
-        {hint && <p className="mt-0.5 text-[13px] text-fg/50">{t(hint)}</p>}
+        {hint && <p className="mt-0.5 text-[13px] text-fg/60">{t(hint)}</p>}
       </div>
       {children}
     </div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
               <select aria-label={t('Day starts')} value={s.dayStartH} onChange={(e) => s.set({ dayStartH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
                 {Array.from({ length: 13 }, (_, h) => h + 5).map((h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}
               </select>
-              <span className="text-fg/40">–</span>
+              <span className="text-fg/60">–</span>
               <select aria-label={t('Day ends')} value={s.dayEndH} onChange={(e) => s.set({ dayEndH: Number(e.target.value) })} className="h-9 rounded-xl bg-fg/[0.06] px-2 text-[14px] font-semibold">
                 {Array.from({ length: 12 }, (_, h) => h + 13).map((h) => <option key={h} value={h}>{String(h % 24).padStart(2, '0')}:00</option>)}
               </select>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                   }}
                   className="h-9 w-24 rounded-xl bg-fg/[0.06] px-3 text-right text-[15px] font-semibold tabular-nums focus:shadow-[0_0_0_2px_rgb(47_107_255/0.5)] focus-visible:outline-none"
                 />
-                <span className="w-9 text-[13px] text-fg/50">{t(unit)}</span>
+                <span className="w-9 text-[13px] text-fg/60">{t(unit)}</span>
               </div>
             </Row>
           ))}
@@ -289,7 +289,7 @@ export default function SettingsPage() {
             <AppIcon size={72} />
             <div>
               <p className="text-[19px] font-bold tracking-[-0.02em]">Universal Planner</p>
-              <p className="text-[13px] text-fg/55">{t('Version')} {__APP_VERSION__}</p>
+              <p className="text-[13px] text-fg/60">{t('Version')} {__APP_VERSION__}</p>
             </div>
           </div>
           <div className="flex flex-col items-center gap-2">
@@ -297,7 +297,7 @@ export default function SettingsPage() {
             <p className="text-[14px] text-fg/60">
               {t('Designed and built by')} <span className="font-semibold text-fg">Eternal Inc.</span>
             </p>
-            <p className="text-[12px] text-fg/40">© {new Date().getFullYear()} Eternal Inc. {t('All rights reserved.')}</p>
+            <p className="text-[12px] text-fg/60">© {new Date().getFullYear()} Eternal Inc. {t('All rights reserved.')}</p>
           </div>
           <PlannerMark size={18} gradient className="opacity-80" />
         </motion.section>

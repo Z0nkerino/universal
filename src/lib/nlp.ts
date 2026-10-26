@@ -1,9 +1,30 @@
-import * as chrono from 'chrono-node';
+import type { ParsedResult } from 'chrono-node';
+import { useEffect, useState } from 'react';
 import { startOfDay } from 'date-fns';
 import type { Priority, Recurrence } from './types';
 import { dayKey } from './dates';
 
 export type Lang = 'en' | 'ru';
+
+type DateParser = { parse: (text: string, ref?: Date, opt?: { forwardDate?: boolean }) => ParsedResult[] };
+let parsers: Record<Lang, DateParser> | null = null;
+let loading: Promise<void> | null = null;
+
+/** Loads the date parsers, which stay out of the startup bundle. Safe to call repeatedly. */
+export function loadDateParsers() {
+  return (loading ??= Promise.all([import('chrono-node/en'), import('chrono-node/ru')]).then(([en, ru]) => {
+    parsers = { en: en.casual, ru: ru.casual };
+  }));
+}
+
+/** Loads the date parsers once `enabled` and re-renders when they're ready. */
+export function useDateParsers(enabled = true) {
+  const [ready, setReady] = useState(!!parsers);
+  useEffect(() => {
+    if (enabled && !ready) void loadDateParsers().then(() => setReady(true));
+  }, [enabled, ready]);
+  return ready;
+}
 
 export const detectLang = (text: string): Lang => (/[а-яё]/i.test(text) ? 'ru' : 'en');
 
@@ -131,8 +152,8 @@ export function parseQuickAdd(input: string, ref = new Date(), forceKind?: 'task
   text = rec.rest;
 
   // Dates and times.
-  const parser = lang === 'ru' ? chrono.ru.casual : chrono.en.casual;
-  const results = parser.parse(text, ref, { forwardDate: true });
+  // Until the parsers have loaded (a moment after startup) phrases are read without dates.
+  const results = parsers ? parsers[lang].parse(text, ref, { forwardDate: true }) : [];
   let start: number | undefined;
   let end: number | undefined;
   let hasTime = false;

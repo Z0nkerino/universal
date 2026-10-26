@@ -57,12 +57,12 @@ function Cell({ d, month, occ, props }: { d: Date; month: Date; occ: Occurrence[
           style={{ touchAction: 'none' }}
         >
           <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: EVENT_HEX[o.event.color] }} />
-          {!o.event.allDay && <span className="hidden shrink-0 font-medium text-fg/45 sm:inline">{fmtTime(o.start)}</span>}
+          {!o.event.allDay && <span className="hidden shrink-0 font-medium text-fg/60 sm:inline">{fmtTime(o.start)}</span>}
           <span className="truncate">{o.event.title}</span>
         </button>
       ))}
       {occ.length > 3 && (
-        <button type="button" onClick={() => props.onOpenDay(d)} className="px-1 text-left text-[11px] font-semibold text-fg/50 hover:text-fg">
+        <button type="button" onClick={() => props.onOpenDay(d)} className="px-1 text-left text-[11px] font-semibold text-fg/60 hover:text-fg">
           +{occ.length - 3} {t('more')}
         </button>
       )}
@@ -89,7 +89,7 @@ export function MonthView(props: Props) {
     <div>
       <div className="grid grid-cols-7 pb-2">
         {days.slice(0, 7).map((d) => (
-          <span key={d.getTime()} className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/50">{fmt(d, 'EEE')}</span>
+          <span key={d.getTime()} className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/60">{fmt(d, 'EEE')}</span>
         ))}
       </div>
       <div className="grid grid-cols-7 overflow-hidden rounded-[18px] border-b border-r border-fg/[0.06]" role="grid">
@@ -119,7 +119,7 @@ export function YearView({ year, occurrences, onOpenMonth, onOpenDay }: { year: 
             </button>
             <div className="grid grid-cols-7 gap-0.5">
               {days.slice(0, 7).map((d) => (
-                <span key={d.getTime()} className="text-center text-[10px] font-semibold text-fg/40">{fmt(d, 'EEEEE')}</span>
+                <span key={d.getTime()} className="text-center text-[10px] font-semibold text-fg/60">{fmt(d, 'EEEEE')}</span>
               ))}
               {days.map((d) => {
                 const n = isSameMonth(d, month) ? counts.get(dayKey(d)) ?? 0 : 0;

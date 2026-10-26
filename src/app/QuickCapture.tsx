@@ -104,7 +104,7 @@ export function QuickCapture() {
             />
           </div>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-[12px] text-fg/40">{t('Enter to save · Shift+Enter for a new line')}</span>
+            <span className="text-[12px] text-fg/60">{t('Enter to save · Shift+Enter for a new line')}</span>
             <Button type="submit" variant="brand" disabled={!text.trim()}>{t('Save')}</Button>
           </div>
         </form>

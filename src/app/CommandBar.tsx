@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { create } from 'zustand';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   CalendarPlus, CheckSquare, CornerDownLeft, Download, Lightbulb, ListPlus, Monitor, Moon, NotebookPen, Palette, Repeat, Search, Settings2, Sparkles, Sun, Target, Wind, CalendarDays, type LucideIcon,
@@ -13,20 +12,16 @@ import { useSettings } from '@/lib/settings';
 import { downloadBackup } from '@/lib/backup';
 import { db } from '@/lib/db';
 import { createIdea, createNote, quickAdd } from '@/lib/actions';
-import { parseQuickAdd } from '@/lib/nlp';
+import { parseQuickAdd, useDateParsers } from '@/lib/nlp';
 import { fmt, fmtTime } from '@/lib/dates';
 import { cn } from '@/lib/cn';
 import { useTaskEditor } from '@/features/planner/store';
-import { useEventEditor } from '@/features/calendar/EventEditor';
-import { useIdeaEditor } from '@/features/ideas/IdeaEditor';
+import { useEventEditor } from '@/features/calendar/editorStore';
+import { useIdeaEditor } from '@/features/ideas/editorStore';
 import { useNotesState } from '@/features/notes/store';
 import { useTodayTab } from '@/features/today/store';
+import { useCommand } from './commandStore';
 
-export const useCommand = create<{ open: boolean; show: () => void; hide: () => void }>((set) => ({
-  open: false,
-  show: () => set({ open: true }),
-  hide: () => set({ open: false }),
-}));
 
 interface Command {
   id: string;
@@ -108,6 +103,7 @@ export function CommandBar() {
     ];
   }, [t, go, settings]);
 
+  const datesReady = useDateParsers(open);
   const results = useMemo(() => {
     const text = q.trim();
     if (!text) return commands;
@@ -164,7 +160,7 @@ export function CommandBar() {
     const other = out.filter((c) => c.group !== t('Create') && c.group !== t('Found')).sort((a, b) => b.score - a.score).slice(0, 6);
     const looksLikeCreate = p.start !== undefined || /^(add|new|create|make|remind|schedule|book|task|event|добавь|создай|новая|новое|напомни|запланируй)\b/i.test(text) || /^(добавь|создай|напомни|запланируй)/i.test(text);
     return looksLikeCreate || (!found.length && !other.length) ? [...create, ...found, ...other] : [...found, ...other, ...create];
-  }, [q, commands, records, t, go]);
+  }, [q, commands, records, t, go, datesReady]);
 
   useEffect(() => setSel(0), [q, open]);
   useEffect(() => {
@@ -184,7 +180,7 @@ export function CommandBar() {
   return (
     <Sheet open={open} onClose={hide} label={t('Command bar')} position="top" className="max-w-[640px]">
       <div className="flex items-center gap-3 border-b border-fg/[0.07] px-5">
-        <Search size={20} className="text-fg/40" aria-hidden />
+        <Search size={20} className="text-fg/60" aria-hidden />
         <input
           autoFocus
           value={q}
@@ -202,7 +198,7 @@ export function CommandBar() {
           aria-activedescendant={results[sel] ? `cmd-${results[sel].id}` : undefined}
           className="h-16 flex-1 bg-transparent text-[17px] font-medium tracking-[-0.01em] placeholder:text-fg/35 focus-visible:outline-none"
         />
-        <kbd className="rounded-md bg-fg/[0.07] px-1.5 py-0.5 text-[11px] font-semibold text-fg/50">esc</kbd>
+        <kbd className="rounded-md bg-fg/[0.07] px-1.5 py-0.5 text-[11px] font-semibold text-fg/60">esc</kbd>
       </div>
       <div ref={listRef} id="cmd-list" role="listbox" className="thin-scrollbar max-h-[min(460px,58vh)] overflow-y-auto p-2">
         {results.map((c, i) => {
@@ -210,7 +206,7 @@ export function CommandBar() {
           lastGroup = c.group;
           return (
             <div key={c.id}>
-              {header && <p className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/45">{c.group}</p>}
+              {header && <p className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/60">{c.group}</p>}
               <button
                 id={`cmd-${c.id}`}
                 data-i={i}
@@ -227,9 +223,9 @@ export function CommandBar() {
                 </span>
                 <span className="relative min-w-0 flex-1">
                   <span className="block truncate">{c.title}</span>
-                  {c.sub && <span className="block truncate text-[12px] font-normal text-fg/50">{c.sub}</span>}
+                  {c.sub && <span className="block truncate text-[12px] font-normal text-fg/60">{c.sub}</span>}
                 </span>
-                {i === sel && <CornerDownLeft size={15} className="relative shrink-0 text-fg/40" aria-hidden />}
+                {i === sel && <CornerDownLeft size={15} className="relative shrink-0 text-fg/60" aria-hidden />}
               </button>
             </div>
           );

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TabBar } from './TabBar';
-import { CommandBar, useCommand } from './CommandBar';
+import { useCommand } from './commandStore';
 import { UpdateToast } from './UpdateToast';
 import { useRouter, type Route } from './router';
 import { NAV } from './nav';
@@ -11,16 +11,26 @@ import { useIsDark, useIsDesktop, useReducedMotion } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
 import { pageVariants } from '@/lib/motion';
 import TodayPage from '@/features/today/TodayPage';
-import { TaskEditor } from '@/features/planner/TaskEditor';
-import { EventEditor } from '@/features/calendar/EventEditor';
-import { FocusMode } from '@/features/planner/FocusMode';
-import { IdeaEditor } from '@/features/ideas/IdeaEditor';
-import { FoodPicker } from '@/features/diet/FoodPicker';
 import { QuickCapture, useCapture } from './QuickCapture';
 import { Toaster } from '@/ui/Toast';
 import { ChoiceHost, ConfirmHost, PromptHost } from '@/ui/Confirm';
 import { DragGhost } from '@/ui/dnd';
 import { startReminders } from '@/lib/reminders';
+// Dialogs load after first paint (and are prefetched when the browser is idle) to keep startup light.
+const hosts = {
+  CommandBar: () => import('./CommandBar').then((m) => ({ default: m.CommandBar })),
+  TaskEditor: () => import('@/features/planner/TaskEditor').then((m) => ({ default: m.TaskEditor })),
+  EventEditor: () => import('@/features/calendar/EventEditor').then((m) => ({ default: m.EventEditor })),
+  FocusMode: () => import('@/features/planner/FocusMode').then((m) => ({ default: m.FocusMode })),
+  IdeaEditor: () => import('@/features/ideas/IdeaEditor').then((m) => ({ default: m.IdeaEditor })),
+  FoodPicker: () => import('@/features/diet/FoodPicker').then((m) => ({ default: m.FoodPicker })),
+};
+const CommandBar = lazy(hosts.CommandBar);
+const TaskEditor = lazy(hosts.TaskEditor);
+const EventEditor = lazy(hosts.EventEditor);
+const FocusMode = lazy(hosts.FocusMode);
+const IdeaEditor = lazy(hosts.IdeaEditor);
+const FoodPicker = lazy(hosts.FoodPicker);
 const Onboarding = lazy(() => import('@/features/onboarding/Onboarding').then((m) => ({ default: m.Onboarding })));
 import { db, getKV, setKV } from '@/lib/db';
 
@@ -112,6 +122,10 @@ function useGlobalEffects() {
   }, []);
 
   useEffect(() => startReminders(), []);
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
+    idle(() => Object.values(hosts).forEach((load) => void load()));
+  }, []);
 
   return reduced;
 }
@@ -160,13 +174,12 @@ export function Shell() {
         </main>
       </div>
       {!desktop && <TabBar />}
-      <CommandBar />
       <UpdateToast />
-      <TaskEditor />
-      <EventEditor />
-      <FocusMode />
-      <IdeaEditor />
-      <FoodPicker />
+      {[CommandBar, TaskEditor, EventEditor, FocusMode, IdeaEditor, FoodPicker].map((Host, i) => (
+        <Suspense key={i} fallback={null}>
+          <Host />
+        </Suspense>
+      ))}
       <QuickCapture />
       <ConfirmHost />
       <ChoiceHost />

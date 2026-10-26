@@ -14,7 +14,7 @@ import { eveningReflection, morningBriefing, rollOverToTomorrow } from '@/featur
 import { TasksView } from '@/features/planner/TasksView';
 import { HabitsView } from '@/features/planner/HabitsView';
 import { GoalsView } from '@/features/planner/GoalsView';
-import { useCommand } from '@/app/CommandBar';
+import { useCommand } from '@/app/commandStore';
 import { useRouter } from '@/app/router';
 import { getKV, setKV } from '@/lib/db';
 import { useIsDesktop, useNow } from '@/lib/hooks';
@@ -103,12 +103,12 @@ function WidgetCard({ item, editing, onResize, onSwap }: { item: LayoutItem; edi
         <TiltCard max={editing ? 0 : 3} className={cn('flex h-full flex-col p-5', over === zone && 'ring-2 ring-blue')}>
           <header className="mb-3 flex items-center gap-2">
             {editing && (
-              <button type="button" aria-label={`${t('Move')} ${t(w.title)}`} onPointerDown={(e) => beginDrag(e, { kind: 'widget', id: item.id, label: t(w.title) })} className="-ml-1 cursor-grab touch-none rounded-lg p-1 text-fg/50 hover:bg-fg/[0.06]">
+              <button type="button" aria-label={`${t('Move')} ${t(w.title)}`} onPointerDown={(e) => beginDrag(e, { kind: 'widget', id: item.id, label: t(w.title) })} className="-ml-1 cursor-grab touch-none rounded-lg p-1 text-fg/60 hover:bg-fg/[0.06]">
                 <GripVertical size={16} aria-hidden />
               </button>
             )}
-            <w.icon size={16} strokeWidth={2.3} className="text-fg/45" aria-hidden />
-            <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/55">{t(w.title)}</h2>
+            <w.icon size={16} strokeWidth={2.3} className="text-fg/60" aria-hidden />
+            <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t(w.title)}</h2>
             {editing && <IconButton icon={item.size === 'l' ? Minimize2 : Maximize2} size={30} label={item.size === 'l' ? t('Make smaller') : t('Make wider')} onClick={onResize} />}
           </header>
           <div className={cn('flex-1', editing && 'pointer-events-none opacity-60')}>
@@ -124,6 +124,12 @@ function Overview() {
   const t = useT();
   const [layout, setLayout] = useState<LayoutItem[]>(DEFAULT_LAYOUT);
   const [editing, setEditing] = useState(false);
+  // The first two widgets render right away; the rest follow once the browser is idle, so the first paint stays quick.
+  const [shown, setShown] = useState(2);
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 200));
+    idle(() => setShown(Infinity));
+  }, []);
   useEffect(() => {
     void getKV<LayoutItem[]>('todayLayout').then((l) => {
       if (l?.length) setLayout([...l.filter((x) => WIDGETS[x.id]), ...DEFAULT_LAYOUT.filter((d) => !l.some((x) => x.id === d.id))]);
@@ -143,9 +149,9 @@ function Overview() {
           {editing ? t('Done') : t('Customize')}
         </Button>
       </div>
-      {editing && <p className="mb-3 text-[13px] text-fg/55">{t('Drag a widget by its handle onto another to swap them. Use the arrows to make it wider or smaller.')}</p>}
+      {editing && <p className="mb-3 text-[13px] text-fg/60">{t('Drag a widget by its handle onto another to swap them. Use the arrows to make it wider or smaller.')}</p>}
       <motion.div layout className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {layout.map((item) => (
+        {layout.slice(0, shown).map((item) => (
           <WidgetCard
             key={item.id}
             item={item}

@@ -28,7 +28,7 @@ export default function IdeasPage() {
       />
       <motion.div variants={itemVariants} className="mb-4 flex items-center justify-between gap-3">
         <Segmented label={t('Ideas view')} value={mode} onChange={set} options={[{ value: 'canvas', label: t('Canvas') }, { value: 'board', label: t('Board') }]} />
-        <p className="hidden text-[13px] text-fg/50 sm:block">{t('Alt+N captures an idea from anywhere')}</p>
+        <p className="hidden text-[13px] text-fg/60 sm:block">{t('Alt+N captures an idea from anywhere')}</p>
       </motion.div>
       <motion.div key={mode} initial={{ opacity: 0, scale: 0.985 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
         {mode === 'canvas' ? <IdeaCanvas /> : <IdeaBoard />}

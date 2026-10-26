@@ -1,7 +1,8 @@
 // Afina's local intelligence engine: deterministic, always available, bilingual.
 // It recognises what the user wants and does it through the same actions the app's
 // screens use. The on-device language model (llm.ts) only steps in for what this can't parse.
-import * as chrono from 'chrono-node';
+import * as chronoEn from 'chrono-node/en';
+import * as chronoRu from 'chrono-node/ru';
 import { addDays, startOfDay, startOfWeek } from 'date-fns';
 import { db } from '@/lib/db';
 import {
@@ -280,7 +281,7 @@ export async function runConfirmed(a: ConfirmAction, lang: Lang): Promise<AfinaR
 const MOVE: Handler = async (_t, lang, m) => {
   const what = m[1].trim();
   const when = m[2].trim();
-  const parser = lang === 'ru' ? chrono.ru.casual : chrono.en.casual;
+  const parser = lang === 'ru' ? chronoRu.casual : chronoEn.casual;
   const r = parser.parse(when, new Date(), { forwardDate: true })[0];
   if (!r) return { handled: true, text: L(lang, `When should I move it to? Try “tomorrow 3pm”.`, `На когда перенести? Например, «завтра в 15:00».`) };
   const date = r.start.date();
@@ -613,7 +614,7 @@ export async function respond(input: string): Promise<AfinaReply> {
   const noMatch = [] as unknown as RegExpMatchArray;
   if (CREATE_TRIGGER.test(text)) return (await CREATE(text, lang, noMatch))!;
   // A statement with a date or time ("dentist friday 3pm") is most likely something to schedule.
-  if (!isQuestion(text) && (lang === 'ru' ? chrono.ru.casual : chrono.en.casual).parse(text).length && text.split(/\s+/).length <= 14) return (await CREATE(text, lang, noMatch))!;
+  if (!isQuestion(text) && (lang === 'ru' ? chronoRu.casual : chronoEn.casual).parse(text).length && text.split(/\s+/).length <= 14) return (await CREATE(text, lang, noMatch))!;
   return { handled: false, text: '' };
 }
 

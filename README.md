@@ -3,99 +3,108 @@
 **Your calendar, tasks, notes, ideas and health — in one calm place.**
 A product of **Eternal Inc.**
 
-Private by design: everything lives on your device (IndexedDB). No accounts, no server, no tracking. Works fully offline and installs as an app on Mac, Windows, iPhone, iPad and Android.
+Private by design: everything lives on your device (IndexedDB). No accounts, no server, no tracking. Works fully offline, in English and Russian, on Mac, Windows, Android, iPhone, iPad and in any modern browser.
 
-## Quick start
+## Get the app
+
+Every release is on the [Releases page](https://github.com/Z0nkerino/universal/releases/latest).
+
+| Platform | Download | Updates |
+| --- | --- | --- |
+| **Mac** | `Universal-Planner-<version>-mac.dmg` (Apple Silicon + Intel) | Automatic, in the background |
+| **Windows** | `Universal-Planner-<version>-windows-setup.exe` | Automatic, in the background |
+| **Android** | `Universal-Planner-<version>-android.apk` | The app offers each new APK |
+| **iPhone / iPad** | Open the web app in Safari → Share → **Add to Home Screen** | Automatic |
+| **Any browser** | The web app at `https://z0nkerino.github.io/universal/` | Automatic |
+
+**Mac, first launch:** the app isn't notarized yet (that needs a paid Apple Developer account), so macOS blocks it the first time. Open **System Settings → Privacy & Security** and click **Open Anyway**. After that it opens normally.
+
+**Windows, first launch:** SmartScreen may say "Windows protected your PC" because the installer isn't code-signed yet. Click **More info → Run anyway**.
+
+**Android:** open the `.apk` on your phone and allow your browser to install apps when asked.
+
+**iPhone:** a native App Store app needs a paid Apple Developer account. The web app installed from Safari works offline, has its own icon and keeps your data on the device.
+
+## Develop
 
 Requires Node.js 20+.
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
+npm test           # unit tests
+npm run build      # production web build in dist/
+npm run preview    # serves dist/ at http://localhost:4173 (service worker + offline)
 ```
 
-Production build:
-
-```bash
-npm run build      # outputs to dist/
-npm run preview    # serves the build at http://localhost:4173 (service worker + offline enabled)
-```
-
-## Install as an app
-
-Serve the production build over HTTPS (or `localhost`), open it, then:
-
-| Platform | How |
-| --- | --- |
-| **Mac** | Chrome/Edge: install icon in the address bar. Safari 17+: File → Add to Dock. |
-| **Windows** | Edge/Chrome: install icon in the address bar (or ⋯ → Apps → Install). Appears in Start and the taskbar. |
-| **iPhone / iPad** | Safari → Share → Add to Home Screen. |
-| **Android** | Chrome → ⋮ → Install app. |
-
-Settings → App also shows an **Install** button when the browser supports it.
-
-## Desktop app (Mac & Windows)
-
-The desktop app wraps the same code in Electron, with native window controls, a menu bar and an About panel credited to Eternal Inc. Data stays on your machine.
+Desktop and Android builds:
 
 ```bash
 npm run desktop     # build and run the desktop app locally
-npm run dist:mac    # on a Mac: release/Universal-Planner-<version>-mac.dmg (Apple Silicon + Intel)
+npm run dist:mac    # on a Mac: release/Universal-Planner-<version>-mac.dmg
 npm run dist:win    # on Windows: release/Universal-Planner-<version>-windows-setup.exe
+npm run android     # build the web app into the Android project (then open android/ in Android Studio)
 ```
 
-### Publishing a release
+## Releasing
 
 ```bash
-npm version patch --no-git-tag-version   # e.g. 0.1.0 → 0.1.1
-git commit -am "Release 0.1.1" && git push
+npm version minor --no-git-tag-version   # e.g. 1.0.0 → 1.1.0
+git commit -am "Release 1.1.0" && git push
 ```
 
-When a push to `main` carries a version with no release yet, the **Desktop apps** GitHub workflow builds the `.dmg`, the Windows installer and the update bundle, and publishes them as a GitHub Release. You can also build without publishing from the Actions tab (Desktop apps → Run workflow).
+When a push to `main` (or the working branch) carries a version with no release yet, the **Apps** GitHub workflow builds the Mac `.dmg`, the Windows installer, the Android `.apk` and the desktop update bundle. It publishes them as a GitHub Release and deploys the web app to the `gh-pages` branch.
 
-### Automatic updates
+### One-time setup
 
-Installed apps check the latest GitHub Release when they open and every 4 hours. A new version downloads in the background and is verified against its SHA-256 checksum. Then the app shows **Restart** (also in Settings → Updates and in the app menu → Check for Updates…). If a new version fails to start, the app rolls back by itself.
+- **Web app hosting:** in the repository's **Settings → Pages**, set the source to **Deploy from a branch → `gh-pages` / root**.
+- **Android signing key:** add two repository secrets under **Settings → Secrets and variables → Actions**:
+  - `ANDROID_KEYSTORE`: the keystore file, base64-encoded
+  - `ANDROID_KEYSTORE_PASSWORD`: its password
 
-Updates replace the app's content, which holds every feature, while the installed shell stays put. Fully silent updates of the Mac binary itself need an Apple Developer ID. If a release ever changes the shell (`updates.shellVersion` in `package.json`), installed apps offer a download of the new installer instead.
+  Create the key once with:
 
-For apps to find updates, the release files must be downloadable without signing in, so the repository (or wherever releases are hosted) has to be public.
+  ```bash
+  keytool -genkeypair -keystore up.keystore -alias universal-planner -keyalg RSA -keysize 2048 -validity 36500
+  base64 -w0 up.keystore   # paste the output into ANDROID_KEYSTORE
+  ```
 
-### First launch on a Mac
+  Keep the keystore safe and never commit it. Android only installs an update if it's signed with the same key. Without the secrets, CI signs each APK with a throwaway key, and you'd have to uninstall before installing a newer version.
 
-The app isn't notarized yet, which needs a paid Apple Developer account. The first time you open it, macOS blocks it: open **System Settings → Privacy & Security** and click **Open Anyway**. After that it opens normally.
+### How updates work
 
-## Keyboard
+- **Desktop:** apps check the latest release when they open and every 4 hours. They download the new content in the background, verify its SHA-256 checksum, then offer **Restart**. If a new version fails to start, the app rolls back by itself. If a release changes the Electron shell (`updates.shellVersion` in `package.json`), apps offer the new installer instead.
+- **Android:** the app reads the same `latest.json` feed and offers the new APK.
+- **Web / iPhone:** the service worker picks up the new version on the next launch.
+
+Release files must be downloadable without signing in, so the repository has to be public.
+
+## Using it
 
 | Shortcut | Action |
 | --- | --- |
-| ⌘K / Ctrl K, or `/` | Command bar |
+| ⌘K / Ctrl K, or `/` | Command bar: search everything, or type "new task tomorrow 5pm gym" |
+| Alt N | Capture an idea from anywhere |
 | ⌥1 … ⌥7 / Alt 1 … Alt 7 | Today · Calendar · Notes · Ideas · Health · Insights · Afina |
 | ⌘, / Ctrl , | Settings |
+
+**Afina** works on every device with her built-in engine: planning your day, logging food, water, sleep and mood, creating tasks and events, breaking work into steps, and answering questions about your data in English or Russian. For free-form chat, install the on-device model from the Afina screen. It's a one-time download that runs offline and needs WebGPU (Chrome or Edge 113+, Safari 18+, or the desktop app).
+
+**Your data:** Settings → Your data exports a full backup (`.json`) and imports it on another device. Sample data from onboarding can be removed there with one click.
 
 ## Project layout
 
 ```
 src/
-  app/            shell, router, sidebar, tab bar, command bar
-  ui/             shared components (Glass, TiltCard, Button, Checkbox, Rings, Sheet, Logo…)
-  lib/            db (Dexie), settings, i18n (EN/RU), backup, motion presets, hooks
+  app/            shell, router, sidebar, tab bar, command bar, quick capture
+  ui/             shared components (Glass, TiltCard, Button, Sheet, charts, drag and drop…)
+  lib/            db (Dexie), actions, natural-language parsing, settings, i18n (EN/RU), backup
   features/
-    today/  calendar/  planner/  notes/  ideas/  diet/  analytics/  afina/  settings/  design/
-public/brand/     logos and app icons (generated by scripts/make-brand.cjs)
-brand-src/        original logo artwork
+    today/  calendar/  planner/  notes/  ideas/  diet/  analytics/  afina/  onboarding/  settings/
+electron/         desktop shell and self-updater
+android/          Capacitor Android project
+public/brand/     logos and app icons
 ```
-
-Regenerate logos/icons from the artwork: `node scripts/trace-logos.cjs && node scripts/make-brand.cjs`.
-
-## Build phases
-
-1. ✅ Design system, navigation shell, glass + 3D components, motion
-2. Today + Day Planner + Calendar
-3. Notes + Ideas
-4. Health & Diet + Insights
-5. Afina (local engine, then on-device WebLLM)
-6. Onboarding, settings, polish, native Mac/Windows/iOS/Android packaging
 
 ---
 

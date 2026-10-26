@@ -249,7 +249,7 @@ export function TimeGrid({ days, items, hourHeight = 56, onCreate, onChange, onO
               onClick={() => onDayClick?.(d)}
               className={cn('flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1 transition-colors', onDayClick && 'hover:bg-fg/[0.04]')}
             >
-              <span className={cn('text-[11px] font-semibold uppercase tracking-[0.08em]', isToday(d) ? 'text-pink' : 'text-fg/55')}>{fmt(d, 'EEE')}</span>
+              <span className={cn('text-[11px] font-semibold uppercase tracking-[0.08em]', isToday(d) ? 'text-pink' : 'text-fg/60')}>{fmt(d, 'EEE')}</span>
               <span className={cn('flex h-8 w-8 items-center justify-center rounded-full text-[17px] font-bold', isToday(d) && 'bg-brand text-white')}>{fmt(d, 'd')}</span>
             </button>
           ))}
@@ -274,7 +274,7 @@ export function TimeGrid({ days, items, hourHeight = 56, onCreate, onChange, onO
         <div className="relative flex" style={{ height: 24 * hourHeight }}>
           <div className="relative w-14 shrink-0" aria-hidden>
             {Array.from({ length: 23 }, (_, h) => (
-              <span key={h} className="absolute right-2 -translate-y-1/2 text-[11px] font-medium tabular-nums text-fg/40" style={{ top: (h + 1) * hourHeight }}>
+              <span key={h} className="absolute right-2 -translate-y-1/2 text-[11px] font-medium tabular-nums text-fg/60" style={{ top: (h + 1) * hourHeight }}>
                 {fmtHour(h + 1)}
               </span>
             ))}

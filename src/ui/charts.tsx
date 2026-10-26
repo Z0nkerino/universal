@@ -67,12 +67,12 @@ export function Legend({ items }: { items: { label: string; color: string; dashe
 export function Stat({ label, value, unit, sub, tone }: { label: string; value: ReactNode; unit?: string; sub?: ReactNode; tone?: 'blue' | 'pink' }) {
   return (
     <div className="min-w-0">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/50">{label}</p>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/60">{label}</p>
       <p className="mt-1 text-[30px] font-bold leading-none tracking-[-0.03em] tabular-nums">
         <span className={tone === 'blue' ? 'text-blue' : tone === 'pink' ? 'text-pink' : undefined}>{value}</span>
-        {unit && <span className="ml-1 text-[15px] font-semibold text-fg/45">{unit}</span>}
+        {unit && <span className="ml-1 text-[15px] font-semibold text-fg/60">{unit}</span>}
       </p>
-      {sub && <p className="mt-1 text-[13px] text-fg/55">{sub}</p>}
+      {sub && <p className="mt-1 text-[13px] text-fg/60">{sub}</p>}
     </div>
   );
 }
@@ -82,7 +82,7 @@ export function DataTable({ caption, columns, rows }: { caption: string; columns
   const t = useT();
   return (
     <details className="mt-3 text-[13px]">
-      <summary className="cursor-pointer select-none text-[12px] font-semibold text-fg/50 hover:text-fg/80">{t('Show as table')}</summary>
+      <summary className="cursor-pointer select-none text-[12px] font-semibold text-fg/60 hover:text-fg/80">{t('Show as table')}</summary>
       <div className="mt-2 max-h-56 overflow-auto rounded-xl ring-1 ring-fg/[0.08]">
         <table className="w-full tabular-nums">
           <caption className="sr-only">{caption}</caption>

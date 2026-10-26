@@ -18,7 +18,7 @@ import { cn } from '@/lib/cn';
 import { itemVariants, spring } from '@/lib/motion';
 import { TimeGrid } from '@/features/calendar/TimeGrid';
 import { toGridItems, useBlockedTasks, useOccurrences } from '@/features/calendar/data';
-import { useEventEditor } from '@/features/calendar/EventEditor';
+import { useEventEditor } from '@/features/calendar/editorStore';
 import { moveOccurrence } from '@/features/calendar/calendarState';
 import { TaskRow } from './TaskRow';
 import { QuickAdd } from './QuickAdd';
@@ -73,13 +73,13 @@ function ListTab({ list, index, active, count, onClick }: { list: (typeof LISTS)
       onClick={onClick}
       className={cn(
         'relative flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[12px] px-2 text-[13px] font-semibold transition-colors sm:flex-none sm:px-3.5',
-        active ? 'text-fg' : 'text-fg/55 hover:text-fg/80',
+        active ? 'text-fg' : 'text-fg/60 hover:text-fg/80',
         over === zone && 'bg-blue/15 text-blue',
       )}
     >
       <list.icon size={15} className="relative" aria-hidden />
       <span className="relative">{t(list.label)}</span>
-      {count > 0 && <span className="relative text-[11px] font-bold tabular-nums text-fg/40">{count}</span>}
+      {count > 0 && <span className="relative text-[11px] font-bold tabular-nums text-fg/60">{count}</span>}
     </button>
   );
 }
@@ -157,7 +157,7 @@ export function TasksView() {
             ) : list === 'scheduled' ? (
               scheduledGroups.map(([day, tasks]) => (
                 <section key={day} className="mt-2">
-                  <h3 className="px-3 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/50">{day ? fmt(fromDayKey(day), 'EEEE, d MMMM') : t('No date')}</h3>
+                  <h3 className="px-3 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/60">{day ? fmt(fromDayKey(day), 'EEEE, d MMMM') : t('No date')}</h3>
                   <ul>
                     <AnimatePresence initial={false}>
                       {tasks.map((task) => <TaskRow key={task.id} task={task} goal={task.goalId ? goalById.get(task.goalId) : undefined} />)}
@@ -174,7 +174,7 @@ export function TasksView() {
             )}
             {list === 'today' && doneToday.length > 0 && (
               <div className="mt-2 border-t border-fg/[0.06] pt-2">
-                <button type="button" onClick={() => setShowDone((v) => !v)} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold text-fg/50 hover:text-fg/80" aria-expanded={showDone}>
+                <button type="button" onClick={() => setShowDone((v) => !v)} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold text-fg/60 hover:text-fg/80" aria-expanded={showDone}>
                   <motion.span animate={{ rotate: showDone ? 0 : -90 }} transition={spring}><ChevronDown size={15} aria-hidden /></motion.span>
                   {t('Done today')} · {doneToday.length}
                 </button>
@@ -188,7 +188,7 @@ export function TasksView() {
               </div>
             )}
           </div>
-          <p className="mt-2 hidden px-2 text-[12px] text-fg/40 sm:block">{t('Tip: drag a task onto the timeline to block time for it, or onto a list tab to move it.')}</p>
+          <p className="mt-2 hidden px-2 text-[12px] text-fg/60 sm:block">{t('Tip: drag a task onto the timeline to block time for it, or onto a list tab to move it.')}</p>
         </Glass>
       </motion.div>
 
@@ -197,7 +197,7 @@ export function TasksView() {
           <div className="mb-3 flex items-center justify-between gap-2 px-1">
             <div>
               <h2 className="text-[17px] font-bold tracking-[-0.02em]">{fmt(new Date(), 'EEEE, d MMMM')}</h2>
-              <p className="text-[13px] text-fg/50">{t('Your timeline')}</p>
+              <p className="text-[13px] text-fg/60">{t('Your timeline')}</p>
             </div>
             <Button size="sm" variant="brand" icon={planning ? Sparkles : Wand2} disabled={planning} onClick={() => void runPlan()}>
               {t('Plan my day')}

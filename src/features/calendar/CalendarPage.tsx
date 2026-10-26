@@ -19,7 +19,7 @@ import { QuickAdd } from '@/features/planner/QuickAdd';
 import { TimeGrid, type GridItem } from './TimeGrid';
 import { MonthView, YearView, monthGridDays } from './MonthView';
 import { toGridItems, useBlockedTasks, useOccurrences } from './data';
-import { useEventEditor } from './EventEditor';
+import { useEventEditor } from './editorStore';
 import { parseIcs, toIcs } from './ics';
 import { itemVariants } from '@/lib/motion';
 
@@ -233,7 +233,7 @@ export default function CalendarPage() {
                 )}
               </motion.div>
           </div>
-          <p className="mt-3 hidden text-[12px] text-fg/40 lg:block">
+          <p className="mt-3 hidden text-[12px] text-fg/60 lg:block">
             {t('Drag to create · drag events to move · drag the bottom edge to resize · pinch or Ctrl+scroll to zoom · ← → to page')}
           </p>
         </Glass>

@@ -149,7 +149,7 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
           />
           <IconButton icon={X} label={t('End focus')} className="absolute right-4 top-[max(16px,env(safe-area-inset-top))]" onClick={() => void finish(false)} />
 
-          <p className="relative text-[13px] font-semibold uppercase tracking-[0.12em] text-fg/50">
+          <p className="relative text-[13px] font-semibold uppercase tracking-[0.12em] text-fg/60">
             {phase === 'break' ? t('Break') : phase === 'done' ? t('Session complete') : initialMin <= 2 && total <= 2 * 60_000 ? t('Just two minutes') : t('Focus')}
           </p>
           <h2 className="relative mt-2 max-w-[22ch] text-center text-[26px] font-bold leading-tight tracking-[-0.02em] sm:text-[32px]">{task?.title ?? t('Deep work')}</h2>
@@ -191,7 +191,7 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
                   {pad(left / 60_000)}:{pad((left % 60_000) / 1000)}
                 </span>
               )}
-              {pausedLeft !== null && <span className="text-[13px] font-semibold text-fg/50">{t('Paused')}</span>}
+              {pausedLeft !== null && <span className="text-[13px] font-semibold text-fg/60">{t('Paused')}</span>}
             </div>
           </div>
 
@@ -242,15 +242,15 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
                 aria-checked={ambient === k}
                 title={t(label)}
                 onClick={() => setAmbient(k)}
-                className={cn('flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition-colors', ambient === k ? 'bg-fg text-bg' : 'text-fg/55 hover:text-fg')}
+                className={cn('flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition-colors', ambient === k ? 'bg-fg text-bg' : 'text-fg/60 hover:text-fg')}
               >
                 <Icon size={16} aria-hidden />
                 <span className="hidden sm:inline">{t(label)}</span>
               </button>
             ))}
-            {ambient !== 'off' && <Volume2 size={14} className="mx-2 text-fg/40" aria-hidden />}
+            {ambient !== 'off' && <Volume2 size={14} className="mx-2 text-fg/60" aria-hidden />}
           </div>
-          <p className="relative mt-4 text-[12px] text-fg/40">{t('Space to pause · Esc to end')}</p>
+          <p className="relative mt-4 text-[12px] text-fg/60">{t('Space to pause · Esc to end')}</p>
         </motion.div>
   );
 }

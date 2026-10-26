@@ -12,7 +12,7 @@ import { useT, tNow } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
 
-export const PRIORITY_COLORS = ['', 'text-fg/45', 'text-blue', 'text-pink'];
+export const PRIORITY_COLORS = ['', 'text-fg/60', 'text-blue', 'text-pink'];
 export const PRIORITY_LABELS = ['None', 'Low', 'Medium', 'High'];
 
 export function dueLabel(t: Pick<Task, 'due' | 'start'>, tr: (s: string) => string) {
@@ -85,9 +85,9 @@ export const TaskRow = forwardRef<HTMLLIElement, { task: Task; goal?: Goal; drag
           />
         </span>
         <div className="min-w-0 flex-1">
-          <p className={cn('text-[15px] font-medium leading-snug transition-colors', done && 'text-fg/40 line-through decoration-fg/40')}>{task.title}</p>
+          <p className={cn('text-[15px] font-medium leading-snug transition-colors', done && 'text-fg/60 line-through decoration-fg/40')}>{task.title}</p>
           {!compact && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium text-fg/50">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium text-fg/60">
               {due && (
                 <span className={cn('inline-flex items-center gap-1', overdue && 'text-pink')}>
                   {task.start ? <Clock3 size={12} aria-hidden /> : <CalendarClock size={12} aria-hidden />}
@@ -97,7 +97,7 @@ export const TaskRow = forwardRef<HTMLLIElement, { task: Task; goal?: Goal; drag
               {task.estimate && <span>{task.estimate >= 60 ? `${Math.round((task.estimate / 60) * 10) / 10} ${tNow('h')}` : `${task.estimate} ${tNow('min')}`}</span>}
               {task.energy && (
                 <span className="inline-flex items-center gap-0.5" title={`${t('Energy')}: ${task.energy}`}>
-                  <Zap size={12} aria-hidden className={task.energy === 'high' ? 'text-pink' : task.energy === 'med' ? 'text-blue' : 'text-fg/40'} />
+                  <Zap size={12} aria-hidden className={task.energy === 'high' ? 'text-pink' : task.energy === 'med' ? 'text-blue' : 'text-fg/60'} />
                   {t(task.energy === 'med' ? 'Medium' : task.energy === 'high' ? 'High' : 'Low')}
                 </span>
               )}
@@ -114,7 +114,7 @@ export const TaskRow = forwardRef<HTMLLIElement, { task: Task; goal?: Goal; drag
                 </span>
               )}
               {task.tags.map((tag) => (
-                <span key={tag} className="text-fg/45">#{tag}</span>
+                <span key={tag} className="text-fg/60">#{tag}</span>
               ))}
             </div>
           )}

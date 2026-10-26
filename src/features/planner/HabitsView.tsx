@@ -124,7 +124,7 @@ function HabitCard({ habit, logs }: { habit: Habit; logs: Set<string> }) {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-[17px] font-bold tracking-[-0.01em]">{habit.name}</h3>
-            <p className="flex items-center gap-1 text-[13px] text-fg/55">
+            <p className="flex items-center gap-1 text-[13px] text-fg/60">
               <Repeat size={12} aria-hidden /> {habitTargetLabel(habit, t)}
             </p>
           </div>
@@ -161,7 +161,7 @@ function HabitCard({ habit, logs }: { habit: Habit; logs: Set<string> }) {
                 }}
                 className={cn('flex flex-col items-center gap-1 rounded-[14px] py-2 text-[11px] font-semibold transition-colors', future ? 'opacity-30' : 'hover:bg-fg/[0.05]', isToday(d) && 'bg-fg/[0.04]')}
               >
-                <span className={cn('uppercase', isToday(d) ? 'text-fg' : 'text-fg/45')}>{fmt(d, 'EEEEE')}</span>
+                <span className={cn('uppercase', isToday(d) ? 'text-fg' : 'text-fg/60')}>{fmt(d, 'EEEEE')}</span>
                 <motion.span
                   className="flex h-7 w-7 items-center justify-center rounded-full text-[13px] text-white"
                   animate={{ background: on ? (habit.color === 'pink' ? '#FF4FA3' : '#2F6BFF') : 'rgba(127,127,127,0.14)', scale: on ? [1, 1.15, 1] : 1 }}
@@ -195,7 +195,7 @@ export function HabitsView() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[15px] text-fg/55">{t('Small things, done often. Flexible targets like 3× a week still count.')}</p>
+        <p className="text-[15px] text-fg/60">{t('Small things, done often. Flexible targets like 3× a week still count.')}</p>
         <Button icon={Plus} onClick={() => setAdding(true)}>{t('New habit')}</Button>
       </div>
       {habits.length === 0 ? (

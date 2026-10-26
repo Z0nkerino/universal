@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { create } from 'zustand';
 import { Bell, MapPin, Repeat, Trash2, X } from 'lucide-react';
-import { db } from '@/lib/db';
 import { createEvent, deleteEvent, skipOccurrence, updateEvent } from '@/lib/actions';
-import { EVENT_COLORS, type CalEvent, type EventColor, type Freq, type Recurrence } from '@/lib/types';
+import { EVENT_COLORS, type EventColor, type Freq, type Recurrence } from '@/lib/types';
 import { Sheet } from '@/ui/Sheet';
 import { Button, IconButton } from '@/ui/Button';
 import { Field, Input, Select, TextArea } from '@/ui/Field';
@@ -14,27 +12,7 @@ import { useT } from '@/lib/i18n';
 import { dayKey, fromDayKey } from '@/lib/dates';
 import { EVENT_HEX, EVENT_LABEL } from './colors';
 import { cn } from '@/lib/cn';
-
-type Draft = Omit<CalEvent, 'id' | 'createdAt' | 'updatedAt'> & { id?: string };
-
-interface EditorState {
-  draft: Draft | null;
-  /** For recurring events: which occurrence was clicked. */
-  occStart?: number;
-  openNew: (start: number, end: number, allDay?: boolean) => void;
-  openExisting: (id: string, occStart?: number) => Promise<void>;
-  close: () => void;
-}
-
-export const useEventEditor = create<EditorState>((set) => ({
-  draft: null,
-  openNew: (start, end, allDay) => set({ draft: { title: '', start, end, allDay, color: 'blue', reminder: allDay ? undefined : 10 }, occStart: undefined }),
-  openExisting: async (id, occStart) => {
-    const e = await db.events.get(id);
-    if (e) set({ draft: e, occStart });
-  },
-  close: () => set({ draft: null }),
-}));
+import { useEventEditor, type Draft } from './editorStore';
 
 const REPEATS: { value: string; label: string; rule?: Recurrence }[] = [
   { value: 'none', label: 'Does not repeat' },
@@ -170,7 +148,7 @@ export function EventEditor() {
             )}
             <Field label={t('Repeat')} htmlFor="ev-repeat">
               <div className="relative">
-                <Repeat size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40" aria-hidden />
+                <Repeat size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
                 <Select id="ev-repeat" className="pl-10" value={repeatValue(d.rrule)} onChange={(e) => set({ rrule: REPEATS.find((r) => r.value === e.target.value)?.rule })}>
                   {REPEATS.map((r) => (
                     <option key={r.value} value={r.value}>{t(r.label)}</option>
@@ -180,7 +158,7 @@ export function EventEditor() {
             </Field>
             <Field label={t('Reminder')} htmlFor="ev-rem">
               <div className="relative">
-                <Bell size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40" aria-hidden />
+                <Bell size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
                 <Select id="ev-rem" className="pl-10" value={d.reminder ?? ''} onChange={(e) => set({ reminder: e.target.value === '' ? undefined : Number(e.target.value) })}>
                   {REMINDERS.map((m) => (
                     <option key={String(m)} value={m ?? ''}>
@@ -192,7 +170,7 @@ export function EventEditor() {
             </Field>
             <Field label={t('Location')} htmlFor="ev-loc" className="sm:col-span-2">
               <div className="relative">
-                <MapPin size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40" aria-hidden />
+                <MapPin size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
                 <Input id="ev-loc" className="pl-10" value={d.location ?? ''} onChange={(e) => set({ location: e.target.value || undefined })} placeholder={t('Add a place')} />
               </div>
             </Field>
@@ -205,7 +183,7 @@ export function EventEditor() {
                     role="radio"
                     aria-checked={d.color === c}
                     onClick={() => set({ color: c })}
-                    className={cn('flex h-8 items-center gap-2 rounded-full px-3 text-[13px] font-semibold transition-colors', d.color === c ? 'bg-fg/[0.1] text-fg' : 'text-fg/55 hover:bg-fg/[0.05]')}
+                    className={cn('flex h-8 items-center gap-2 rounded-full px-3 text-[13px] font-semibold transition-colors', d.color === c ? 'bg-fg/[0.1] text-fg' : 'text-fg/60 hover:bg-fg/[0.05]')}
                   >
                     <span className="h-3 w-3 rounded-full" style={{ background: EVENT_HEX[c], boxShadow: d.color === c ? `0 0 0 3px color-mix(in srgb, ${EVENT_HEX[c]} 30%, transparent)` : undefined }} />
                     {t(EVENT_LABEL[c])}
@@ -217,7 +195,7 @@ export function EventEditor() {
               <TextArea id="ev-notes" value={d.notes ?? ''} onChange={(e) => set({ notes: e.target.value || undefined })} />
             </Field>
           </div>
-          {!isNew && d.rrule && <p className="mt-3 px-1 text-[12px] text-fg/45">{t('Changes apply to every event in this series.')}</p>}
+          {!isNew && d.rrule && <p className="mt-3 px-1 text-[12px] text-fg/60">{t('Changes apply to every event in this series.')}</p>}
           <div className="mt-6 flex items-center justify-between gap-2 border-t border-fg/[0.06] pt-4">
             {!isNew ? (
               <Button variant="ghost" size="sm" icon={Trash2} className="text-[#E5484D] hover:text-[#E5484D]" onClick={() => void remove()}>

@@ -173,7 +173,7 @@ export function TaskEditor() {
 
           <section className="mt-6" aria-label={t('Steps')}>
             <h3 className="mb-2 px-1 text-[13px] font-semibold text-fg/60">
-              {t('Steps')} {draft.subtasks.length > 0 && <span className="text-fg/40">· {draft.subtasks.filter((s) => s.done).length}/{draft.subtasks.length}</span>}
+              {t('Steps')} {draft.subtasks.length > 0 && <span className="text-fg/60">· {draft.subtasks.filter((s) => s.done).length}/{draft.subtasks.length}</span>}
             </h3>
             <ul className="flex flex-col">
               <AnimatePresence initial={false}>
@@ -184,7 +184,7 @@ export function TaskEditor() {
                       value={s.title}
                       aria-label={t('Step')}
                       onChange={(e) => patch({ subtasks: draft.subtasks.map((x) => (x.id === s.id ? { ...x, title: e.target.value } : x)) })}
-                      className={`min-w-0 flex-1 bg-transparent text-[15px] focus-visible:outline-none ${s.done ? 'text-fg/40 line-through' : ''}`}
+                      className={`min-w-0 flex-1 bg-transparent text-[15px] focus-visible:outline-none ${s.done ? 'text-fg/60 line-through' : ''}`}
                     />
                     <IconButton icon={X} size={28} label={t('Remove step')} className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={() => patch({ subtasks: draft.subtasks.filter((x) => x.id !== s.id) })} />
                   </motion.li>
@@ -199,7 +199,7 @@ export function TaskEditor() {
                 setNewSub('');
               }}
             >
-              <Plus size={18} className="ml-1 text-fg/40" aria-hidden />
+              <Plus size={18} className="ml-1 text-fg/60" aria-hidden />
               <input value={newSub} onChange={(e) => setNewSub(e.target.value)} placeholder={t('Add a step')} aria-label={t('Add a step')} className="h-9 flex-1 bg-transparent text-[15px] placeholder:text-fg/35 focus-visible:outline-none" />
             </form>
           </section>
@@ -209,7 +209,7 @@ export function TaskEditor() {
           </Field>
 
           <div className="mt-6 flex items-center justify-between border-t border-fg/[0.06] pt-4">
-            <p className="text-[12px] text-fg/40">
+            <p className="text-[12px] text-fg/60">
               {t('Created')} {new Date(draft.createdAt).toLocaleDateString(t.locale)}
               {draft.doneAt ? ` · ${t('Done')} ${new Date(draft.doneAt).toLocaleDateString(t.locale)}` : ''}
             </p>

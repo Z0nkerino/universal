@@ -33,7 +33,7 @@ function ModelCard() {
   if (status === 'checking') return null;
   if (status === 'ready')
     return (
-      <div className="flex items-center justify-center gap-2 text-[12px] font-medium text-fg/50">
+      <div className="flex items-center justify-center gap-2 text-[12px] font-medium text-fg/60">
         <ShieldCheck size={13} className="text-blue" aria-hidden />
         {t('On-device model ready')} · {model.label} · {t('nothing leaves this device')}
       </div>
@@ -42,7 +42,7 @@ function ModelCard() {
     <Glass shimmer={false} className="mx-auto w-full max-w-xl p-4">
       {status === 'unsupported' ? (
         <div className="flex gap-3">
-          <Cpu size={20} className="mt-0.5 shrink-0 text-fg/50" aria-hidden />
+          <Cpu size={20} className="mt-0.5 shrink-0 text-fg/60" aria-hidden />
           <p className="text-[14px] text-fg/70">
             <strong className="text-fg">{t('Running on Afina’s built-in engine.')}</strong> {t(reason ?? '')} {t('She can still plan, log, schedule and answer questions about your data. Free-form chat needs WebGPU (Chrome or Edge 113+, Safari 18+, or the desktop app).')}
           </p>
@@ -56,7 +56,7 @@ function ModelCard() {
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-fg/[0.08]" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={t('Model download')}>
             <motion.div className="h-full rounded-full bg-brand" animate={{ width: `${Math.max(3, progress * 100)}%` }} transition={spring} />
           </div>
-          <p className="mt-2 truncate text-[12px] text-fg/45">{detail || `${model.label} · ${model.size} · ${t('downloads once, then works offline')}`}</p>
+          <p className="mt-2 truncate text-[12px] text-fg/60">{detail || `${model.label} · ${model.size} · ${t('downloads once, then works offline')}`}</p>
         </div>
       ) : (
         <div>
@@ -73,7 +73,7 @@ function ModelCard() {
               {status === 'error' ? t('Try again') : t('Install')}
             </Button>
           </div>
-          <button type="button" onClick={() => setChoosing((v) => !v)} className="mt-2 text-[12px] font-semibold text-fg/50 hover:text-fg">{choosing ? t('Hide models') : t('Choose a different model')}</button>
+          <button type="button" onClick={() => setChoosing((v) => !v)} className="mt-2 text-[12px] font-semibold text-fg/60 hover:text-fg">{choosing ? t('Hide models') : t('Choose a different model')}</button>
           <AnimatePresence>
             {choosing && (
               <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-2 overflow-hidden" role="radiogroup" aria-label={t('Model')}>
@@ -81,7 +81,7 @@ function ModelCard() {
                   <li key={m.id}>
                     <button type="button" role="radio" aria-checked={m.id === model.id} onClick={() => void switchModel(m.id)} className={cn('flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] hover:bg-fg/[0.05]', m.id === model.id && 'bg-fg/[0.06]')}>
                       <span className={cn('h-3 w-3 rounded-full border-2', m.id === model.id ? 'border-blue bg-blue' : 'border-fg/30')} />
-                      <span className="flex-1"><strong>{m.label}</strong> · {m.size}<br /><span className="text-fg/50">{t(m.note)}</span></span>
+                      <span className="flex-1"><strong>{m.label}</strong> · {m.size}<br /><span className="text-fg/60">{t(m.note)}</span></span>
                     </button>
                   </li>
                 ))}
@@ -314,7 +314,7 @@ export default function AfinaPage() {
             <ArrowUp size={20} strokeWidth={2.5} />
           </motion.button>
         </Glass>
-        {!installed && status === 'idle' && <p className="mt-1.5 text-center text-[11px] text-fg/40">{t('Afina’s built-in engine is answering. Install the on-device model above for free-form chat.')}</p>}
+        {!installed && status === 'idle' && <p className="mt-1.5 text-center text-[11px] text-fg/60">{t('Afina’s built-in engine is answering. Install the on-device model above for free-form chat.')}</p>}
       </div>
     </div>
   );

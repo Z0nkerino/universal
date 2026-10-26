@@ -35,7 +35,7 @@ export function Segmented<T extends string>({
             role="radio"
             aria-checked={active}
             onClick={() => onChange(o.value)}
-            className={cn('relative h-8 whitespace-nowrap rounded-[10px] px-3.5 text-[13px] font-semibold transition-colors', active ? 'text-fg' : 'text-fg/55 hover:text-fg/80')}
+            className={cn('relative h-8 whitespace-nowrap rounded-[10px] px-3.5 text-[13px] font-semibold transition-colors', active ? 'text-fg' : 'text-fg/60 hover:text-fg/80')}
           >
             <span className="relative">{t(o.label)}</span>
           </button>

@@ -43,7 +43,7 @@ function GoalCard({ goal, tasks }: { goal: Goal; tasks: Task[] }) {
           </span>
           <div className="min-w-0 flex-1">
             <h3 className="text-[18px] font-bold leading-tight tracking-[-0.02em]">{goal.title}</h3>
-            {goal.why && <p className="mt-0.5 text-[14px] text-fg/55">{goal.why}</p>}
+            {goal.why && <p className="mt-0.5 text-[14px] text-fg/60">{goal.why}</p>}
           </div>
           <IconButton
             icon={Trash2}
@@ -61,7 +61,7 @@ function GoalCard({ goal, tasks }: { goal: Goal; tasks: Task[] }) {
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between text-[13px] font-semibold">
             <span>{Math.round(p.value * 100)}%</span>
-            <span className="flex items-center gap-1 text-fg/50">
+            <span className="flex items-center gap-1 text-fg/60">
               {goal.targetDate && (
                 <>
                   <CalendarDays size={12} aria-hidden />
@@ -77,12 +77,12 @@ function GoalCard({ goal, tasks }: { goal: Goal; tasks: Task[] }) {
         </div>
 
         <section className="mt-4" aria-label={t('Milestones')}>
-          <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/50">{t('Milestones')}</h4>
+          <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t('Milestones')}</h4>
           <ul>
             {goal.milestones.map((m) => (
               <li key={m.id} className="group flex items-center gap-3 rounded-xl px-1 py-1.5">
                 <Checkbox size={20} checked={m.done} label={m.title} onChange={(done) => void updateGoal(goal.id, { milestones: goal.milestones.map((x) => (x.id === m.id ? { ...x, done } : x)) })} />
-                <span className={`flex-1 text-[15px] ${m.done ? 'text-fg/40 line-through' : ''}`}>{m.title}</span>
+                <span className={`flex-1 text-[15px] ${m.done ? 'text-fg/60 line-through' : ''}`}>{m.title}</span>
                 <IconButton icon={X} size={28} label={t('Remove milestone')} className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={() => void updateGoal(goal.id, { milestones: goal.milestones.filter((x) => x.id !== m.id) })} />
               </li>
             ))}
@@ -96,14 +96,14 @@ function GoalCard({ goal, tasks }: { goal: Goal; tasks: Task[] }) {
               setMilestone('');
             }}
           >
-            <Plus size={16} className="ml-1 text-fg/40" aria-hidden />
+            <Plus size={16} className="ml-1 text-fg/60" aria-hidden />
             <input value={milestone} onChange={(e) => setMilestone(e.target.value)} placeholder={t('Add a milestone')} aria-label={t('Add a milestone')} className="h-9 flex-1 bg-transparent text-[14px] placeholder:text-fg/35 focus-visible:outline-none" />
           </form>
         </section>
 
         <section className="mt-3" aria-label={t('Linked tasks')}>
-          <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/50">
-            {t('Tasks')} {p.linked.length > 0 && <span className="text-fg/35">· {p.linked.length - openTasks.length}/{p.linked.length}</span>}
+          <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/60">
+            {t('Tasks')} {p.linked.length > 0 && <span className="text-fg/60">· {p.linked.length - openTasks.length}/{p.linked.length}</span>}
           </h4>
           <ul>
             <AnimatePresence initial={false}>{openTasks.map((x) => <TaskRow key={x.id} task={x} compact draggable={false} />)}</AnimatePresence>
@@ -117,7 +117,7 @@ function GoalCard({ goal, tasks }: { goal: Goal; tasks: Task[] }) {
               setTaskTitle('');
             }}
           >
-            <Plus size={16} className="ml-1 text-fg/40" aria-hidden />
+            <Plus size={16} className="ml-1 text-fg/60" aria-hidden />
             <input value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder={t('Add a task for this goal')} aria-label={t('Add a task for this goal')} className="h-9 flex-1 bg-transparent text-[14px] placeholder:text-fg/35 focus-visible:outline-none" />
           </form>
         </section>
@@ -175,7 +175,7 @@ export function GoalsView() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-[15px] text-fg/55">{t('Goals → milestones → tasks. Progress fills in as you finish things.')}</p>
+        <p className="text-[15px] text-fg/60">{t('Goals → milestones → tasks. Progress fills in as you finish things.')}</p>
         <Button icon={Plus} onClick={() => setAdding(true)}>{t('New goal')}</Button>
       </div>
       {sorted.length === 0 ? (

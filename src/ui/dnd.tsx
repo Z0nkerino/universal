@@ -121,9 +121,9 @@ export function DragGhost() {
           exit={{ scale: 0.8, opacity: 0 }}
           transition={springSnappy}
         >
-          <GripVertical size={14} className="shrink-0 text-fg/40" aria-hidden />
+          <GripVertical size={14} className="shrink-0 text-fg/60" aria-hidden />
           <span className="truncate">{item.label}</span>
-          {item.durationMin && <span className="shrink-0 text-[12px] font-medium text-fg/50">{item.durationMin} {tNow('min')}</span>}
+          {item.durationMin && <span className="shrink-0 text-[12px] font-medium text-fg/60">{item.durationMin} {tNow('min')}</span>}
         </motion.div>
       )}
     </AnimatePresence>

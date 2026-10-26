@@ -35,12 +35,12 @@ function FoodRow({ f, onPick, lang }: { f: Food; onPick: () => void; lang: 'en' 
       <button type="button" onClick={onPick} className="flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left hover:bg-fg/[0.05]">
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold">{lang === 'ru' && f.nameRu ? f.nameRu : f.name}</span>
-          <span className="block truncate text-[12px] text-fg/50">
+          <span className="block truncate text-[12px] text-fg/60">
             {f.serving} · P {f.protein} · C {f.carbs} · F {f.fat}
             {f.custom ? ' · custom' : ''}
           </span>
         </span>
-        <span className="shrink-0 text-[14px] font-bold tabular-nums">{f.kcal}<span className="ml-0.5 text-[11px] font-semibold text-fg/45">{tNow('kcal')}</span></span>
+        <span className="shrink-0 text-[14px] font-bold tabular-nums">{f.kcal}<span className="ml-0.5 text-[11px] font-semibold text-fg/60">{tNow('kcal')}</span></span>
       </button>
     </li>
   );
@@ -135,12 +135,12 @@ export function FoodPicker() {
               <IconButton icon={ChevronLeft} label={t('Back')} onClick={() => setChosen(null)} />
               <h2 className="min-w-0 flex-1 truncate text-[20px] font-bold tracking-[-0.02em]">{t.lang === 'ru' && chosen.nameRu ? chosen.nameRu : chosen.name}</h2>
             </div>
-            <p className="mt-1 px-1 text-[13px] text-fg/55">{chosen.serving}</p>
+            <p className="mt-1 px-1 text-[13px] text-fg/60">{chosen.serving}</p>
             <div className="mt-5 flex items-center justify-center gap-4">
               <IconButton icon={Minus} label={t('Less')} size={44} className="bg-fg/[0.06]" onClick={() => setServings((s) => Math.max(0.25, Math.round((s - 0.25) * 100) / 100))} />
               <div className="text-center">
                 <p className="text-[40px] font-bold tabular-nums tracking-[-0.03em]">{servings}</p>
-                <p className="text-[12px] font-semibold text-fg/50">{t(servings === 1 ? 'serving' : 'servings')}</p>
+                <p className="text-[12px] font-semibold text-fg/60">{t(servings === 1 ? 'serving' : 'servings')}</p>
               </div>
               <IconButton icon={Plus} label={t('More')} size={44} className="bg-fg/[0.06]" onClick={() => setServings((s) => Math.round((s + 0.25) * 100) / 100)} />
             </div>
@@ -153,7 +153,7 @@ export function FoodPicker() {
               ].map(([k, v]) => (
                 <div key={String(k)} className="rounded-2xl bg-fg/[0.04] py-2.5">
                   <p className="text-[17px] font-bold tabular-nums">{v}</p>
-                  <p className="text-[11px] font-semibold text-fg/50">{k}</p>
+                  <p className="text-[11px] font-semibold text-fg/60">{k}</p>
                 </div>
               ))}
             </div>
@@ -169,7 +169,7 @@ export function FoodPicker() {
               <IconButton icon={X} label={t('Close')} onClick={hide} />
             </div>
             <div className="relative mt-3">
-              <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40" aria-hidden />
+              <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
               <input
                 autoFocus
                 value={q}
@@ -199,7 +199,7 @@ export function FoodPicker() {
               {tab === 'search' && (
                 q.trim() ? (
                   results.length ? <ul>{results.map((f) => <FoodRow key={f.id} f={f} lang={t.lang} onPick={() => pick(f)} />)}</ul> : (
-                    <div className="py-10 text-center text-[14px] text-fg/55">
+                    <div className="py-10 text-center text-[14px] text-fg/60">
                       {t('No food called')} “{q}”.{' '}
                       <button type="button" className="font-semibold text-blue" onClick={() => setTab('custom')}>{t('Add it as a custom food')}</button>
                     </div>
@@ -208,7 +208,7 @@ export function FoodPicker() {
                   <ul>{(recent.length ? recent : BUILTIN_FOODS.slice(0, 15)).map((f) => <FoodRow key={f.id} f={f} lang={t.lang} onPick={() => pick(f)} />)}</ul>
                 )
               )}
-              {tab === 'recent' && (recent.length ? <ul>{recent.map((f) => <FoodRow key={f.id} f={f} lang={t.lang} onPick={() => pick(f)} />)}</ul> : <p className="flex items-center justify-center gap-2 py-10 text-[14px] text-fg/55"><Clock size={16} /> {t('Foods you log show up here for one-tap re-adding.')}</p>)}
+              {tab === 'recent' && (recent.length ? <ul>{recent.map((f) => <FoodRow key={f.id} f={f} lang={t.lang} onPick={() => pick(f)} />)}</ul> : <p className="flex items-center justify-center gap-2 py-10 text-[14px] text-fg/60"><Clock size={16} /> {t('Foods you log show up here for one-tap re-adding.')}</p>)}
               {tab === 'saved' &&
                 (saved.length ? (
                   <ul>
@@ -218,7 +218,7 @@ export function FoodPicker() {
                           <Star size={16} className="shrink-0 text-pink" aria-hidden />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-[15px] font-semibold">{m.name}</span>
-                            <span className="block truncate text-[12px] text-fg/50">{m.items.map((i) => i.name).join(', ')}</span>
+                            <span className="block truncate text-[12px] text-fg/60">{m.items.map((i) => i.name).join(', ')}</span>
                           </span>
                           <span className="text-[14px] font-bold tabular-nums">{Math.round(m.items.reduce((a, i) => a + i.kcal, 0))} {t('kcal')}</span>
                         </button>
@@ -226,7 +226,7 @@ export function FoodPicker() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="flex items-center justify-center gap-2 py-10 text-center text-[14px] text-fg/55"><UtensilsCrossed size={16} /> {t('Save a meal from the food log with ★ to re-add it in one tap.')}</p>
+                  <p className="flex items-center justify-center gap-2 py-10 text-center text-[14px] text-fg/60"><UtensilsCrossed size={16} /> {t('Save a meal from the food log with ★ to re-add it in one tap.')}</p>
                 ))}
               {tab === 'custom' && (
                 <div className="py-2">

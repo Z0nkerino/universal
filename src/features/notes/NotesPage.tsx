@@ -43,7 +43,7 @@ function Sidebar({ notes, filter, onFilter, folders }: { notes: Note[]; filter: 
       <button key={key} type="button" onClick={onClick} aria-current={active ? 'true' : undefined} className={cn('flex h-9 w-full items-center gap-2.5 rounded-xl px-2.5 text-[14px] font-semibold transition-colors', active ? 'bg-fg/[0.08] text-fg' : 'text-fg/60 hover:bg-fg/[0.04] hover:text-fg')}>
         <Icon size={16} aria-hidden className="shrink-0" />
         <span className="flex-1 truncate text-left">{label}</span>
-        {count !== undefined && <span className="text-[12px] tabular-nums text-fg/40">{count}</span>}
+        {count !== undefined && <span className="text-[12px] tabular-nums text-fg/60">{count}</span>}
       </button>
     );
   };
@@ -51,7 +51,7 @@ function Sidebar({ notes, filter, onFilter, folders }: { notes: Note[]; filter: 
     <nav aria-label={t('Note folders')} className="flex flex-col gap-0.5">
       {item('all', filter.kind === 'all', () => onFilter({ kind: 'all' }), FileText, t('All notes'), notes.length)}
       {item('pinned', filter.kind === 'pinned', () => onFilter({ kind: 'pinned' }), Pin, t('Pinned'), notes.filter((n) => n.pinned).length)}
-      <p className="mt-3 flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/45">
+      <p className="mt-3 flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/60">
         {t('Folders')}
         <button
           type="button"
@@ -69,7 +69,7 @@ function Sidebar({ notes, filter, onFilter, folders }: { notes: Note[]; filter: 
         </button>
       </p>
       {folders.map((f) => item(`f:${f}`, filter.kind === 'folder' && filter.name === f, () => onFilter({ kind: 'folder', name: f }), Folder, f, notes.filter((n) => n.folder === f).length))}
-      {tags.length > 0 && <p className="mt-3 px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/45">{t('Tags')}</p>}
+      {tags.length > 0 && <p className="mt-3 px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t('Tags')}</p>}
       {tags.slice(0, 12).map(([tag, n]) => item(`t:${tag}`, filter.kind === 'tag' && filter.name === tag, () => onFilter({ kind: 'tag', name: tag }), Hash, tag, n))}
     </nav>
   );
@@ -91,13 +91,13 @@ function NoteHeader({ note, folders, onBack, shared }: { note: Note; folders: st
           aria-label={t('Folder')}
           value={note.folder}
           onChange={(e) => void updateNote(note.id, { folder: e.target.value })}
-          className="h-8 max-w-[45%] truncate rounded-lg bg-transparent px-1.5 text-[13px] font-semibold text-fg/55 hover:bg-fg/[0.05]"
+          className="h-8 max-w-[45%] truncate rounded-lg bg-transparent px-1.5 text-[13px] font-semibold text-fg/60 hover:bg-fg/[0.05]"
         >
           {[...new Set([...folders, note.folder])].map((f) => (
             <option key={f} value={f}>{f}</option>
           ))}
         </select>
-        <span className="ml-auto text-[12px] text-fg/40">{t('Edited')} {relTime(note.updatedAt, t)}</span>
+        <span className="ml-auto text-[12px] text-fg/60">{t('Edited')} {relTime(note.updatedAt, t)}</span>
         <IconButton icon={note.pinned ? PinOff : Pin} size={34} label={note.pinned ? t('Unpin') : t('Pin')} onClick={() => void updateNote(note.id, { pinned: note.pinned ? 0 : 1 })} />
         <IconButton
           icon={Trash2}
@@ -124,7 +124,7 @@ function NoteHeader({ note, folders, onBack, shared }: { note: Note; folders: st
         className="mt-2 w-full bg-transparent text-[30px] font-bold leading-tight tracking-[-0.03em] placeholder:text-fg/25 focus-visible:outline-none sm:text-[34px]"
       />
       </motion.div>
-      <div className="mt-1 flex items-center gap-1.5 text-[13px] text-fg/50">
+      <div className="mt-1 flex items-center gap-1.5 text-[13px] text-fg/60">
         <Hash size={13} aria-hidden />
         <input
           value={tags}
@@ -145,7 +145,7 @@ function Backlinks({ note, onOpen }: { note: Note; onOpen: (n: Note) => void }) 
   if (!back.length) return null;
   return (
     <section className="mt-8 border-t border-fg/[0.06] pt-4" aria-label={t('Linked from')}>
-      <h3 className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/50">
+      <h3 className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-fg/60">
         <Link2 size={13} aria-hidden /> {t('Linked from')} · {back.length}
       </h3>
       <div className="flex flex-wrap gap-2">
@@ -197,7 +197,7 @@ export default function NotesPage() {
   const list = (
     <div className="flex min-h-0 flex-col">
       <div className="relative mb-2">
-        <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40" aria-hidden />
+        <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -205,7 +205,7 @@ export default function NotesPage() {
           aria-label={t('Search notes')}
           className="h-11 w-full rounded-[14px] bg-fg/[0.05] pl-10 pr-9 text-[15px] placeholder:text-fg/40 focus:shadow-[0_0_0_2px_rgb(47_107_255/0.5)] focus-visible:outline-none"
         />
-        {query && <button type="button" aria-label={t('Clear search')} onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/40 hover:text-fg"><X size={16} /></button>}
+        {query && <button type="button" aria-label={t('Clear search')} onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/60 hover:text-fg"><X size={16} /></button>}
       </div>
       {filtered.length === 0 ? (
         query ? (
@@ -230,9 +230,9 @@ export default function NotesPage() {
                     <motion.span layoutId={desktop ? undefined : `note-title-${note.id}`} transition={spring} className="truncate text-[15px] font-semibold">
                       {note.title || t('Untitled')}
                     </motion.span>
-                    <span className="ml-auto shrink-0 text-[11px] text-fg/40">{relTime(note.updatedAt, t)}</span>
+                    <span className="ml-auto shrink-0 text-[11px] text-fg/60">{relTime(note.updatedAt, t)}</span>
                   </span>
-                  <span className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-fg/50">{snippet || t('No additional text')}</span>
+                  <span className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-fg/60">{snippet || t('No additional text')}</span>
                 </button>
               </motion.li>
             ))}

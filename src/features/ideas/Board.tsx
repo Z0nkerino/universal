@@ -11,7 +11,8 @@ import { toast } from '@/ui/Toast';
 import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { spring } from '@/lib/motion';
-import { COLUMNS, useIdeaEditor } from './IdeaEditor';
+import { COLUMNS } from './IdeaEditor';
+import { useIdeaEditor } from './editorStore';
 
 const ACCENT: Record<IdeaColumn, string> = { raw: 'bg-fg/30', exploring: 'bg-blue', doing: 'bg-pink', done: 'bg-brand' };
 
@@ -33,7 +34,7 @@ function Column({ id, label, ideas }: { id: IdeaColumn; label: string; ideas: Id
       <header className="flex items-center gap-2 px-2 py-2">
         <span className={cn('h-2.5 w-2.5 rounded-full', ACCENT[id])} />
         <h2 className="text-[14px] font-bold">{t(label)}</h2>
-        <span className="text-[12px] font-semibold text-fg/40">{ideas.length}</span>
+        <span className="text-[12px] font-semibold text-fg/60">{ideas.length}</span>
       </header>
       <ul className="flex flex-col gap-2">
         <AnimatePresence initial={false}>
@@ -51,7 +52,7 @@ function Column({ id, label, ideas }: { id: IdeaColumn; label: string; ideas: Id
                   {i.color !== 'none' && <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', i.color === 'blue' ? 'bg-blue' : 'bg-pink')} />}
                   <p className="text-[14px] font-semibold leading-snug">{i.title}</p>
                 </div>
-                {i.body && <p className="mt-1 line-clamp-2 text-[13px] text-fg/55">{i.body}</p>}
+                {i.body && <p className="mt-1 line-clamp-2 text-[13px] text-fg/60">{i.body}</p>}
               </Glass>
             </motion.li>
           ))}
@@ -66,7 +67,7 @@ function Column({ id, label, ideas }: { id: IdeaColumn; label: string; ideas: Id
           setText('');
         }}
       >
-        <Plus size={15} className="text-fg/40" aria-hidden />
+        <Plus size={15} className="text-fg/60" aria-hidden />
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Add an idea')} aria-label={`${t('Add an idea to')} ${t(label)}`} className="h-9 flex-1 bg-transparent text-[14px] placeholder:text-fg/35 focus-visible:outline-none" />
       </form>
     </section>

@@ -24,9 +24,23 @@
         } catch (e) {}
       })();
     </script>
+    <style>
+      html { background: #fff; }
+      html.dark { background: #0a0a0a; }
+      .up-splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+        font: 600 17px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.01em; color: #0a0a0a; }
+      html.dark .up-splash { color: #fff; }
+      .up-splash img { border-radius: 14px; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown until the app renders (React replaces it on first render). -->
+      <div class="up-splash" aria-hidden="true">
+        <img src="/favicon.svg" width="56" height="56" alt="" />
+        <span>Universal Planner</span>
+      </div>
+    </div>
     <noscript>Universal Planner needs JavaScript to run.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

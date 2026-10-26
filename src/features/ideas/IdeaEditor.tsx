@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { create } from 'zustand';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CheckSquare, NotebookPen, Target, Trash2, X } from 'lucide-react';
 import { db } from '@/lib/db';
@@ -16,6 +15,7 @@ import { useRouter } from '@/app/router';
 import { useTaskEditor } from '@/features/planner/store';
 import { useTodayTab } from '@/features/today/store';
 import { useNotesState } from '@/features/notes/store';
+import { useIdeaEditor } from './editorStore';
 import { cn } from '@/lib/cn';
 
 export const COLUMNS: { id: IdeaColumn; label: string }[] = [
@@ -25,7 +25,6 @@ export const COLUMNS: { id: IdeaColumn; label: string }[] = [
   { id: 'done', label: 'Done' },
 ];
 
-export const useIdeaEditor = create<{ id: string | null; open: (id: string) => void; close: () => void }>((set) => ({ id: null, open: (id) => set({ id }), close: () => set({ id: null }) }));
 
 /** Turns an idea into a task / note / goal and jumps to it. */
 export async function convertAndOpen(idea: Idea, to: 'task' | 'note' | 'goal', tr: (s: string) => string) {
