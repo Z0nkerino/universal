@@ -1,8 +1,9 @@
 name: Desktop apps
 
-# When package.json's version changes on main, this builds the Mac .dmg, the Windows
-# installer and the self-update bundle, and publishes them as GitHub Release v<version>.
-# Installed apps pick the release up automatically. "Run workflow" builds without publishing.
+# When package.json's version has no GitHub Release yet, this builds the Mac .dmg, the
+# Windows installer and the self-update bundle, uploads them to a draft release, then
+# publishes it. Installed apps pick the new release up automatically.
+# Files go straight to the release (not Actions artifacts), so artifact storage quotas don't apply.
 on:
   workflow_dispatch:
   push:
@@ -11,53 +12,59 @@ on:
 permissions:
   contents: write
 
+# One release build at a time, so two quick pushes can't both publish the same version.
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
 jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
       release: ${{ steps.v.outputs.release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: v
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          if [ "$GITHUB_EVENT_NAME" = "push" ] && ! gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "release=true" >> "$GITHUB_OUTPUT"
-            echo "Version $VERSION has no release yet: building and publishing."
-          else
+          TAG="v$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' 2>/dev/null | grep -q false; then
             echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "$TAG is already published; nothing to build."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            # Start from a clean draft (a failed earlier attempt may have left one behind).
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes 2>/dev/null || true
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
+              --title "Universal Planner ${TAG#v}" \
+              --notes "Download the .dmg for Mac or the setup .exe for Windows. Installed apps update themselves."
           fi
 
   update-bundle:
     needs: version
-    if: needs.version.outputs.release == 'true' || github.event_name == 'workflow_dispatch'
+    if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run bundle -- "${{ github.event.head_commit.message }}"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: update-bundle
-          path: |
-            release/app-bundle.tar.gz
-            release/latest.json
+      - run: npm run bundle
+      - run: gh release upload "${{ needs.version.outputs.tag }}" release/app-bundle.tar.gz release/latest.json --repo "$GITHUB_REPOSITORY" --clobber
 
   mac:
     needs: version
-    if: needs.version.outputs.release == 'true' || github.event_name == 'workflow_dispatch'
+    if: needs.version.outputs.release == 'true'
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -66,18 +73,18 @@ jobs:
         env:
           # No Apple Developer ID yet: the app is ad-hoc signed and not notarized.
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mac-dmg
-          path: release/*.dmg
+      - run: gh release upload "${{ needs.version.outputs.tag }}" release/*.dmg --repo "$GITHUB_REPOSITORY" --clobber
 
   windows:
     needs: version
-    if: needs.version.outputs.release == 'true' || github.event_name == 'workflow_dispatch'
+    if: needs.version.outputs.release == 'true'
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -86,26 +93,11 @@ jobs:
         env:
           UP_DESKTOP: '1'
       - run: npx electron-builder --win nsis
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: release/*.exe
+      - run: gh release upload "${{ needs.version.outputs.tag }}" release/*.exe --repo "$GITHUB_REPOSITORY" --clobber
 
-  release:
-    if: needs.version.outputs.release == 'true'
+  publish:
     needs: [version, update-bundle, mac, windows]
+    if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: out
-          merge-multiple: true
-      - name: Publish GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "v${{ needs.version.outputs.version }}" out/* \
-            --repo "${GITHUB_REPOSITORY}" \
-            --target "${GITHUB_SHA}" \
-            --title "Universal Planner ${{ needs.version.outputs.version }}" \
-            --notes "Download the .dmg for Mac or the setup .exe for Windows. Installed apps update themselves."
+      - run: gh release edit "${{ needs.version.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --draft=false --latest

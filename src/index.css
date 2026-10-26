@@ -40,6 +40,7 @@ body {
 }
 ::selection { background: rgb(47 107 255 / 0.25); }
 
+@layer components {
 /* ---------- Liquid glass ---------- */
 .glass {
   position: relative;
@@ -100,6 +101,7 @@ body {
   color: transparent;
 }
 .bg-brand-soft { background: linear-gradient(135deg, rgb(47 107 255 / 0.12), rgb(255 79 163 / 0.12)); }
+}
 
 /* ---------- Ambient backdrop ---------- */
 .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }

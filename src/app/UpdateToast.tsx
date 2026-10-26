@@ -25,9 +25,9 @@ export function UpdateToast() {
         >
           <AppIcon size={40} />
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold tracking-[-0.01em]">Version {status.version} is ready</p>
+            <p className="text-[15px] font-semibold tracking-[-0.01em]">{status.state === 'ready' ? 'Update ready' : 'New version available'}</p>
             <p className="truncate text-[13px] text-fg/55">
-              {status.state === 'ready' ? (status.notes || 'Restart to switch — it takes a second.') : 'This update needs a fresh download.'}
+              Version {status.version}. {status.state === 'ready' ? 'Restart to switch.' : 'Needs a fresh download.'}
             </p>
           </div>
           {status.state === 'ready' ? (
