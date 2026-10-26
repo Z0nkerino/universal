@@ -13,8 +13,10 @@ import TodayPage from '@/features/today/TodayPage';
 import { TaskEditor } from '@/features/planner/TaskEditor';
 import { EventEditor } from '@/features/calendar/EventEditor';
 import { FocusMode } from '@/features/planner/FocusMode';
+import { IdeaEditor } from '@/features/ideas/IdeaEditor';
+import { QuickCapture, useCapture } from './QuickCapture';
 import { Toaster } from '@/ui/Toast';
-import { ChoiceHost, ConfirmHost } from '@/ui/Confirm';
+import { ChoiceHost, ConfirmHost, PromptHost } from '@/ui/Confirm';
 import { DragGhost } from '@/ui/dnd';
 import { startReminders } from '@/lib/reminders';
 import { db, getKV, setKV } from '@/lib/db';
@@ -84,6 +86,9 @@ function useGlobalEffects() {
       } else if (e.altKey && /^Digit[1-7]$/.test(e.code)) {
         e.preventDefault();
         useRouter.getState().go(NAV[Number(e.code.slice(5)) - 1].id);
+      } else if (e.altKey && e.code === 'KeyN') {
+        e.preventDefault();
+        useCapture.getState().show();
       } else if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault();
         useRouter.getState().go('settings');
@@ -143,8 +148,11 @@ export function Shell() {
       <TaskEditor />
       <EventEditor />
       <FocusMode />
+      <IdeaEditor />
+      <QuickCapture />
       <ConfirmHost />
       <ChoiceHost />
+      <PromptHost />
       <DragGhost />
       <Toaster />
     </MotionConfig>

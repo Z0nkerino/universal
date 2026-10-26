@@ -151,3 +151,43 @@ html[data-shell='mac'] .sidebar { padding-top: 44px; }
 @media (max-width: 1023px) {
   html[data-shell='mac'] #main { padding-top: 52px; }
 }
+
+/* ---------- Note editor ---------- */
+.prose-up { font-size: 16px; line-height: 1.65; color: rgb(var(--fg) / 0.88); }
+.prose-up > * + * { margin-top: 0.6em; }
+.prose-up h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; color: rgb(var(--fg)); margin-top: 0.4em; }
+.prose-up h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; color: rgb(var(--fg)); margin-top: 1.1em; }
+.prose-up h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: rgb(var(--fg)); margin-top: 1em; }
+.prose-up ul { list-style: disc; padding-left: 1.4em; }
+.prose-up ol { list-style: decimal; padding-left: 1.4em; }
+.prose-up li > p { margin: 0.15em 0; }
+.prose-up ul[data-type='taskList'] { list-style: none; padding-left: 0.1em; }
+.prose-up ul[data-type='taskList'] li { display: flex; gap: 0.6em; align-items: flex-start; }
+.prose-up ul[data-type='taskList'] li > label { margin-top: 0.3em; user-select: none; }
+.prose-up ul[data-type='taskList'] li > div { flex: 1; }
+.prose-up ul[data-type='taskList'] input[type='checkbox'] {
+  appearance: none; width: 18px; height: 18px; border-radius: 9999px; box-shadow: inset 0 0 0 1.75px rgb(var(--fg) / 0.3); cursor: pointer; display: grid; place-items: center; transition: background 0.2s;
+}
+.prose-up ul[data-type='taskList'] input[type='checkbox']:checked { background: var(--brand); box-shadow: none; }
+.prose-up ul[data-type='taskList'] input[type='checkbox']:checked::after { content: '✓'; color: white; font-size: 11px; font-weight: 800; }
+.prose-up ul[data-type='taskList'] li[data-checked='true'] > div { color: rgb(var(--fg) / 0.4); text-decoration: line-through; }
+.prose-up blockquote { border-left: 3px solid; border-image: var(--brand) 1; padding-left: 1em; color: rgb(var(--fg) / 0.7); font-style: italic; }
+.prose-up code { background: rgb(var(--fg) / 0.07); border-radius: 6px; padding: 0.1em 0.35em; font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+.prose-up pre { background: rgb(10 10 10 / 0.92); color: #f3f3f5; border-radius: 16px; padding: 14px 16px; overflow-x: auto; font-size: 14px; line-height: 1.55; }
+.dark .prose-up pre { background: rgb(255 255 255 / 0.06); }
+.prose-up pre code { background: none; padding: 0; color: inherit; }
+.prose-up hr { border: none; height: 1px; background: rgb(var(--fg) / 0.12); margin: 1.4em 0; }
+.prose-up a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+.prose-up img { border-radius: 16px; max-width: 100%; height: auto; }
+.prose-up img.ProseMirror-selectednode { outline: 3px solid var(--blue); }
+.prose-up table { border-collapse: separate; border-spacing: 0; width: 100%; overflow: hidden; border-radius: 12px; box-shadow: inset 0 0 0 1px rgb(var(--fg) / 0.1); font-size: 15px; }
+.prose-up th, .prose-up td { border-bottom: 1px solid rgb(var(--fg) / 0.08); border-right: 1px solid rgb(var(--fg) / 0.08); padding: 6px 10px; vertical-align: top; text-align: left; }
+.prose-up th { background: rgb(var(--fg) / 0.04); font-weight: 650; }
+.prose-up tr > *:last-child { border-right: none; }
+.prose-up tr:last-child > * { border-bottom: none; }
+.prose-up .selectedCell { background: rgb(47 107 255 / 0.12); }
+.prose-up .wikilink { color: var(--blue); font-weight: 600; background: rgb(47 107 255 / 0.1); border-radius: 6px; padding: 0 0.25em; cursor: pointer; }
+.prose-up .wikilink:hover { background: rgb(47 107 255 / 0.18); }
+.prose-up p.is-empty:first-child::before, .prose-up .is-empty::before {
+  content: attr(data-placeholder); color: rgb(var(--fg) / 0.35); float: left; height: 0; pointer-events: none;
+}

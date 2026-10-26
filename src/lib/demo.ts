@@ -195,9 +195,16 @@ export async function seedDemoData(now = new Date()) {
         h(2, 'Pages'),
         { type: 'bulletList', content: [li('Home with three featured projects'), li('Work index'), li('About + contact')] },
         h(2, 'Next steps'),
-        { type: 'taskList', content: [li('Choose the six projects', true), li('Write case studies using [[Case study template]]', false), li('Pick a domain', false)] },
+        {
+          type: 'taskList',
+          content: [
+            li('Choose the six projects', true),
+            { type: 'taskItem', attrs: { checked: false }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Write case studies using ' }, { type: 'text', text: 'Case study template', marks: [{ type: 'wikilink', attrs: { title: 'Case study template' } }] }] }] },
+            li('Pick a domain', false),
+          ],
+        },
       ),
-      text: 'Portfolio site plan Goal: a fast, simple site that shows six projects in depth. Pages Home with three featured projects Work index About + contact Next steps Choose the six projects Write case studies using [[Case study template]] Pick a domain',
+      text: 'Portfolio site plan Goal: a fast, simple site that shows six projects in depth. Pages Home with three featured projects Work index About + contact Next steps Choose the six projects Write case studies using Case study template Pick a domain',
     },
     {
       ...base,

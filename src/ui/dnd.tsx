@@ -6,7 +6,7 @@ import { springSnappy } from '@/lib/motion';
 
 /** Something being dragged between parts of the app (a task onto the timeline, a widget…). */
 export interface DragItem {
-  kind: 'task' | 'widget' | 'event';
+  kind: 'task' | 'widget' | 'event' | 'idea';
   id: string;
   label: string;
   durationMin?: number;
@@ -111,7 +111,7 @@ export function DragGhost() {
   const { item, x, y } = useDnd();
   return (
     <AnimatePresence>
-      {item && (item.kind === 'task' || item.kind === 'event') && (
+      {item && item.kind !== 'widget' && (
         <motion.div
           className="glass glass-strong pointer-events-none fixed left-0 top-0 z-[80] flex max-w-[260px] items-center gap-2 rounded-2xl px-3 py-2 text-[14px] font-semibold"
           style={{ x: x + 12, y: y - 18 }}

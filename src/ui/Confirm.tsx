@@ -83,3 +83,55 @@ export function ChoiceHost() {
     </Sheet>
   );
 }
+
+interface PromptRequest {
+  title: string;
+  label: string;
+  initial?: string;
+  placeholder?: string;
+  confirmLabel: string;
+  resolve: (v: string | null) => void;
+}
+const usePromptStore = create<{ req: PromptRequest | null }>(() => ({ req: null }));
+
+/** Asks for a line of text inside the app (window.prompt doesn't work in the desktop app). */
+export function promptText(opts: Omit<PromptRequest, 'resolve'>) {
+  return new Promise<string | null>((resolve) => usePromptStore.setState({ req: { ...opts, resolve } }));
+}
+
+export function PromptHost() {
+  const t = useT();
+  const req = usePromptStore((s) => s.req);
+  const close = (v: string | null) => {
+    req?.resolve(v);
+    usePromptStore.setState({ req: null });
+  };
+  return (
+    <Sheet open={!!req} onClose={() => close(null)} label={req?.title ?? ''} className="max-w-md">
+      {req && (
+        <form
+          className="p-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            close(String(new FormData(e.currentTarget).get('value') ?? ''));
+          }}
+        >
+          <h2 className="text-[20px] font-bold tracking-[-0.02em]">{req.title}</h2>
+          <label className="mt-4 block text-[13px] font-semibold text-fg/60" htmlFor="prompt-value">{req.label}</label>
+          <input
+            id="prompt-value"
+            name="value"
+            autoFocus
+            defaultValue={req.initial}
+            placeholder={req.placeholder}
+            className="mt-1.5 h-11 w-full rounded-[14px] bg-fg/[0.05] px-3.5 text-[15px] focus:shadow-[0_0_0_2px_rgb(47_107_255/0.55)] focus-visible:outline-none"
+          />
+          <div className="mt-6 flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => close(null)}>{t('Cancel')}</Button>
+            <Button type="submit">{req.confirmLabel}</Button>
+          </div>
+        </form>
+      )}
+    </Sheet>
+  );
+}
