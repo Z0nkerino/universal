@@ -47,11 +47,11 @@ npm run dist:win    # on Windows: release/Universal-Planner-<version>-windows-se
 ### Publishing a release
 
 ```bash
-npm version patch          # e.g. 0.1.0 → 0.1.1 (commits and tags v0.1.1)
-git push --follow-tags
+npm version patch --no-git-tag-version   # e.g. 0.1.0 → 0.1.1
+git commit -am "Release 0.1.1" && git push
 ```
 
-The **Desktop apps** GitHub workflow then builds the `.dmg`, the Windows installer and the update bundle, and publishes them as a GitHub Release. You can also build without publishing from the Actions tab (Desktop apps → Run workflow).
+When a push to `main` carries a version with no release yet, the **Desktop apps** GitHub workflow builds the `.dmg`, the Windows installer and the update bundle, and publishes them as a GitHub Release. You can also build without publishing from the Actions tab (Desktop apps → Run workflow).
 
 ### Automatic updates
 
