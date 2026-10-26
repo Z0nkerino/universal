@@ -136,6 +136,38 @@ export default function SettingsPage() {
           </Row>
         </Section>
 
+        <Section title="Health targets">
+          {(
+            [
+              ['kcal', 'Calories', 'kcal', 800, 6000, 50],
+              ['protein', 'Protein', 'g', 20, 400, 5],
+              ['carbs', 'Carbs', 'g', 20, 800, 5],
+              ['fat', 'Fat', 'g', 10, 300, 5],
+              ['waterMl', 'Water', 'ml', 500, 6000, 250],
+              ['sleepH', 'Sleep', 'h', 4, 12, 0.5],
+            ] as const
+          ).map(([key, label, unit, min, max, step]) => (
+            <Row key={key} label={label}>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  aria-label={`${label} target`}
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={s.targets[key]}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    if (v >= min && v <= max) s.set({ targets: { ...s.targets, [key]: v } });
+                  }}
+                  className="h-9 w-24 rounded-xl bg-fg/[0.06] px-3 text-right text-[15px] font-semibold tabular-nums focus:shadow-[0_0_0_2px_rgb(47_107_255/0.5)] focus-visible:outline-none"
+                />
+                <span className="w-9 text-[13px] text-fg/50">{unit}</span>
+              </div>
+            </Row>
+          ))}
+        </Section>
+
         <Section title="Your data">
           <Row label="Sample data" hint={demo ? 'The app is showing example tasks, events and logs. Remove them when you’re ready.' : 'Add example data to explore the app. You can remove it in one click.'}>
             {demo ? (

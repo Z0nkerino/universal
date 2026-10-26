@@ -14,6 +14,7 @@ import { TaskEditor } from '@/features/planner/TaskEditor';
 import { EventEditor } from '@/features/calendar/EventEditor';
 import { FocusMode } from '@/features/planner/FocusMode';
 import { IdeaEditor } from '@/features/ideas/IdeaEditor';
+import { FoodPicker } from '@/features/diet/FoodPicker';
 import { QuickCapture, useCapture } from './QuickCapture';
 import { Toaster } from '@/ui/Toast';
 import { ChoiceHost, ConfirmHost, PromptHost } from '@/ui/Confirm';
@@ -23,10 +24,17 @@ import { db, getKV, setKV } from '@/lib/db';
 import { seedDemoData } from '@/lib/demo';
 
 /** First launch: fill the app with removable sample data so it doesn't open empty. */
-async function firstRun() {
-  if (await getKV('initialized')) return;
-  await setKV('initialized', Date.now());
-  if ((await db.tasks.count()) === 0 && (await db.events.count()) === 0) await seedDemoData();
+let firstRunPromise: Promise<void> | null = null;
+function firstRun() {
+  // Once per page load, even if effects run twice (React StrictMode) or several tabs race.
+  firstRunPromise ??= db.transaction('rw', db.kv, async () => {
+    if (await getKV('initialized')) return false;
+    await setKV('initialized', Date.now());
+    return true;
+  }).then(async (fresh) => {
+    if (fresh && (await db.tasks.count()) === 0 && (await db.events.count()) === 0) await seedDemoData();
+  });
+  return firstRunPromise;
 }
 
 const pages: Record<Route, React.ComponentType> = {
@@ -149,6 +157,7 @@ export function Shell() {
       <EventEditor />
       <FocusMode />
       <IdeaEditor />
+      <FoodPicker />
       <QuickCapture />
       <ConfirmHost />
       <ChoiceHost />

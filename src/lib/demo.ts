@@ -84,7 +84,10 @@ export async function seedDemoData(now = new Date()) {
     for (let i = 0; i < count; i++) {
       const hour = [9, 10, 10, 11, 11, 14, 15, 16, 17, 20][Math.floor(r() * 10)];
       const est = [15, 30, 30, 45, 60][Math.floor(r() * 5)];
-      tasks.push({ ...base, id: uid(), title: history[Math.floor(r() * history.length)], status: 'today', done: 1, doneAt: at(d, hour, Math.floor(r() * 50)), priority: Math.floor(r() * 4) as Task['priority'], tags: [], subtasks: [], due: k, estimate: est, order: order++ });
+      const doneAt = at(d, hour, Math.floor(r() * 50));
+      // Most finished tasks were time-blocked beforehand, so "planned vs actual" has history.
+      const planned = r() < 0.7 ? { start: doneAt - est * 60_000, end: doneAt } : {};
+      tasks.push({ ...base, id: uid(), title: history[Math.floor(r() * history.length)], status: 'today', done: 1, doneAt, priority: Math.floor(r() * 4) as Task['priority'], tags: [], subtasks: [], due: k, estimate: est, order: order++, ...planned });
     }
   }
   const t = (title: string, x: Partial<Task>): Task => ({ ...base, id: uid(), title, status: 'today', done: 0, priority: 0, tags: [], subtasks: [], order: order++, ...x });

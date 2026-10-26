@@ -1,7 +1,7 @@
 {
   "name": "universal-planner",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Universal Planner by Eternal Inc. — an all-in-one, offline-first planner.",
   "type": "module",
   "scripts": {
