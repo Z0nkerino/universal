@@ -1,0 +1,84 @@
+name: Desktop apps
+
+# Push a tag like v0.2.0 to build the Mac .dmg, the Windows installer and the
+# self-update bundle, and publish them as a GitHub Release. Installed apps pick
+# the release up automatically. "Run workflow" builds without publishing.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  update-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run bundle -- "${{ github.event.head_commit.message }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: update-bundle
+          path: |
+            release/app-bundle.tar.gz
+            release/latest.json
+
+  mac:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run dist:mac
+        env:
+          # No Apple Developer ID yet: the app is ad-hoc signed and not notarized.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-dmg
+          path: release/*.dmg
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vite build --outDir dist-desktop
+        env:
+          UP_DESKTOP: '1'
+      - run: npx electron-builder --win nsis
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: release/*.exe
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [update-bundle, mac, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" out/* \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "Universal Planner ${GITHUB_REF_NAME#v}" \
+            --notes "Download the .dmg for Mac or the setup .exe for Windows. Installed apps update themselves."

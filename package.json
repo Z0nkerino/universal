@@ -1,0 +1,117 @@
+{
+  "name": "universal-planner",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Universal Planner by Eternal Inc. \u2014 an all-in-one, offline-first planner.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "build:desktop": "UP_DESKTOP=1 vite build --outDir dist-desktop",
+    "desktop": "npm run build:desktop && electron .",
+    "dist:mac": "npm run build:desktop && electron-builder --mac dmg --universal",
+    "dist:win": "npm run build:desktop && electron-builder --win nsis",
+    "bundle": "npm run build:desktop && node scripts/make-update-bundle.cjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.1.1",
+    "@react-three/drei": "9.117.3",
+    "@react-three/fiber": "8.17.10",
+    "dexie": "4.0.11",
+    "dexie-react-hooks": "1.1.7",
+    "framer-motion": "11.18.2",
+    "lucide-react": "0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.170.0",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@types/three": "0.170.0",
+    "@vitejs/plugin-react": "4.4.1",
+    "autoprefixer": "10.4.20",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "postcss": "8.4.49",
+    "potrace": "2.1.8",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3",
+    "vite": "6.3.5",
+    "vite-plugin-pwa": "0.21.1"
+  },
+  "main": "electron/main.cjs",
+  "author": {
+    "name": "Eternal Inc."
+  },
+  "build": {
+    "appId": "com.eternalinc.universalplanner",
+    "productName": "Universal Planner",
+    "copyright": "\u00a9 2026 Eternal Inc.",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "dist-desktop/**",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        "dmg"
+      ],
+      "darkModeSupport": true,
+      "hardenedRuntime": true,
+      "artifactName": "Universal-Planner-${version}-mac.${ext}",
+      "identity": "-",
+      "notarize": false
+    },
+    "dmg": {
+      "title": "Universal Planner",
+      "iconSize": 112,
+      "window": {
+        "width": 560,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 190
+        },
+        {
+          "x": 410,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Universal-Planner-${version}-windows-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Universal Planner"
+    },
+    "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Z0nkerino/universal.git"
+  },
+  "updates": {
+    "repo": "Z0nkerino/universal",
+    "shellVersion": 1
+  }
+}
