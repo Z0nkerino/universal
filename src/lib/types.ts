@@ -71,6 +71,8 @@ export interface CalEvent extends Base {
   reminder?: number; // minutes before; undefined = none
   /** UID from an imported .ics, kept so re-imports don't duplicate. */
   uid?: string;
+  /** Set when a connector owns this event (e.g. 'connector:abc'); such events are read-only here. */
+  source?: string;
 }
 
 /** One concrete occurrence of an event (recurrences expanded). */

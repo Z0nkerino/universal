@@ -295,8 +295,8 @@ export function IdeaCanvas() {
           <svg className="pointer-events-none absolute left-0 top-0 overflow-visible" width="1" height="1" aria-hidden>
             <defs>
               <linearGradient id="link-g" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stopColor="#2F6BFF" />
-                <stop offset="1" stopColor="#FF4FA3" />
+                <stop offset="0" style={{ stopColor: 'var(--blue)' }} />
+                <stop offset="1" style={{ stopColor: 'var(--pink)' }} />
               </linearGradient>
             </defs>
             {links.map((l) => {

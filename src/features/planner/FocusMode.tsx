@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSettings } from '@/lib/settings';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CloudRain, Coffee, Minus, Pause, Play, Plus, Volume2, VolumeX, Waves, Wind, X } from 'lucide-react';
@@ -30,6 +31,8 @@ export function FocusMode() {
 /** Timing is timestamp-based, so it stays correct even if the tab sleeps. */
 function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialMin: number; close: () => void }) {
   const t = useT();
+  const focusMin = useSettings((s) => s.focusMin);
+  const breakMin = useSettings((s) => s.breakMin);
   const task = useLiveQuery(() => (taskId ? db.tasks.get(taskId) : undefined), [taskId]);
   const reduced = useReducedMotion();
   const [phase, setPhase] = useState<Phase>('focus');
@@ -63,8 +66,8 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
     if (phase === 'focus') setPhase('done');
     else {
       setPhase('focus');
-      setTotal(25 * 60_000);
-      setEndsAt(Date.now() + 25 * 60_000);
+      setTotal(focusMin * 60_000);
+      setEndsAt(Date.now() + focusMin * 60_000);
       runningSince.current = Date.now();
     }
   }, [left, pausedLeft, phase]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -143,7 +146,7 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
           <motion.div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-1/2 h-[120vmax] w-[120vmax] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-40 blur-3xl"
-            style={{ background: phase === 'break' ? 'radial-gradient(circle, rgb(255 79 163 / .35), transparent 60%)' : 'radial-gradient(circle, rgb(47 107 255 / .35), transparent 60%)' }}
+            style={{ background: phase === 'break' ? 'radial-gradient(circle, rgb(var(--pink-rgb) / .35), transparent 60%)' : 'radial-gradient(circle, rgb(var(--blue-rgb) / .35), transparent 60%)' }}
             animate={reduced ? undefined : { scale: [1, 1.08, 1] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           />
@@ -164,8 +167,8 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
             <svg width={300} height={300} viewBox="0 0 300 300" className="max-w-[72vw]" aria-hidden>
               <defs>
                 <linearGradient id="focus-g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#2F6BFF" />
-                  <stop offset="1" stopColor="#FF4FA3" />
+                  <stop offset="0" style={{ stopColor: 'var(--blue)' }} />
+                  <stop offset="1" style={{ stopColor: 'var(--pink)' }} />
                 </linearGradient>
               </defs>
               <circle cx={150} cy={150} r={R} fill="none" stroke="rgb(var(--fg) / 0.07)" strokeWidth={10} />
@@ -200,11 +203,11 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
               <p className="text-[16px] text-fg/60">{total <= 2 * 60_000 ? t('You started — that’s the hardest part. Keep going?') : t('Nice work. Take a breather?')}</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {total <= 2 * 60_000 ? (
-                  <Button variant="brand" icon={Play} onClick={() => startPhase('focus', 25)}>{t('Keep going · 25 min')}</Button>
+                  <Button variant="brand" icon={Play} onClick={() => startPhase('focus', focusMin)}>{`${t('Keep going')} · ${focusMin} ${t('min')}`}</Button>
                 ) : (
-                  <Button variant="brand" icon={Coffee} onClick={() => startPhase('break', 5)}>{t('5-min break')}</Button>
+                  <Button variant="brand" icon={Coffee} onClick={() => startPhase('break', breakMin)}>{`${t('Break')} · ${breakMin} ${t('min')}`}</Button>
                 )}
-                <Button variant="glass" icon={Play} onClick={() => startPhase('focus', 25)}>{t('Another round')}</Button>
+                <Button variant="glass" icon={Play} onClick={() => startPhase('focus', focusMin)}>{t('Another round')}</Button>
                 {taskId && <Button variant="glass" onClick={() => void finish(true)}>{t('Mark task done')}</Button>}
                 <Button variant="ghost" onClick={() => void finish(false)}>{t('Finish')}</Button>
               </div>

@@ -117,7 +117,7 @@ function SleepCard() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <Stat label={t('Last night')} value={today ? today.hours : '—'} unit={t('h')} sub={avg !== null ? `${t('2-week average')} ${avg.toFixed(1)} ${t('h')} · ${t('goal')} ${target} h` : undefined} />
         <div className="flex items-center gap-2">
-          <input type="range" min={3} max={12} step={0.25} value={hours} onChange={(e) => setHours(Number(e.target.value))} aria-label={t('Hours slept')} className="w-28 accent-[#2F6BFF]" />
+          <input type="range" min={3} max={12} step={0.25} value={hours} onChange={(e) => setHours(Number(e.target.value))} aria-label={t('Hours slept')} className="w-28 accent-blue" />
           <span className="w-12 text-right text-[15px] font-bold tabular-nums">{hours}h</span>
           <Button onClick={async () => (await logSleep(hours), toast(`${t('Sleep logged')} · ${hours} ${t('h')}`))}>{t('Log')}</Button>
         </div>

@@ -1,9 +1,25 @@
 import { create } from 'zustand';
 import { getKV, setKV } from './db';
+import type { BackgroundId, FontId, GlassId, PaletteId } from './appearance';
 
 export type ThemePref = 'system' | 'light' | 'dark';
 export type MotionPref = 'system' | 'reduced' | 'full';
 export type LangPref = 'auto' | 'en' | 'ru';
+
+/** How Afina looks and talks. */
+export interface AfinaPrefs {
+  /** 'match' follows the app's accent colors. */
+  palette: 'match' | 'ocean' | 'aurora' | 'sunset' | 'forest' | 'mono';
+  /** glass = 3D glass orb where the device can render it; gradient = soft 2D orb; minimal = a calm ring. */
+  style: 'glass' | 'gradient' | 'minimal';
+  motion: 'lively' | 'calm' | 'still';
+  /** Reply style for the on-device model. */
+  tone: 'warm' | 'brief' | 'cheerful';
+  /** Greets you by your profile name. */
+  useName: boolean;
+  /** Shows Afina's briefing card on Today. */
+  briefing: boolean;
+}
 
 export interface Settings {
   theme: ThemePref;
@@ -21,6 +37,33 @@ export interface Settings {
   model: string;
   /** Sections the user chose to use; hidden ones leave the navigation. */
   features: string[];
+
+  // Look
+  palette: PaletteId;
+  customAccent: string;
+  font: FontId;
+  background: BackgroundId;
+  glass: GlassId;
+  afina: AfinaPrefs;
+
+  // Calendar
+  eventMinutes: number;
+  /** Minutes before an event; -1 = no reminder. */
+  eventReminder: number;
+  eventColor: 'blue' | 'pink' | 'violet' | 'sky' | 'rose' | 'gray';
+
+  // Focus
+  focusMin: number;
+  breakMin: number;
+
+  // Notifications
+  /** Hour for a daily "your day" notification; -1 = off. */
+  briefingAt: number;
+  /** Hour for an evening check-in notification; -1 = off. */
+  checkInAt: number;
+
+  // Health
+  glassMl: number;
 }
 
 const defaults: Settings = {
@@ -36,7 +79,23 @@ const defaults: Settings = {
   reminders: true,
   model: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
   features: ['calendar', 'notes', 'ideas', 'health', 'insights'],
+  palette: 'ocean',
+  customAccent: '#2F6BFF',
+  font: 'system',
+  background: 'aurora',
+  glass: 'frosted',
+  afina: { palette: 'match', style: 'glass', motion: 'lively', tone: 'warm', useName: true, briefing: true },
+  eventMinutes: 60,
+  eventReminder: 10,
+  eventColor: 'blue',
+  focusMin: 25,
+  breakMin: 5,
+  briefingAt: -1,
+  checkInAt: -1,
+  glassMl: 250,
 };
+
+export const DEFAULT_SETTINGS = defaults;
 
 interface SettingsState extends Settings {
   ready: boolean;
@@ -62,7 +121,12 @@ export const useSettings = create<SettingsState>((set, get) => ({
   hydrate: async () => {
     try {
       const saved = await getKV<Partial<Settings>>('settings');
-      set({ ...defaults, ...saved, targets: { ...defaults.targets, ...saved?.targets }, ready: true });
+      set({ ...defaults, ...saved, targets: { ...defaults.targets, ...saved?.targets }, afina: { ...defaults.afina, ...saved?.afina }, ready: true });
+      try {
+        localStorage.setItem('up.theme', get().theme);
+      } catch {
+        /* storage unavailable */
+      }
     } catch {
       set({ ready: true });
     }

@@ -21,6 +21,13 @@
           var t = localStorage.getItem('up.theme') || 'system';
           var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
           document.documentElement.classList.toggle('dark', dark);
+          // The last-used look (accent colors, font, background, glass) so the first frame already matches.
+          var look = JSON.parse(localStorage.getItem('up.look') || 'null');
+          if (look) {
+            for (var k in look.vars) document.documentElement.style.setProperty(k, look.vars[k]);
+            document.documentElement.dataset.bg = look.bg;
+            document.documentElement.dataset.glass = look.glass;
+          }
         } catch (e) {}
       })();
     </script>

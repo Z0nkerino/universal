@@ -11,14 +11,17 @@ function fromHash(): Route {
 
 interface RouterState {
   route: Route;
-  go: (r: Route) => void;
+  /** `sub` deep-links inside a page, e.g. go('settings', 'connectors'). */
+  go: (r: Route, sub?: string) => void;
 }
 
 export const useRouter = create<RouterState>((set) => ({
   route: fromHash(),
-  go: (route) => {
-    if (location.hash !== `#/${route}`) history.pushState(null, '', `#/${route}`);
+  go: (route, sub) => {
+    const hash = `#/${route}${sub ? `/${sub}` : ''}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
     set({ route });
+    if (sub) dispatchEvent(new Event('up:subroute'));
   },
 }));
 

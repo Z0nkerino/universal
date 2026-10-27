@@ -111,6 +111,16 @@ function registerIpc() {
   ipcMain.handle('update:download', (_e, url) => {
     if (/^https:\/\/github\.com\//.test(url)) shell.openExternal(url);
   });
+  // Connectors (calendar feeds, webhooks…) go through here: unlike the page, the main process
+  // isn't bound by CORS. Only http(s), with a timeout and a size cap.
+  ipcMain.handle('net:request', async (_e, { url, method = 'GET', headers = {}, body }) => {
+    const u = new URL(url);
+    if (!/^https?:$/.test(u.protocol)) throw new Error('Only http and https addresses are allowed.');
+    const res = await net.fetch(u.href, { method, headers, body, signal: AbortSignal.timeout(20_000) });
+    const text = await res.text();
+    if (text.length > 20 * 1024 * 1024) throw new Error('The response is too large.');
+    return { status: res.status, text };
+  });
 }
 
 app.setAboutPanelOptions({

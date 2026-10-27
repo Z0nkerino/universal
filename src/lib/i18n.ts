@@ -1,5 +1,39 @@
+import { create } from 'zustand';
 import { useSettings } from './settings';
-import { RU_STRINGS } from './i18n-ru';
+
+// The Russian dictionary loads only for people who use Russian (it's ~50 KB).
+let RU_STRINGS: Record<string, string> = {};
+const useDict = create<{ ru: boolean }>(() => ({ ru: false }));
+let loading: Promise<void> | null = null;
+
+/** Loads the Russian dictionary; components using useT() re-render once it's in. */
+export function loadRussian() {
+  return (loading ??= import('./i18n-ru').then((m) => {
+    RU_STRINGS = m.RU_STRINGS;
+    useDict.setState({ ru: true });
+  }));
+}
+
+/** Best guess before settings load: the last language used on this device, else the system's. */
+export function likelyRussian() {
+  try {
+    const last = localStorage.getItem('up.lang');
+    if (last) return last === 'ru';
+  } catch {
+    /* storage unavailable */
+  }
+  return resolveLang('auto') === 'ru';
+}
+
+useSettings.subscribe((s) => {
+  const lang = resolveLang(s.language);
+  try {
+    if (s.ready) localStorage.setItem('up.lang', lang);
+  } catch {
+    /* storage unavailable */
+  }
+  if (lang === 'ru') void loadRussian();
+});
 
 const en = {
   'nav.today': 'Today',
@@ -53,6 +87,7 @@ export function translate(lang: 'en' | 'ru', k: Key | (string & {})): string {
 
 export function useT() {
   const lang = resolveLang(useSettings((s) => s.language));
+  useDict((d) => d.ru);
   const t = (k: Key | (string & {})) => translate(lang, k);
   return Object.assign(t, { lang, locale: lang === 'ru' ? 'ru-RU' : undefined });
 }

@@ -131,7 +131,7 @@ export function YearView({ year, occurrences, onOpenMonth, onOpenDay }: { year: 
                     onClick={() => onOpenDay(d)}
                     aria-label={`${fmt(d, 'd MMMM')}${n ? `, ${n}` : ''}`}
                     className={cn('flex aspect-square items-center justify-center rounded-md text-[11px] font-medium tabular-nums transition-colors', !isSameMonth(d, month) ? 'invisible' : isToday(d) ? 'bg-brand font-bold text-white' : 'hover:bg-fg/[0.08]')}
-                    style={n && !isToday(d) ? { background: `rgb(47 107 255 / ${Math.min(0.12 + n * 0.12, 0.55)})` } : undefined}
+                    style={n && !isToday(d) ? { background: `rgb(var(--blue-rgb) / ${Math.min(0.12 + n * 0.12, 0.55)})` } : undefined}
                   >
                     {fmt(d, 'd')}
                   </button>

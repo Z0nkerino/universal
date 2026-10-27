@@ -55,7 +55,7 @@ export function QuickCapture() {
 
   return (
     <>
-      {!desktop && route !== 'afina' && (
+      {!desktop && route !== 'afina' && route !== 'settings' && (
         <motion.button
           type="button"
           aria-label={t('Quick capture')}

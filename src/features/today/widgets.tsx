@@ -2,10 +2,11 @@ import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { addDays, startOfDay } from 'date-fns';
-import { ArrowRight, Clock3, Droplets, Flame, ListTodo, Play, Plus, Repeat, Star, Target, Timer } from 'lucide-react';
+import { ArrowRight, Clock3, Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudMoon, CloudRain, CloudSnow, CloudSun, Droplets, Flame, ListTodo, Moon, Play, Plus, Repeat, Star, Sun, Target, Timer, type LucideIcon } from 'lucide-react';
 import { db } from '@/lib/db';
 import { addWater, toggleHabit, updateTask } from '@/lib/actions';
-import { dayKey, fmtTime, todayKey } from '@/lib/dates';
+import { dayKey, fmtTime, fromDayKey, todayKey } from '@/lib/dates';
+import { getWeather, weatherLabel } from '@/features/connectors/weather';
 import { useNow } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
 import { tNow, useT } from '@/lib/i18n';
@@ -56,7 +57,7 @@ export function TimelineWidget() {
     () =>
       [
         ...occ.filter((o) => !o.event.allDay && o.end - o.start < 86_400_000).map((o) => ({ key: `${o.event.id}${o.start}`, title: o.event.title, start: o.start, end: o.end, color: EVENT_HEX[o.event.color], open: () => void openEvent(o.event.id, o.start), done: false, task: false })),
-        ...tasks.map((x) => ({ key: x.id, title: x.title, start: x.start!, end: x.end ?? x.start! + 1_800_000, color: '#2F6BFF', open: () => openTask(x.id), done: !!x.done, task: true })),
+        ...tasks.map((x) => ({ key: x.id, title: x.title, start: x.start!, end: x.end ?? x.start! + 1_800_000, color: 'var(--blue)', open: () => openTask(x.id), done: !!x.done, task: true })),
       ]
         .filter((i) => i.end > now.getTime() - 30 * 60_000)
         .sort((a, b) => a.start - b.start),
@@ -191,8 +192,9 @@ export function NutritionWidget() {
   const go = useRouter((s) => s.go);
   const ml = water.reduce((a, w) => a + w.ml, 0);
   const kcal = meals.reduce((a, m) => a + m.kcal, 0);
-  const glasses = Math.round(ml / 250);
-  const target = Math.round(targets.waterMl / 250);
+  const glassMl = useSettings((s) => s.glassMl);
+  const glasses = Math.round(ml / glassMl);
+  const target = Math.round(targets.waterMl / glassMl);
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
@@ -202,11 +204,11 @@ export function NutritionWidget() {
         </p>
         <div className="mt-2 flex flex-wrap gap-1" aria-hidden>
           {Array.from({ length: target }, (_, i) => (
-            <motion.span key={i} className="h-5 w-2.5 rounded-full" animate={{ background: i < glasses ? '#2F6BFF' : 'rgba(47,107,255,0.15)' }} transition={{ delay: i * 0.03 }} />
+            <motion.span key={i} className="h-5 w-2.5 rounded-full" animate={{ background: i < glasses ? 'var(--blue)' : 'var(--blue-soft)' }} transition={{ delay: i * 0.03 }} />
           ))}
         </div>
-        <Button size="sm" variant="glass" icon={Droplets} className="mt-3" onClick={() => void addWater(250).then(() => toast(t('+1 glass of water')))}>
-          +250 {t('ml')}
+        <Button size="sm" variant="glass" icon={Droplets} className="mt-3" onClick={() => void addWater(glassMl).then(() => toast(t('+1 glass of water')))}>
+          +{glassMl} {t('ml')}
         </Button>
       </div>
       <button type="button" onClick={() => go('health')} className="rounded-2xl text-left">
@@ -228,6 +230,7 @@ export function NutritionWidget() {
 export function FocusWidget() {
   const t = useT();
   const start = useFocusMode((s) => s.start);
+  const focusMin = useSettings((s) => s.focusMin);
   const d0 = startOfDay(new Date()).getTime();
   const focus = useLiveQuery(() => db.focus.where('start').aboveOrEqual(d0).toArray(), [d0]) ?? [];
   const top = useLiveQuery(async () => {
@@ -243,7 +246,7 @@ export function FocusWidget() {
       </p>
       {top && <p className="truncate text-[14px] text-fg/60">{t('Up next')}: <span className="font-semibold text-fg">{top.title}</span></p>}
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="brand" icon={Play} onClick={() => start(top?.id, 25)}>{t('Focus 25 min')}</Button>
+        <Button size="sm" variant="brand" icon={Play} onClick={() => start(top?.id)}>{`${t('Focus')} ${focusMin} ${t('min')}`}</Button>
         <Button size="sm" variant="glass" icon={Timer} onClick={() => start(top?.id, 2)}>{t('Just start · 2 min')}</Button>
       </div>
     </div>
@@ -275,5 +278,47 @@ export function GoalsWidget() {
         );
       })}
     </ul>
+  );
+}
+
+const WEATHER_ICON = (code: number, day = true): LucideIcon =>
+  code === 0 ? (day ? Sun : Moon) : code <= 2 ? (day ? CloudSun : CloudMoon) : code === 3 ? Cloud : code <= 48 ? CloudFog : code <= 57 ? CloudDrizzle : code <= 67 || (code >= 80 && code <= 82) ? CloudRain : code <= 86 ? CloudSnow : CloudLightning;
+
+/** Today's weather from the Weather connector; only on Today when it's connected. */
+export function WeatherWidget() {
+  const t = useT();
+  const w = useLiveQuery(() => getWeather(), []);
+  if (!w) return null;
+  const Icon = WEATHER_ICON(w.current.code, w.current.isDay);
+  const today = w.daily[0];
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-3">
+        <Icon size={40} strokeWidth={1.6} className="shrink-0 text-blue" aria-hidden />
+        <div className="min-w-0">
+          <p className="text-[34px] font-bold leading-none tracking-[-0.03em] tabular-nums">{w.current.temp}°</p>
+          <p className="mt-1 truncate text-[13px] text-fg/60">
+            {t(weatherLabel(w.current.code))} · {w.place}
+          </p>
+        </div>
+      </div>
+      {today && (
+        <p className="mt-2 text-[13px] text-fg/60">
+          ↑ {today.max}° ↓ {today.min}°{today.rain >= 20 ? ` · ☂ ${today.rain}%` : ''}
+        </p>
+      )}
+      <ul className="mt-auto flex gap-2 pt-3">
+        {w.daily.slice(1, 4).map((d) => {
+          const I = WEATHER_ICON(d.code);
+          return (
+            <li key={d.date} className="flex flex-1 flex-col items-center gap-1 rounded-xl bg-fg/[0.04] py-2 text-[12px]">
+              <span className="font-semibold text-fg/60">{fromDayKey(d.date).toLocaleDateString(t.locale, { weekday: 'short' })}</span>
+              <I size={18} className="text-fg/70" aria-label={t(weatherLabel(d.code))} />
+              <span className="tabular-nums">{d.max}°</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

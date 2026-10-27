@@ -5,8 +5,17 @@
 :root {
   --bg: 255 255 255;
   --fg: 10 10 10;
+  /* Accent palette; src/lib/appearance.ts overwrites these with the user's choice. */
   --blue: #2f6bff;
   --pink: #ff4fa3;
+  --blue-rgb: 47 107 255;
+  --pink-rgb: 255 79 163;
+  --blue-2-rgb: 110 151 255;
+  --pink-2-rgb: 255 140 196;
+  --blue-soft: rgb(var(--blue-rgb) / 0.15);
+  --track: rgb(127 127 127 / 0.25);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Variable', Inter, system-ui, sans-serif;
+  --glass-blur: 24px;
   --brand: linear-gradient(135deg, var(--blue), var(--pink));
   --glass-fill: rgb(255 255 255 / 0.62);
   --glass-strong: rgb(255 255 255 / 0.82);
@@ -38,7 +47,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
-::selection { background: rgb(47 107 255 / 0.25); }
+::selection { background: rgb(var(--blue-rgb) / 0.25); }
 
 @layer components {
 /* ---------- Liquid glass ---------- */
@@ -46,8 +55,8 @@ body {
   position: relative;
   isolation: isolate;
   background: var(--glass-fill);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   box-shadow: inset 0 0 0 1px var(--glass-rim-low), inset 0 1px 0 0 var(--glass-rim), var(--glass-shadow);
 }
 .glass-strong { background: var(--glass-strong); }
@@ -100,7 +109,7 @@ body {
   background-clip: text;
   color: transparent;
 }
-.bg-brand-soft { background: linear-gradient(135deg, rgb(47 107 255 / 0.12), rgb(255 79 163 / 0.12)); }
+.bg-brand-soft { background: linear-gradient(135deg, rgb(var(--blue-rgb) / 0.12), rgb(var(--pink-rgb) / 0.12)); }
 }
 
 /* ---------- Ambient backdrop ---------- */
@@ -114,11 +123,22 @@ body {
 .ambient i:nth-child(1) { width: 52vmax; height: 52vmax; left: -14vmax; top: -18vmax; background: var(--blue); }
 .ambient i:nth-child(2) { width: 44vmax; height: 44vmax; right: -16vmax; bottom: -14vmax; background: var(--pink); animation-duration: 34s; animation-direction: alternate-reverse; }
 .ambient i:nth-child(3) { width: 26vmax; height: 26vmax; left: 46%; top: 38%; background: var(--blue); opacity: calc(var(--accent) * 0.12); animation-duration: 40s; }
+/* Background styles: aurora (drifting glow, default), soft (still glow), plain (none). */
+[data-bg='soft'] .ambient i { animation: none; }
+[data-bg='plain'] .ambient { display: none; }
+
 @keyframes drift {
   0% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(6vmax, 4vmax, 0) scale(1.08); }
   100% { transform: translate3d(-3vmax, 7vmax, 0) scale(0.96); }
 }
+
+/* ---------- Glass styles: frosted (default), clear, solid ---------- */
+[data-glass='clear'] { --glass-fill: rgb(255 255 255 / 0.4); --glass-blur: 14px; }
+.dark[data-glass='clear'] { --glass-fill: rgb(255 255 255 / 0.03); }
+[data-glass='solid'] { --glass-fill: rgb(255 255 255); --glass-strong: rgb(255 255 255); --glass-blur: 0px; }
+.dark[data-glass='solid'] { --glass-fill: rgb(28 28 30); --glass-strong: rgb(28 28 30); }
+[data-glass='solid'] .glass::before { display: none; }
 
 /* ---------- Focus & a11y ---------- */
 :focus { outline: none; }

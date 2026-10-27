@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { toast } from '@/ui/Toast';
 import { startOfDay } from 'date-fns';
 import { choose } from '@/ui/Confirm';
 import { createEvent, skipOccurrence, updateEvent } from '@/lib/actions';
@@ -17,6 +18,7 @@ export const useCalendarState = create<{ view: CalView; cursor: number; set: (p:
 /** Moves one occurrence; for a repeating series, asks whether to move just this one or all. */
 export async function moveOccurrence(o: Pick<Occurrence, 'event' | 'start' | 'end'>, start: number, end: number, tr: (s: string) => string) {
   const ev = o.event;
+  if (ev.source) return void toast(tr('This event comes from a connected calendar, so it can’t be moved here.'));
   if (!ev.rrule) return updateEvent(ev.id, { start, end });
   const which = await choose({ title: tr('Move repeating event'), options: [{ label: tr('Only this event'), value: 'one', primary: true }, { label: tr('All events in the series'), value: 'all' }] });
   if (which === 'one') {

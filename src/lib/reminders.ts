@@ -4,7 +4,7 @@ import { startOfDay } from 'date-fns';
 import { db } from './db';
 import { dayKey, fmtTime } from './dates';
 import { useSettings } from './settings';
-import { tNow } from './i18n';
+import { resolveLang, tNow } from './i18n';
 import { expandEvents } from '@/features/calendar/recurrence';
 import { toast } from '@/ui/Toast';
 
@@ -72,6 +72,17 @@ export async function checkReminders(now = Date.now()) {
       const top = open.sort((a, b) => (b.top ?? 0) - (a.top ?? 0) || b.priority - a.priority)[0];
       notify(tNow('How about two minutes?'), `${tNow('Just start')}: ${top.title}`, nudgeKey);
     }
+  }
+
+  // Afina's daily notes at the hours chosen in Settings → Notifications (within two hours, once a day).
+  const { briefingAt, checkInAt, language } = useSettings.getState();
+  for (const [hour, kind] of [[briefingAt, 'brief'], [checkInAt, 'checkin']] as const) {
+    const key = `${kind}:${dayKey(d)}`;
+    if (hour < 0 || d.getHours() < hour || d.getHours() >= hour + 2 || fired.has(key)) continue;
+    fired.add(key);
+    const lang = resolveLang(language);
+    const { morningBriefing, eveningReflection } = await import('@/features/afina/briefing');
+    notify(kind === 'brief' ? tNow('Your day') : tNow('Evening check-in'), kind === 'brief' ? await morningBriefing(lang) : await eveningReflection(lang), key);
   }
   saveFired(fired);
 }

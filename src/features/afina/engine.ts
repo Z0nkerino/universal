@@ -9,7 +9,7 @@ import {
   addWater, createIdea, createGoal, createNote, createTask, deleteEvent, deleteIdea, deleteNote, deleteTask, logFood, logMood, logSleep, logWeight, quickAdd, setTaskDone, updateEvent, updateTask,
 } from '@/lib/actions';
 import { detectLang, type Lang } from '@/lib/nlp';
-import { dayKey, fmt, fmtTime, todayKey } from '@/lib/dates';
+import { dayKey, fmt, fmtTime, todayKey, fromDayKey } from '@/lib/dates';
 import { useSettings } from '@/lib/settings';
 import { mean, sum } from '@/lib/stats';
 import type { CalEvent, Food, MoodLog, Note, Task } from '@/lib/types';
@@ -21,6 +21,7 @@ import { planMyDay } from '@/features/planner/planDay';
 import { currentStreak } from '@/features/planner/habits';
 import { searchNotes } from '@/features/notes/search';
 import { eveningReflection, morningBriefing } from './briefing';
+import { getWeather, weatherSentence } from '@/features/connectors/weather';
 import { parseFoodSentence } from './foodParse';
 
 export type ConfirmAction = { kind: 'delete_task' | 'delete_event' | 'delete_note' | 'delete_idea'; id: string; title: string };
@@ -173,8 +174,8 @@ const WATER: Handler = async (text, lang) => {
   const glassM = t.match(/(\d+|a|an|one|two|three|four|один|одну|два|две|три|четыре)\s+(glass(?:es)?|cups?|bottles?|стакан\w*|бутылк\w*)/);
   const words: Record<string, number> = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, один: 1, одну: 1, два: 2, две: 2, три: 3, четыре: 4 };
   if (mlM) ml = parseFloat(mlM[1].replace(',', '.')) * (/^(l|л|liter|litre|литр)/.test(mlM[2]) ? 1000 : 1);
-  else if (glassM) ml = (Number(glassM[1]) || words[glassM[1]] || 1) * (/bottle|бутыл/.test(glassM[2]) ? 500 : 250);
-  else ml = 250;
+  else if (glassM) ml = (Number(glassM[1]) || words[glassM[1]] || 1) * (/bottle|бутыл/.test(glassM[2]) ? 500 : useSettings.getState().glassMl);
+  else ml = useSettings.getState().glassMl;
   ml = Math.round(ml);
   const rec = await addWater(ml);
   const total = sum((await db.water.where('date').equals(todayKey()).toArray()).map((w) => w.ml));
@@ -521,7 +522,24 @@ const CREATE: Handler = async (text, lang) => {
 };
 
 /** Ordered rules: the first pattern that matches handles the message. */
+const WEATHER: Handler = async (_text, lang) => {
+  const w = await getWeather();
+  const line = weatherSentence(w, lang);
+  if (line) {
+    const next = w!.daily.slice(1, 3).map((d) => `${fmt(fromDayKey(d.date), 'EEE')} ${d.min}…${d.max}°`).join(', ');
+    return { handled: true, text: next ? `${line} ${L(lang, 'Next:', 'Дальше:')} ${next}.` : line };
+  }
+  return {
+    handled: true,
+    text: w
+      ? L(lang, 'My weather is a few hours old and I’m offline. I’ll update it once you’re back online.', 'Прогноз устарел, а сети нет. Обновлю, когда появится интернет.')
+      : L(lang, 'Connect Weather in Settings → Connectors and I’ll include the forecast in your day.', 'Подключи «Погоду» в Настройках → Подключения, и я буду учитывать прогноз.'),
+    chips: w ? undefined : [L(lang, 'Open settings', 'Открой настройки')],
+  };
+};
+
 const RULES: [RegExp, Handler][] = [
+  [/\b(weather|forecast|temperature|umbrella)\b|will it rain|погод|прогноз|температур|зонт|будет ли дождь/i, WEATHER],
   [/^(help|what can you do|\?|помощь|что ты умеешь|помоги)\b/i, HELP],
   [/^(hi|hello|hey|good morning|morning|brief me|briefing|morning briefing|what'?s my day|my day|привет|доброе утро|утро|брифинг|мой день)\b[!. ]*$/i, BRIEFING],
   [/(how was my day|evening (review|reflection|check-?in)|reflect|wrap up (the|my) day|итоги дня|как прош[её]л (мой )?день|вечерний обзор)/i, REFLECTION],

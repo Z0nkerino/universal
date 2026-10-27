@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify('test'), __UPDATE_REPO__: JSON.stringify('test/test') },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

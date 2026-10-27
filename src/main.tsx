@@ -1,8 +1,14 @@
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/inter';
 import './index.css';
 import { Shell } from './app/Shell';
+
+import { ConfirmHost } from './ui/Confirm';
+import { useProfiles } from './lib/profiles';
+import { likelyRussian, loadRussian } from './lib/i18n';
+
+const LockScreen = lazy(() => import('./features/account/LockScreen').then((m) => ({ default: m.LockScreen })));
 import { useSettings } from './lib/settings';
 import './lib/install';
 import { desktop } from './lib/desktop';
@@ -16,8 +22,24 @@ if (desktop) {
 
 void useSettings.getState().hydrate();
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+/** A profile with a PIN shows the lock screen until it's unlocked. */
+function Root() {
+  const unlocked = useProfiles((s) => s.unlocked);
+  return unlocked ? (
     <Shell />
-  </StrictMode>,
+  ) : (
+    <Suspense fallback={null}>
+      <LockScreen />
+      <ConfirmHost />
+    </Suspense>
+  );
+}
+
+// Russian speakers get their dictionary before the first render, so nothing flashes in English.
+void (likelyRussian() ? loadRussian().catch(() => {}) : Promise.resolve()).then(() =>
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <Root />
+    </StrictMode>,
+  ),
 );

@@ -12,6 +12,10 @@ import { Segmented, Switch } from '@/ui/Segmented';
 import { AppIcon, EternalMark } from '@/ui/Logo';
 import { AfinaOrb } from '@/features/afina/AfinaOrb';
 import { cn } from '@/lib/cn';
+import { Avatar } from '@/ui/Avatar';
+import { AccentPicker } from '@/ui/AccentPicker';
+import { AvatarPicker } from '@/features/account/ProfileSheet';
+import { updateProfile, useActiveProfile } from '@/lib/profiles';
 import { spring } from '@/lib/motion';
 
 const FEATURES: { id: string; icon: LucideIcon; title: string; body: string }[] = [
@@ -26,11 +30,11 @@ const FEATURES: { id: string; icon: LucideIcon; title: string; body: string }[] 
 function FormingOrb() {
   const reduced = useReducedMotion();
   const drops = [
-    { x: -150, y: -90, s: 46, c: 'rgb(47 107 255 / .55)' },
-    { x: 160, y: -60, s: 38, c: 'rgb(255 79 163 / .55)' },
+    { x: -150, y: -90, s: 46, c: 'rgb(var(--blue-rgb) / .55)' },
+    { x: 160, y: -60, s: 38, c: 'rgb(var(--pink-rgb) / .55)' },
     { x: -120, y: 110, s: 34, c: 'rgb(143 91 255 / .5)' },
-    { x: 130, y: 120, s: 42, c: 'rgb(47 107 255 / .45)' },
-    { x: 0, y: -160, s: 30, c: 'rgb(255 79 163 / .45)' },
+    { x: 130, y: 120, s: 42, c: 'rgb(var(--blue-rgb) / .45)' },
+    { x: 0, y: -160, s: 30, c: 'rgb(var(--pink-rgb) / .45)' },
   ];
   return (
     <div className="relative flex h-[260px] w-[260px] items-center justify-center">
@@ -57,6 +61,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const s = useSettings();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
+  const me = useActiveProfile();
   const [features, setFeatures] = useState<string[]>(s.features);
   const [goal, setGoal] = useState('');
   const [sample, setSample] = useState(true);
@@ -89,7 +94,28 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         <p className="mt-6 flex items-center gap-1.5 text-[12px] text-fg/60"><EternalMark size={14} className="text-fg/70" /> {t('A product of Eternal Inc.')}</p>
       </motion.div>
     </div>,
-    // 2. Pick features
+    // 2. Make it yours: the profile's name and avatar, and the accent color
+    <div key="p" className="flex w-full flex-col items-center text-center">
+      <Avatar profile={{ name: me.name || '?', emoji: me.emoji, color: me.color }} size={72} />
+      <h2 className="mt-4 text-[28px] font-bold tracking-[-0.03em]">{t('Make it yours')}</h2>
+      <p className="mt-1 text-[15px] text-fg/60">{t('Your profile lives on this device. You can add more profiles later, each with its own data.')}</p>
+      <input
+        aria-label={t('Your name')}
+        placeholder={t('What should we call you?')}
+        value={me.name}
+        maxLength={40}
+        onChange={(e) => updateProfile(me.id, { name: e.target.value })}
+        className="mt-5 h-12 w-full max-w-[320px] rounded-2xl bg-fg/[0.06] px-4 text-center text-[17px] font-semibold placeholder:font-normal placeholder:text-fg/40 focus:shadow-[0_0_0_2px_rgb(var(--blue-rgb)/0.55)]"
+      />
+      <div className="mt-4 flex justify-center">
+        <AvatarPicker name={me.name} emoji={me.emoji} color={me.color} onChange={(p) => updateProfile(me.id, p)} />
+      </div>
+      <p className="mt-6 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t('Accent color')}</p>
+      <div className="mt-3 flex justify-center">
+        <AccentPicker />
+      </div>
+    </div>,
+    // 3. Pick features
     <div key="f" className="w-full">
       <h2 className="text-center text-[28px] font-bold tracking-[-0.03em]">{t('What do you want to use?')}</h2>
       <p className="mt-1 text-center text-[15px] text-fg/60">{t('Today and Afina are always there. You can change this later in Settings.')}</p>
@@ -122,7 +148,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         })}
       </div>
     </div>,
-    // 3. Goals & targets
+    // 4. Goals & targets
     <div key="g" className="w-full">
       <h2 className="text-center text-[28px] font-bold tracking-[-0.03em]">{t('A few targets')}</h2>
       <p className="mt-1 text-center text-[15px] text-fg/60">{t('Rough is fine — Insights will show you how it really goes.')}</p>
@@ -141,7 +167,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         </div>
         <div className="flex items-center justify-between gap-3 p-4">
           <span className="text-[15px] font-semibold">{t('Sleep goal')}</span>
-          <span className="flex items-center gap-3"><input type="range" min={5} max={10} step={0.5} value={s.targets.sleepH} onChange={(e) => s.set({ targets: { ...s.targets, sleepH: Number(e.target.value) } })} aria-label={t('Sleep goal')} className="w-28 accent-[#2F6BFF]" /><span className="w-10 text-right font-bold tabular-nums">{s.targets.sleepH} {t('h')}</span></span>
+          <span className="flex items-center gap-3"><input type="range" min={5} max={10} step={0.5} value={s.targets.sleepH} onChange={(e) => s.set({ targets: { ...s.targets, sleepH: Number(e.target.value) } })} aria-label={t('Sleep goal')} className="w-28 accent-blue" /><span className="w-10 text-right font-bold tabular-nums">{s.targets.sleepH} {t('h')}</span></span>
         </div>
         {features.includes('health') && (
           <>
@@ -151,13 +177,13 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             </div>
             <div className="flex items-center justify-between gap-3 p-4">
               <span className="text-[15px] font-semibold">{t('Water')}</span>
-              <span className="flex items-center gap-3"><input type="range" min={1000} max={4000} step={250} value={s.targets.waterMl} onChange={(e) => s.set({ targets: { ...s.targets, waterMl: Number(e.target.value) } })} aria-label={t('Water goal')} className="w-28 accent-[#2F6BFF]" /><span className="w-16 text-right font-bold tabular-nums">{s.targets.waterMl} {t('ml')}</span></span>
+              <span className="flex items-center gap-3"><input type="range" min={1000} max={4000} step={250} value={s.targets.waterMl} onChange={(e) => s.set({ targets: { ...s.targets, waterMl: Number(e.target.value) } })} aria-label={t('Water goal')} className="w-28 accent-blue" /><span className="w-16 text-right font-bold tabular-nums">{s.targets.waterMl} {t('ml')}</span></span>
             </div>
           </>
         )}
       </div>
     </div>,
-    // 4. Meet Afina
+    // 5. Meet Afina
     <div key="a" className="flex flex-col items-center text-center">
       <AfinaOrb size={180} thinking />
       <h2 className="mt-4 text-[30px] font-bold tracking-[-0.03em]">{t('Meet')} <span className="text-brand">Afina</span></h2>
@@ -181,9 +207,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     <motion.div className="fixed inset-0 z-[90] flex flex-col overflow-y-auto bg-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label={t('Welcome to Universal Planner')}>
       <div className="ambient" aria-hidden><i /><i /><i /></div>
       <div className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))]">
-        <div className="flex gap-1.5" role="img" aria-label={`${t('Step')} ${step + 1} / 4`}>
+        <div className="flex gap-1.5" role="img" aria-label={`${t('Step')} ${step + 1} / ${screens.length}`}>
           {screens.map((_, i) => (
-            <motion.span key={i} className="h-1.5 rounded-full bg-fg/20" animate={{ width: i === step ? 28 : 8, background: i <= step ? '#2F6BFF' : 'rgba(127,127,127,0.25)' }} transition={spring} />
+            <motion.span key={i} className="h-1.5 rounded-full bg-fg/20" animate={{ width: i === step ? 28 : 8, background: i <= step ? 'var(--blue)' : 'var(--track)' }} transition={spring} />
           ))}
         </div>
         <Button variant="ghost" size="sm" onClick={() => void finish(true)} disabled={busy}>{t('Skip')}</Button>

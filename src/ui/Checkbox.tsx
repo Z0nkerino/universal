@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { springSnappy } from '@/lib/motion';
 import { useReducedMotion } from '@/lib/hooks';
 
-const COLORS = ['#2F6BFF', '#FF4FA3', '#7C8CFF', '#FF86C2'];
+const COLORS = ['rgb(var(--blue-rgb))', 'rgb(var(--pink-rgb))', 'rgb(var(--blue-2-rgb))', 'rgb(var(--pink-2-rgb))'];
 
 function Burst() {
   const parts = Array.from({ length: 10 }, (_, i) => {
@@ -56,10 +56,15 @@ export function Checkbox({ checked, onChange, label, size = 24, className }: Che
       style={{ width: size, height: size }}
     >
       <motion.span
+        className="absolute inset-0 rounded-full bg-brand"
+        initial={false}
+        animate={{ opacity: checked ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+      />
+      <motion.span
         className="absolute inset-0 rounded-full"
         initial={false}
         animate={{
-          background: checked ? 'linear-gradient(135deg,#2F6BFF,#FF4FA3)' : 'linear-gradient(135deg,rgba(0,0,0,0),rgba(0,0,0,0))',
           boxShadow: checked ? 'inset 0 0 0 0px rgb(var(--fg) / 0)' : 'inset 0 0 0 1.75px rgb(var(--fg) / 0.28)',
           scale: checked ? [1, 1.18, 1] : 1,
         }}

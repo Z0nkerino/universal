@@ -7,17 +7,18 @@ export default {
       colors: {
         ink: '#0A0A0A',
         paper: '#FFFFFF',
-        blue: { DEFAULT: '#2F6BFF' },
-        pink: { DEFAULT: '#FF4FA3' },
+        // Accent colors come from the user's palette (src/lib/appearance.ts).
+        blue: 'rgb(var(--blue-rgb) / <alpha-value>)',
+        pink: 'rgb(var(--pink-rgb) / <alpha-value>)',
         // Neutrals are tints of ink, driven by CSS vars so they flip with the theme.
         fg: 'rgb(var(--fg) / <alpha-value>)',
         bg: 'rgb(var(--bg) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)'],
       },
       borderRadius: { glass: '24px', '4xl': '28px' },
-      backgroundImage: { brand: 'linear-gradient(135deg, #2F6BFF 0%, #FF4FA3 100%)' },
+      backgroundImage: { brand: 'linear-gradient(135deg, var(--blue) 0%, var(--pink) 100%)' },
     },
   },
   plugins: [],

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useSettings } from '@/lib/settings';
 
 /** Which task (if any) is open in the editor sheet. */
 export const useTaskEditor = create<{ id: string | null; open: (id: string) => void; close: () => void }>((set) => ({
@@ -11,6 +12,6 @@ export const useTaskEditor = create<{ id: string | null; open: (id: string) => v
 export const useFocusMode = create<{ open: boolean; taskId?: string; minutes: number; start: (taskId?: string, minutes?: number) => void; close: () => void }>((set) => ({
   open: false,
   minutes: 25,
-  start: (taskId, minutes = 25) => set({ open: true, taskId, minutes }),
+  start: (taskId, minutes = useSettings.getState().focusMin) => set({ open: true, taskId, minutes }),
   close: () => set({ open: false }),
 }));

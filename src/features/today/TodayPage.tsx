@@ -1,7 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { motion } from 'framer-motion';
-import { Check, Clock3, Droplets, GripVertical, LayoutGrid, Maximize2, Minimize2, MoveRight, Repeat, Search, Settings2, Target, Timer, Star, type LucideIcon } from 'lucide-react';
+import { Check, Clock3, CloudSun, Droplets, GripVertical, LayoutGrid, Maximize2, Minimize2, MoveRight, Repeat, Search, Settings2, Target, Timer, Star, type LucideIcon } from 'lucide-react';
 import { PageHeader } from '@/ui/PageHeader';
 import { Glass } from '@/ui/Glass';
 import { TiltCard } from '@/ui/TiltCard';
@@ -20,8 +20,11 @@ import { getKV, setKV } from '@/lib/db';
 import { useIsDesktop, useNow } from '@/lib/hooks';
 import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
+import { useActiveProfile } from '@/lib/profiles';
+import { useSettings } from '@/lib/settings';
 import { itemVariants, spring } from '@/lib/motion';
-import { FocusWidget, GoalsWidget, HabitsWidget, NutritionWidget, TimelineWidget, Top3Widget } from './widgets';
+import { FocusWidget, GoalsWidget, HabitsWidget, NutritionWidget, TimelineWidget, Top3Widget, WeatherWidget } from './widgets';
+import { getWeather } from '@/features/connectors/weather';
 import { useTodayTab, type TodayTab } from './store';
 
 export function greetingKey(h: number) {
@@ -31,7 +34,7 @@ export function greetingKey(h: number) {
   return 'greet.evening' as const;
 }
 
-type WidgetId = 'timeline' | 'top3' | 'habits' | 'focus' | 'nutrition' | 'goals';
+type WidgetId = 'timeline' | 'top3' | 'habits' | 'focus' | 'nutrition' | 'goals' | 'weather';
 interface LayoutItem {
   id: WidgetId;
   size: 's' | 'l';
@@ -43,6 +46,7 @@ const WIDGETS: Record<WidgetId, { title: string; icon: LucideIcon; C: ComponentT
   focus: { title: 'Focus', icon: Timer, C: FocusWidget },
   nutrition: { title: 'Water & food', icon: Droplets, C: NutritionWidget },
   goals: { title: 'Goals', icon: Target, C: GoalsWidget },
+  weather: { title: 'Weather', icon: CloudSun, C: WeatherWidget },
 };
 const DEFAULT_LAYOUT: LayoutItem[] = [
   { id: 'timeline', size: 's' },
@@ -51,6 +55,7 @@ const DEFAULT_LAYOUT: LayoutItem[] = [
   { id: 'focus', size: 's' },
   { id: 'nutrition', size: 's' },
   { id: 'goals', size: 's' },
+  { id: 'weather', size: 's' },
 ];
 
 function Briefing() {
@@ -135,15 +140,20 @@ function Overview() {
       if (l?.length) setLayout([...l.filter((x) => WIDGETS[x.id]), ...DEFAULT_LAYOUT.filter((d) => !l.some((x) => x.id === d.id))]);
     });
   }, []);
+  const briefing = useSettings((s) => s.afina.briefing);
+  // The weather widget only appears once the Weather connector is set up.
+  const hasWeather = useLiveQuery(async () => !!(await getWeather()), [], false);
   const save = (l: LayoutItem[]) => {
     setLayout(l);
     void setKV('todayLayout', l);
   };
   return (
     <>
-      <motion.div variants={itemVariants}>
-        <Briefing />
-      </motion.div>
+      {briefing && (
+        <motion.div variants={itemVariants}>
+          <Briefing />
+        </motion.div>
+      )}
       <div className="mb-3 flex justify-end">
         <Button size="sm" variant={editing ? 'primary' : 'ghost'} icon={editing ? Check : LayoutGrid} onClick={() => setEditing((v) => !v)}>
           {editing ? t('Done') : t('Customize')}
@@ -151,7 +161,7 @@ function Overview() {
       </div>
       {editing && <p className="mb-3 text-[13px] text-fg/60">{t('Drag a widget by its handle onto another to swap them. Use the arrows to make it wider or smaller.')}</p>}
       <motion.div layout className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {layout.slice(0, shown).map((item) => (
+        {layout.filter((x) => x.id !== 'weather' || hasWeather).slice(0, shown).map((item) => (
           <WidgetCard
             key={item.id}
             item={item}
@@ -178,13 +188,15 @@ export default function TodayPage() {
   const go = useRouter((s) => s.go);
   const showCommand = useCommand((s) => s.show);
   const { tab, set } = useTodayTab();
+  const me = useActiveProfile();
+  const useName = useSettings((s) => s.afina.useName);
   const date = now.toLocaleDateString(t.locale, { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
     <>
       <PageHeader
         eyebrow={date}
-        title={t(greetingKey(now.getHours()))}
+        title={useName && me.name.trim() ? `${t(greetingKey(now.getHours()))}, ${me.name.trim()}` : t(greetingKey(now.getHours()))}
         actions={
           !desktop && (
             <>

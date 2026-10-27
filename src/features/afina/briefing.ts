@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { dayKey, fmtTime } from '@/lib/dates';
 import { expandEvents } from '@/features/calendar/recurrence';
 import { useSettings } from '@/lib/settings';
+import { getWeather, weatherSentence } from '@/features/connectors/weather';
 import { mean } from '@/lib/stats';
 
 type Lang = 'en' | 'ru';
@@ -37,6 +38,8 @@ export async function gatherDay(now = new Date()) {
 export async function morningBriefing(lang: Lang, now = new Date()): Promise<string> {
   const d = await gatherDay(now);
   const parts: string[] = [];
+  const wx = weatherSentence(await getWeather(), lang, now.getTime());
+  if (wx) parts.push(wx);
   const timed = d.occ.filter((o) => !o.event.allDay && o.end > now.getTime());
   const next = timed[0];
   const top = [...d.today].sort((a, b) => (b.top ?? 0) - (a.top ?? 0) || b.priority - a.priority)[0];

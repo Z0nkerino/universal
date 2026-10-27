@@ -5,7 +5,7 @@ import { Environment, Lightformer, MeshTransmissionMaterial } from '@react-three
 
 type MTM = THREE.MeshPhysicalMaterial & { distortion: number; temporalDistortion: number };
 
-function Orb({ thinking, dark }: { thinking: boolean; dark: boolean }) {
+function Orb({ thinking, dark, colors, speed }: { thinking: boolean; dark: boolean; colors: [string, string]; speed: number }) {
   // Transmission samples what's behind the orb; give it a tint instead of transparent black.
   const bg = useMemo(() => new THREE.Color(dark ? '#16131f' : '#eef1ff'), [dark]);
   const group = useRef<THREE.Group>(null!);
@@ -19,10 +19,10 @@ function Orb({ thinking, dark }: { thinking: boolean; dark: boolean }) {
     const d = Math.min(dt, 0.05);
     energy.current = THREE.MathUtils.damp(energy.current, thinking ? 1 : 0, 2.5, d);
     const e = energy.current;
-    const t = state.clock.elapsedTime;
+    const t = state.clock.elapsedTime * speed;
     // Breathing: slow when idle, quicker and deeper while thinking.
     shell.current.scale.setScalar(1 + Math.sin(t * (1.1 + e * 2.6)) * (0.022 + e * 0.03));
-    group.current.rotation.y += d * (0.12 + e * 1.4);
+    group.current.rotation.y += d * speed * (0.12 + e * 1.4);
     group.current.rotation.x = THREE.MathUtils.damp(group.current.rotation.x, -state.pointer.y * 0.3, 3, d);
     group.current.rotation.z = THREE.MathUtils.damp(group.current.rotation.z, state.pointer.x * 0.2, 3, d);
     const s = 0.55 + e * 1.8;
@@ -59,17 +59,18 @@ function Orb({ thinking, dark }: { thinking: boolean; dark: boolean }) {
       </mesh>
       <mesh ref={blue}>
         <sphereGeometry args={[0.44, 48, 48]} />
-        <meshBasicMaterial color="#2F6BFF" toneMapped={false} />
+        <meshBasicMaterial color={colors[0]} toneMapped={false} />
       </mesh>
       <mesh ref={pink}>
         <sphereGeometry args={[0.38, 48, 48]} />
-        <meshBasicMaterial color="#FF4FA3" toneMapped={false} />
+        <meshBasicMaterial color={colors[1]} toneMapped={false} />
       </mesh>
     </group>
   );
 }
 
-export default function Orb3D({ thinking, active, dark }: { thinking: boolean; active: boolean; dark: boolean }) {
+/** speed scales the idle motion (1 = lively, lower = calmer). */
+export default function Orb3D({ thinking, active, dark, colors, speed = 1 }: { thinking: boolean; active: boolean; dark: boolean; colors: [string, string]; speed?: number }) {
   return (
     <Canvas
       dpr={[1, 2]}
@@ -79,15 +80,15 @@ export default function Orb3D({ thinking, active, dark }: { thinking: boolean; a
       style={{ background: 'transparent' }}
       aria-hidden
     >
-      <Environment resolution={256}>
+      <Environment key={colors.join()} resolution={256}>
         <group rotation={[-Math.PI / 3, 0, 1]}>
           <Lightformer form="circle" intensity={4} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
           <Lightformer form="circle" intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />
-          <Lightformer form="ring" color="#2F6BFF" intensity={8} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={5} />
-          <Lightformer form="ring" color="#FF4FA3" intensity={8} rotation-y={-Math.PI / 2} position={[5, 1, 0]} scale={5} />
+          <Lightformer form="ring" color={colors[0]} intensity={8} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={5} />
+          <Lightformer form="ring" color={colors[1]} intensity={8} rotation-y={-Math.PI / 2} position={[5, 1, 0]} scale={5} />
         </group>
       </Environment>
-      <Orb thinking={thinking} dark={dark} />
+      <Orb thinking={thinking} dark={dark} colors={colors} speed={speed} />
     </Canvas>
   );
 }

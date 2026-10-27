@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { activeProfileId, dbNameFor } from './profiles';
 import type {
   CalEvent,
   ChatMessage,
@@ -49,9 +50,11 @@ export class PlannerDB extends Dexie {
   sleep!: Table<SleepLog, string>;
   mood!: Table<MoodLog, string>;
   chat!: Table<ChatMessage, string>;
+  handles!: Table<{ key: string; handle: FileSystemDirectoryHandle }, string>;
 
   constructor() {
-    super('universal-planner');
+    // Each local profile has its own database (see profiles.ts).
+    super(dbNameFor(activeProfileId()));
     this.version(1).stores({ kv: '&key' });
     this.version(2).stores({
       kv: '&key',
@@ -74,6 +77,9 @@ export class PlannerDB extends Dexie {
       mood: 'id, date',
       chat: 'id, at',
     });
+    // v3: events can come from a connector (a subscribed calendar, holidays).
+    // Folder handles for the backup connector live in their own table and are never exported.
+    this.version(3).stores({ events: 'id, start, end, uid, source', handles: '&key' });
   }
 }
 

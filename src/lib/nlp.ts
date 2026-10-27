@@ -105,7 +105,8 @@ function cleanTitle(s: string) {
 }
 
 /** Parses a quick-add phrase like "Lunch with Sam Friday 1pm for 1h" or "купить молоко завтра #дом !!". */
-export function parseQuickAdd(input: string, ref = new Date(), forceKind?: 'task' | 'event'): QuickAdd {
+/** `eventMinutes` is the length of an event that doesn't say how long it lasts. */
+export function parseQuickAdd(input: string, ref = new Date(), forceKind?: 'task' | 'event', eventMinutes = 60): QuickAdd {
   const lang = detectLang(input);
   let text = ` ${input.trim()} `;
   let kind: 'task' | 'event' | undefined = forceKind;
@@ -183,7 +184,7 @@ export function parseQuickAdd(input: string, ref = new Date(), forceKind?: 'task
     if (!hasTime) {
       end = start + 86_400_000;
     } else if (end === undefined) {
-      end = start + (estimate ?? 60) * 60_000;
+      end = start + (estimate ?? eventMinutes) * 60_000;
     }
   }
 

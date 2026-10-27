@@ -17,22 +17,40 @@ interface Updater {
   onStatus: (cb: (s: UpdateState) => void) => () => void;
 }
 
+export interface HttpRequest {
+  url: string;
+  method?: 'GET' | 'POST';
+  headers?: Record<string, string>;
+  body?: string;
+}
+export interface HttpResponse {
+  status: number;
+  text: string;
+}
+
 interface DesktopBridge {
   platform: string;
   ready: () => void;
   updates: Updater;
+  /** Missing in desktop apps installed before 1.1. */
+  net?: { request: (r: HttpRequest) => Promise<HttpResponse> };
 }
 
 interface CapacitorGlobal {
   isNativePlatform?: () => boolean;
   getPlatform?: () => string;
-  Plugins?: { CapacitorHttp?: { get: (o: { url: string; responseType?: string }) => Promise<{ status: number; data: unknown }> } };
+  Plugins?: {
+    CapacitorHttp?: {
+      get: (o: { url: string; responseType?: string }) => Promise<{ status: number; data: unknown }>;
+      request: (o: { url: string; method: string; headers?: Record<string, string>; data?: unknown; responseType?: string }) => Promise<{ status: number; data: unknown }>;
+    };
+  };
 }
 
 /** Present only inside the Mac/Windows desktop app. */
-export const desktop = (window as Window & { desktop?: DesktopBridge }).desktop;
+export const desktop = (globalThis as typeof globalThis & { desktop?: DesktopBridge }).desktop;
 
-const capacitor = (window as Window & { Capacitor?: CapacitorGlobal }).Capacitor;
+const capacitor = (globalThis as typeof globalThis & { Capacitor?: CapacitorGlobal }).Capacitor;
 /** True inside the Android app (Capacitor). */
 export const android = !!capacitor?.isNativePlatform?.() && capacitor.getPlatform?.() === 'android';
 
@@ -41,6 +59,19 @@ export const useUpdates = create<{ status: UpdateState; dismissed: string | null
   dismissed: null,
   dismiss: () => set({ dismissed: 'version' in get().status ? (get().status as { version: string }).version : null }),
 }));
+
+/**
+ * HTTP from the native side (desktop main process or Android), which isn't limited by the
+ * browser's CORS rules. Returns null where there's no native side, i.e. in a browser.
+ */
+export async function nativeRequest(r: HttpRequest): Promise<HttpResponse | null> {
+  if (desktop?.net) return desktop.net.request(r);
+  const http = android ? capacitor?.Plugins?.CapacitorHttp : undefined;
+  if (!http) return null;
+  const isJson = /json/i.test(r.headers?.['Content-Type'] ?? '');
+  const res = await http.request({ url: r.url, method: r.method ?? 'GET', headers: r.headers, data: r.body && isJson ? JSON.parse(r.body) : r.body, responseType: 'text' });
+  return { status: res.status, text: typeof res.data === 'string' ? res.data : JSON.stringify(res.data) };
+}
 
 const FEED = `https://github.com/${__UPDATE_REPO__}/releases/latest/download/latest.json`;
 

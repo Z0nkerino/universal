@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, MapPin, Repeat, Trash2, X } from 'lucide-react';
+import { Bell, Link2, MapPin, Repeat, Trash2, X } from 'lucide-react';
 import { createEvent, deleteEvent, skipOccurrence, updateEvent } from '@/lib/actions';
 import { EVENT_COLORS, type EventColor, type Freq, type Recurrence } from '@/lib/types';
 import { Sheet } from '@/ui/Sheet';
@@ -9,7 +9,8 @@ import { Switch } from '@/ui/Segmented';
 import { choose } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
 import { useT } from '@/lib/i18n';
-import { dayKey, fromDayKey } from '@/lib/dates';
+import { dayKey, fmt, fmtTime, fromDayKey } from '@/lib/dates';
+import { useConnectors } from '@/features/connectors/connectors';
 import { EVENT_HEX, EVENT_LABEL } from './colors';
 import { cn } from '@/lib/cn';
 import { useEventEditor, type Draft } from './editorStore';
@@ -42,6 +43,7 @@ function combine(day: string, time: string) {
 export function EventEditor() {
   const t = useT();
   const { draft: initial, occStart, close } = useEventEditor();
+  const connectors = useConnectors((s) => s.list);
   const [d, setD] = useState<Draft | null>(null);
   useEffect(() => setD(initial ? { ...initial } : null), [initial]);
   if (!d && !initial) return <Sheet open={false} onClose={close} label="">{null}</Sheet>;
@@ -49,6 +51,36 @@ export function EventEditor() {
   const set = (p: Partial<Draft>) => setD((x) => (x ? { ...x, ...p } : x));
   const isNew = !d?.id;
   const durMs = d ? d.end - d.start : 0;
+
+  // Events from a connector (subscribed calendar, holidays) are shown, not edited.
+  if (d?.source) {
+    const from = connectors.find((c) => `connector:${c.id}` === d.source);
+    const start = occStart ?? d.start;
+    const end = start + durMs;
+    return (
+      <Sheet open={!!initial} onClose={close} label={d.title} className="max-w-md">
+        <div className="flex flex-col gap-3 p-6">
+          <div className="flex items-start gap-3">
+            <span className="mt-1.5 h-3 w-3 shrink-0 rounded-full" style={{ background: EVENT_HEX[d.color] }} aria-hidden />
+            <h2 className="flex-1 text-[22px] font-bold leading-tight tracking-[-0.02em]">{d.title}</h2>
+            <IconButton icon={X} label={t('Close')} size={34} onClick={close} />
+          </div>
+          <p className="text-[15px] font-medium text-fg/70">
+            {d.allDay ? fmt(start, 'EEEE, d MMMM') : `${fmt(start, 'EEEE, d MMMM')} · ${fmtTime(start)}–${fmtTime(end)}`}
+          </p>
+          {d.location && (
+            <p className="flex items-center gap-2 text-[14px] text-fg/70">
+              <MapPin size={15} aria-hidden /> {d.location}
+            </p>
+          )}
+          {d.notes && <p className="whitespace-pre-line text-[14px] text-fg/70">{d.notes}</p>}
+          <p className="mt-2 flex items-center gap-2 rounded-xl bg-fg/[0.05] px-3 py-2.5 text-[13px] text-fg/65">
+            <Link2 size={15} aria-hidden /> {t('From')} {from?.name ?? t('a connected calendar')} · {t('read-only here')}
+          </p>
+        </div>
+      </Sheet>
+    );
+  }
 
   const save = async () => {
     if (!d) return;

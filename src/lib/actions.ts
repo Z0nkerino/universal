@@ -2,6 +2,8 @@
 import { db, stamp, uid } from './db';
 import { dayKey, todayKey } from './dates';
 import type { CalEvent, Food, Goal, Habit, Idea, IdeaColumn, MealEntry, MealSlot, MoodLog, Note, Task } from './types';
+import { useSettings } from './settings';
+import { emitAppEvent } from './events';
 import { loadDateParsers, parseQuickAdd, type QuickAdd } from './nlp';
 
 /* ---------- Tasks ---------- */
@@ -21,6 +23,7 @@ export async function createTask(t: NewTask) {
     ...t,
   }) as Task;
   await db.tasks.add(rec);
+  emitAppEvent('task.created', rec.title, { id: rec.id, due: rec.due, start: rec.start });
   return rec;
 }
 
@@ -28,6 +31,10 @@ export const updateTask = (id: string, patch: Partial<Task>) => db.tasks.update(
 
 export async function setTaskDone(id: string, done: boolean) {
   await db.tasks.update(id, { done: done ? 1 : 0, doneAt: done ? Date.now() : undefined, updatedAt: Date.now() });
+  if (done) {
+    const t = await db.tasks.get(id);
+    if (t) emitAppEvent('task.completed', t.title, { id });
+  }
 }
 
 export const deleteTask = (id: string) => db.tasks.delete(id);
@@ -47,8 +54,9 @@ export async function scheduleTask(id: string, start: number | null, durationMin
 export type NewEvent = Partial<Omit<CalEvent, 'id' | 'createdAt' | 'updatedAt'>> & { title: string; start: number; end: number };
 
 export async function createEvent(e: NewEvent) {
-  const rec = stamp({ color: 'blue' as const, ...e }) as CalEvent;
+  const rec = stamp({ color: useSettings.getState().eventColor, ...e }) as CalEvent;
   await db.events.add(rec);
+  emitAppEvent('event.created', rec.title, { id: rec.id, start: rec.start, end: rec.end, allDay: !!rec.allDay });
   return rec;
 }
 export const updateEvent = (id: string, patch: Partial<CalEvent>) => db.events.update(id, { ...patch, updatedAt: Date.now() });
@@ -63,9 +71,10 @@ export async function skipOccurrence(id: string, start: number) {
 /** Creates a task or event from a quick-add phrase. */
 export async function quickAdd(text: string, forceKind?: 'task' | 'event'): Promise<{ kind: 'task' | 'event'; parsed: QuickAdd; record: Task | CalEvent }> {
   await loadDateParsers();
-  const p = parseQuickAdd(text, new Date(), forceKind);
+  const { eventMinutes, eventReminder } = useSettings.getState();
+  const p = parseQuickAdd(text, new Date(), forceKind, eventMinutes);
   if (p.kind === 'event' && p.start !== undefined) {
-    const record = await createEvent({ title: p.title, start: p.start, end: p.end!, allDay: p.allDay, rrule: p.rrule, color: 'blue', reminder: p.allDay ? undefined : 10 });
+    const record = await createEvent({ title: p.title, start: p.start, end: p.end!, allDay: p.allDay, rrule: p.rrule, reminder: p.allDay || eventReminder < 0 ? undefined : eventReminder });
     return { kind: 'event', parsed: p, record };
   }
   const record = await createTask({
@@ -93,7 +102,11 @@ export async function createHabit(h: Pick<Habit, 'name' | 'emoji' | 'target' | '
 export async function toggleHabit(habitId: string, date = todayKey()) {
   const existing = await db.habitLogs.where('[habitId+date]').equals([habitId, date]).first();
   if (existing) await db.habitLogs.delete(existing.id);
-  else await db.habitLogs.add({ id: uid(), habitId, date });
+  else {
+    await db.habitLogs.add({ id: uid(), habitId, date });
+    const h = await db.habits.get(habitId);
+    if (h) emitAppEvent('habit.done', h.name, { id: habitId, date });
+  }
   return !existing;
 }
 
@@ -123,6 +136,8 @@ export async function logFocus(taskId: string | undefined, start: number, end: n
   const minutes = Math.round((end - start) / 60_000);
   if (minutes < 1) return;
   await db.focus.add({ id: uid(), taskId, start, end, minutes });
+  const task = taskId ? await db.tasks.get(taskId) : undefined;
+  emitAppEvent('focus.finished', task?.title ?? '', { minutes });
 }
 
 /* ---------- Notes & ideas ---------- */
@@ -139,6 +154,7 @@ export async function createIdea(i: Partial<Idea> & { title: string }) {
   const n = await db.ideas.count();
   const rec = stamp({ body: '', column: 'raw' as IdeaColumn, x: 80 + (n % 5) * 260, y: 80 + Math.floor(n / 5) * 180, color: 'none' as const, order: Date.now(), ...i }) as Idea;
   await db.ideas.add(rec);
+  emitAppEvent('idea.created', rec.title, { id: rec.id });
   return rec;
 }
 export const updateIdea = (id: string, patch: Partial<Idea>) => db.ideas.update(id, { ...patch, updatedAt: Date.now() });

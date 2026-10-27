@@ -12,7 +12,7 @@ export interface Backup {
 export async function exportBackup(): Promise<Backup> {
   const tables: Record<string, unknown[]> = {};
   await db.transaction('r', db.tables, async () => {
-    for (const t of db.tables) tables[t.name] = await t.toArray();
+    for (const t of db.tables) if (t.name !== 'handles') tables[t.name] = await t.toArray();
   });
   return { app: APP_ID, schema: db.verno, exportedAt: new Date().toISOString(), tables };
 }
@@ -45,10 +45,11 @@ export async function importBackup(file: File) {
   });
 }
 
+/** Erases this profile's data. Other profiles, and the list of profiles, stay as they are. */
 export async function wipeAllData() {
   await db.delete();
   try {
-    Object.keys(localStorage).filter((k) => k.startsWith('up.')).forEach((k) => localStorage.removeItem(k));
+    ['up.theme', 'up.look'].forEach((k) => localStorage.removeItem(k));
   } catch {
     /* storage unavailable */
   }

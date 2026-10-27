@@ -20,6 +20,7 @@ import { TimeGrid, type GridItem } from './TimeGrid';
 import { MonthView, YearView, monthGridDays } from './MonthView';
 import { toGridItems, useBlockedTasks, useOccurrences } from './data';
 import { useEventEditor } from './editorStore';
+import { useSettings } from '@/lib/settings';
 import { parseIcs, toIcs } from './ics';
 import { itemVariants } from '@/lib/motion';
 
@@ -142,7 +143,7 @@ export default function CalendarPage() {
               const s = new Date(view === 'day' ? cursor : new Date());
               s.setMinutes(0, 0, 0);
               s.setHours(Math.min(22, new Date().getHours() + 1));
-              openNew(s.getTime(), s.getTime() + 3_600_000);
+              openNew(s.getTime(), s.getTime() + useSettings.getState().eventMinutes * 60_000);
             }}>
               {desktop ? t('New event') : ''}
             </Button>
@@ -212,7 +213,7 @@ export default function CalendarPage() {
                     onCreate={(d) => {
                       const s = new Date(d);
                       s.setHours(9, 0, 0, 0);
-                      openNew(s.getTime(), s.getTime() + 3_600_000);
+                      openNew(s.getTime(), s.getTime() + useSettings.getState().eventMinutes * 60_000);
                     }}
                     onOpen={(o) => void openExisting(o.event.id, o.start)}
                     onMove={(o, d) => {

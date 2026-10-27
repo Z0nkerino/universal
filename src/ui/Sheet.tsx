@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Glass } from './Glass';
 import { cn } from '@/lib/cn';
@@ -30,7 +31,9 @@ export function Sheet({ open, onClose, label, children, className, position = 'a
     };
   }, [open, onClose]);
 
-  return (
+  // Portaled to <body> so a sheet opened inside a card (which has its own stacking context)
+  // still covers the tab bar and floating buttons.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <div className={cn('fixed inset-0 z-50 flex justify-center', position === 'top' ? 'items-start pt-[12vh] max-sm:items-end max-sm:pt-0' : 'items-end sm:items-center')}>
@@ -58,6 +61,7 @@ export function Sheet({ open, onClose, label, children, className, position = 'a
           </Glass>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

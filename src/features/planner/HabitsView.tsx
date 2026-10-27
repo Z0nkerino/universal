@@ -164,7 +164,7 @@ function HabitCard({ habit, logs }: { habit: Habit; logs: Set<string> }) {
                 <span className={cn('uppercase', isToday(d) ? 'text-fg' : 'text-fg/60')}>{fmt(d, 'EEEEE')}</span>
                 <motion.span
                   className="flex h-7 w-7 items-center justify-center rounded-full text-[13px] text-white"
-                  animate={{ background: on ? (habit.color === 'pink' ? '#FF4FA3' : '#2F6BFF') : 'rgba(127,127,127,0.14)', scale: on ? [1, 1.15, 1] : 1 }}
+                  animate={{ background: on ? (habit.color === 'pink' ? 'var(--pink)' : 'var(--blue)') : 'rgba(127,127,127,0.14)', scale: on ? [1, 1.15, 1] : 1 }}
                   transition={{ duration: 0.3 }}
                 >
                   {on ? '✓' : ''}

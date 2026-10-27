@@ -9,6 +9,8 @@ import { NAV } from './nav';
 import { tNow } from '@/lib/i18n';
 import { useIsDark, useIsDesktop, useReducedMotion } from '@/lib/hooks';
 import { useSettings } from '@/lib/settings';
+import { useShallow } from 'zustand/react/shallow';
+import { applyLook } from '@/lib/appearance';
 import { pageVariants } from '@/lib/motion';
 import TodayPage from '@/features/today/TodayPage';
 import { QuickCapture, useCapture } from './QuickCapture';
@@ -16,6 +18,7 @@ import { Toaster } from '@/ui/Toast';
 import { ChoiceHost, ConfirmHost, PromptHost } from '@/ui/Confirm';
 import { DragGhost } from '@/ui/dnd';
 import { startReminders } from '@/lib/reminders';
+import { startAutoLock } from '@/lib/profiles';
 // Dialogs load after first paint (and are prefetched when the browser is idle) to keep startup light.
 const hosts = {
   CommandBar: () => import('./CommandBar').then((m) => ({ default: m.CommandBar })),
@@ -24,6 +27,7 @@ const hosts = {
   FocusMode: () => import('@/features/planner/FocusMode').then((m) => ({ default: m.FocusMode })),
   IdeaEditor: () => import('@/features/ideas/IdeaEditor').then((m) => ({ default: m.IdeaEditor })),
   FoodPicker: () => import('@/features/diet/FoodPicker').then((m) => ({ default: m.FoodPicker })),
+  ProfileSheet: () => import('@/features/account/ProfileSheet').then((m) => ({ default: m.ProfileSheet })),
 };
 const CommandBar = lazy(hosts.CommandBar);
 const TaskEditor = lazy(hosts.TaskEditor);
@@ -31,6 +35,7 @@ const EventEditor = lazy(hosts.EventEditor);
 const FocusMode = lazy(hosts.FocusMode);
 const IdeaEditor = lazy(hosts.IdeaEditor);
 const FoodPicker = lazy(hosts.FoodPicker);
+const ProfileSheet = lazy(hosts.ProfileSheet);
 const Onboarding = lazy(() => import('@/features/onboarding/Onboarding').then((m) => ({ default: m.Onboarding })));
 import { db, getKV, setKV } from '@/lib/db';
 
@@ -77,6 +82,11 @@ function useGlobalEffects() {
     document.documentElement.classList.toggle('reduce-motion', reduced);
   }, [reduced]);
   useEffect(() => document.documentElement.style.setProperty('--accent', String(accent)), [accent]);
+  const look = useSettings(useShallow((s) => ({ palette: s.palette, customAccent: s.customAccent, font: s.font, background: s.background, glass: s.glass })));
+  const ready = useSettings((s) => s.ready);
+  useEffect(() => {
+    if (ready) applyLook(look, dark);
+  }, [look, dark, ready]);
 
   // Device tilt drives the glass sheen angle on phones and tablets.
   useEffect(() => {
@@ -122,6 +132,14 @@ function useGlobalEffects() {
   }, []);
 
   useEffect(() => startReminders(), []);
+  useEffect(() => startAutoLock(), []);
+  // Connectors (calendar feeds, weather, webhooks, backups) load after startup.
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+    void import('@/features/connectors/connectors').then((m) => !cancelled && (stop = m.startConnectors()));
+    return () => ((cancelled = true), stop?.());
+  }, []);
   useEffect(() => {
     const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
     idle(() => Object.values(hosts).forEach((load) => void load()));
@@ -175,7 +193,7 @@ export function Shell() {
       </div>
       {!desktop && <TabBar />}
       <UpdateToast />
-      {[CommandBar, TaskEditor, EventEditor, FocusMode, IdeaEditor, FoodPicker].map((Host, i) => (
+      {[CommandBar, TaskEditor, EventEditor, FocusMode, IdeaEditor, FoodPicker, ProfileSheet].map((Host, i) => (
         <Suspense key={i} fallback={null}>
           <Host />
         </Suspense>
@@ -187,7 +205,7 @@ export function Shell() {
       <DragGhost />
       <Toaster />
       <Suspense fallback={null}>
-        <AnimatePresence>{onboarding && <Onboarding onDone={() => setOnboarding(false)} />}</AnimatePresence>
+        <AnimatePresence>{onboarding && <Onboarding onDone={() => ((firstRunPromise = Promise.resolve(false)), setOnboarding(false))} />}</AnimatePresence>
       </Suspense>
     </MotionConfig>
   );

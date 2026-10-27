@@ -90,6 +90,8 @@ interface PromptRequest {
   initial?: string;
   placeholder?: string;
   confirmLabel: string;
+  /** Masks the input, e.g. for a PIN. */
+  password?: boolean;
   resolve: (v: string | null) => void;
 }
 const usePromptStore = create<{ req: PromptRequest | null }>(() => ({ req: null }));
@@ -119,6 +121,7 @@ export function PromptHost() {
           <h2 className="text-[20px] font-bold tracking-[-0.02em]">{req.title}</h2>
           <label className="mt-4 block text-[13px] font-semibold text-fg/60" htmlFor="prompt-value">{req.label}</label>
           <input
+            type={req?.password ? 'password' : 'text'}
             id="prompt-value"
             name="value"
             autoFocus

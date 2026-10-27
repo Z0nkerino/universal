@@ -80,7 +80,7 @@ function Heatmap({ grid }: { grid: number[][] }) {
               {hours.map((h) => {
                 const v = row[h];
                 return (
-                  <td key={h} title={`${t(WEEKDAYS[d])} ${h}:00 · ${Math.round(v * 10) / 10}`} className="h-5 rounded-[5px]" style={{ background: v ? `rgb(47 107 255 / ${0.12 + (v / max) * 0.83})` : 'rgb(var(--fg) / 0.04)' }}>
+                  <td key={h} title={`${t(WEEKDAYS[d])} ${h}:00 · ${Math.round(v * 10) / 10}`} className="h-5 rounded-[5px]" style={{ background: v ? `rgb(var(--blue-rgb) / ${0.12 + (v / max) * 0.83})` : 'rgb(var(--fg) / 0.04)' }}>
                     <span className="sr-only">{Math.round(v * 10) / 10}</span>
                   </td>
                 );
@@ -91,7 +91,7 @@ function Heatmap({ grid }: { grid: number[][] }) {
       </table>
       <div className="mt-2 flex items-center gap-2 text-[11px] text-fg/60">
         {t('Less')}
-        {[0.12, 0.35, 0.6, 0.95].map((a) => <span key={a} className="h-3 w-5 rounded-[4px]" style={{ background: `rgb(47 107 255 / ${a})` }} />)}
+        {[0.12, 0.35, 0.6, 0.95].map((a) => <span key={a} className="h-3 w-5 rounded-[4px]" style={{ background: `rgb(var(--blue-rgb) / ${a})` }} />)}
         {t('More')}
       </div>
     </div>

@@ -10,3 +10,7 @@ g.addEventListener ??= () => {};
 import { beforeAll } from 'vitest';
 import { loadDateParsers } from '@/lib/nlp';
 beforeAll(() => loadDateParsers());
+
+// The Russian dictionary is lazy in the app.
+import { loadRussian } from '@/lib/i18n';
+beforeAll(() => loadRussian());

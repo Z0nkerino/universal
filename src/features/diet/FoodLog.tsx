@@ -36,6 +36,7 @@ function MacroBar({ label, value, target, color }: { label: string; value: numbe
 export function FoodLog({ date }: { date: string }) {
   const t = useT();
   const targets = useSettings((s) => s.targets);
+  const glassMl = useSettings((s) => s.glassMl);
   const meals = useLiveQuery(() => db.meals.where('date').equals(date).sortBy('createdAt'), [date]) ?? [];
   const water = useLiveQuery(() => db.water.where('date').equals(date).toArray(), [date]) ?? [];
   const showPicker = useFoodPicker((s) => s.show);
@@ -65,10 +66,10 @@ export function FoodLog({ date }: { date: string }) {
                   size={132}
                   stroke={12}
                   rings={[
-                    { value: totals.kcal / targets.kcal, from: '#2F6BFF', to: '#FF4FA3', label: t('Calories') },
-                    { value: totals.protein / targets.protein, from: '#2F6BFF', to: '#6E97FF', label: t('Protein') },
+                    { value: totals.kcal / targets.kcal, from: 'rgb(var(--blue-rgb))', to: 'rgb(var(--pink-rgb))', label: t('Calories') },
+                    { value: totals.protein / targets.protein, from: 'rgb(var(--blue-rgb))', to: 'rgb(var(--blue-2-rgb))', label: t('Protein') },
                     { value: totals.carbs / targets.carbs, from: '#8F5BFF', to: '#B08BFF', label: t('Carbs') },
-                    { value: totals.fat / targets.fat, from: '#FF4FA3', to: '#FF8CC4', label: t('Fat') },
+                    { value: totals.fat / targets.fat, from: 'rgb(var(--pink-rgb))', to: 'rgb(var(--pink-2-rgb))', label: t('Fat') },
                   ]}
                 />
               </div>
@@ -79,9 +80,9 @@ export function FoodLog({ date }: { date: string }) {
               </div>
             </div>
             <div className="mt-5 flex flex-col gap-3">
-              <MacroBar label={t('Protein')} value={totals.protein} target={targets.protein} color="#2F6BFF" />
+              <MacroBar label={t('Protein')} value={totals.protein} target={targets.protein} color="rgb(var(--blue-rgb))" />
               <MacroBar label={t('Carbs')} value={totals.carbs} target={targets.carbs} color="#8F5BFF" />
-              <MacroBar label={t('Fat')} value={totals.fat} target={targets.fat} color="#FF4FA3" />
+              <MacroBar label={t('Fat')} value={totals.fat} target={targets.fat} color="rgb(var(--pink-rgb))" />
             </div>
           </TiltCard>
         </motion.div>
@@ -92,15 +93,15 @@ export function FoodLog({ date }: { date: string }) {
               <h2 className="flex-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-fg/60">{t('Water')}</h2>
               <span className="text-[13px] font-semibold tabular-nums text-fg/60">{ml} / {targets.waterMl} {t('ml')}</span>
             </div>
-            <div className="mt-4 flex flex-wrap gap-1.5" role="img" aria-label={`${Math.round(ml / 250)} ${t('glasses')}`}>
-              {Array.from({ length: Math.max(Math.ceil(targets.waterMl / 250), Math.ceil(ml / 250)) }, (_, i) => (
-                <motion.span key={i} initial={false} animate={{ scale: i < ml / 250 ? [1, 1.15, 1] : 1 }} className={`flex h-11 w-8 items-end justify-center rounded-b-xl rounded-t-md ${i < ml / 250 ? 'bg-blue text-white' : 'bg-blue/10 text-blue/40'}`}>
+            <div className="mt-4 flex flex-wrap gap-1.5" role="img" aria-label={`${Math.round(ml / glassMl)} ${t('glasses')}`}>
+              {Array.from({ length: Math.max(Math.ceil(targets.waterMl / glassMl), Math.ceil(ml / glassMl)) }, (_, i) => (
+                <motion.span key={i} initial={false} animate={{ scale: i < ml / glassMl ? [1, 1.15, 1] : 1 }} className={`flex h-11 w-8 items-end justify-center rounded-b-xl rounded-t-md ${i < ml / glassMl ? 'bg-blue text-white' : 'bg-blue/10 text-blue/40'}`}>
                   <GlassWater size={14} className="mb-1.5" />
                 </motion.span>
               ))}
             </div>
             <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="glass" icon={Plus} onClick={() => void addWater(250, date)}>250 ml</Button>
+              <Button size="sm" variant="glass" icon={Plus} onClick={() => void addWater(glassMl, date)}>{glassMl} {t('ml')}</Button>
               <Button size="sm" variant="glass" icon={Plus} onClick={() => void addWater(500, date)}>500 ml</Button>
               <IconButton
                 icon={Minus}

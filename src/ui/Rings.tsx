@@ -10,9 +10,9 @@ export interface Ring {
 }
 
 export const RING_PRESETS = {
-  blue: { from: '#2F6BFF', to: '#6E97FF' },
-  pink: { from: '#FF4FA3', to: '#FF8CC4' },
-  brand: { from: '#2F6BFF', to: '#FF4FA3' },
+  blue: { from: 'rgb(var(--blue-rgb))', to: 'rgb(var(--blue-2-rgb))' },
+  pink: { from: 'rgb(var(--pink-rgb))', to: 'rgb(var(--pink-2-rgb))' },
+  brand: { from: 'rgb(var(--blue-rgb))', to: 'rgb(var(--pink-rgb))' },
 };
 
 /** Concentric activity rings, outermost first. */
@@ -24,8 +24,8 @@ export function Rings({ rings, size = 120, stroke = 12, gap = 3 }: { rings: Ring
       <defs>
         {rings.map((r, i) => (
           <linearGradient key={i} id={`${id}-${i}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor={r.from} />
-            <stop offset="1" stopColor={r.to} />
+            <stop offset="0" style={{ stopColor: r.from }} />
+            <stop offset="1" style={{ stopColor: r.to }} />
           </linearGradient>
         ))}
       </defs>
@@ -36,7 +36,7 @@ export function Rings({ rings, size = 120, stroke = 12, gap = 3 }: { rings: Ring
         const v = Math.max(0, Math.min(r.value, 1));
         return (
           <g key={i} transform={`rotate(-90 ${c} ${c})`}>
-            <circle cx={c} cy={c} r={rad} fill="none" stroke={r.from} strokeOpacity={0.16} strokeWidth={stroke} />
+            <circle cx={c} cy={c} r={rad} fill="none" style={{ stroke: r.from }} strokeOpacity={0.16} strokeWidth={stroke} />
             <motion.circle
               cx={c}
               cy={c}

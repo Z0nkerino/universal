@@ -4,6 +4,10 @@ contextBridge.exposeInMainWorld('desktop', {
   platform: process.platform,
   /** Tells the shell this version booted fine (otherwise it rolls back to the built-in one). */
   ready: () => ipcRenderer.send('app:ready'),
+  /** HTTP for connectors, outside the page's CORS rules. */
+  net: {
+    request: (opts) => ipcRenderer.invoke('net:request', opts),
+  },
   updates: {
     status: () => ipcRenderer.invoke('update:status'),
     check: () => ipcRenderer.invoke('update:check'),

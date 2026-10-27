@@ -13,6 +13,7 @@ import { expandEvents } from '@/features/calendar/recurrence';
 import { searchNotes } from '@/features/notes/search';
 import { bestMatch, fallback, respond, type AfinaReply } from './engine';
 import { complete, llmReady } from './llm';
+import { activeProfile } from '@/lib/profiles';
 
 const SYSTEM = `You are Afina, the assistant built into Universal Planner by Eternal Inc.
 Personality: warm, sharp, concise, encouraging but honest, never cheesy. No emoji spam.
@@ -138,6 +139,19 @@ export interface Turn {
   text: string;
 }
 
+const TONES = {
+  warm: '',
+  brief: '\nStyle: be extra brief — one sentence, no pleasantries.',
+  cheerful: '\nStyle: upbeat and playful; one fitting emoji is welcome.',
+};
+
+/** The user's chosen reply style and name, added to the system prompt. */
+function personalize() {
+  const { afina } = useSettings.getState();
+  const name = activeProfile()?.name.trim();
+  return TONES[afina.tone] + (afina.useName && name ? `\nThe user's name is ${name}; use it now and then, not in every reply.` : '');
+}
+
 export async function think(text: string, history: Turn[]): Promise<AfinaReply> {
   const lang = detectLang(text);
   const local = await respond(text);
@@ -145,7 +159,7 @@ export async function think(text: string, history: Turn[]): Promise<AfinaReply> 
   if (!llmReady()) return fallback(lang);
 
   const messages: ChatCompletionMessageParam[] = [
-    { role: 'system', content: `${SYSTEM}\n\nCONTEXT:\n${await buildContext(text)}` },
+    { role: 'system', content: `${SYSTEM}${personalize()}\n\nCONTEXT:\n${await buildContext(text)}` },
     ...history.slice(-6).map((h) => ({ role: h.role === 'user' ? ('user' as const) : ('assistant' as const), content: h.text })),
     { role: 'user', content: text },
   ];

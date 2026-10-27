@@ -9,6 +9,7 @@ import { LiquidIndicator, useActiveRect } from '@/ui/LiquidIndicator';
 import { EternalCredit, Wordmark } from '@/ui/Logo';
 import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
+import { ProfileMenu } from '@/features/account/ProfileMenu';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
@@ -67,8 +68,9 @@ export function Sidebar() {
           </button>
         </li>
       </ul>
-      <div className="mt-3 border-t border-fg/[0.06] px-2 pt-3">
-        <EternalCredit />
+      <div className="mt-3 border-t border-fg/[0.06] pt-2">
+        <ProfileMenu />
+        <EternalCredit className="mt-2 px-2" />
       </div>
     </Glass>
   );

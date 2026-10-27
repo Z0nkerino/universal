@@ -85,12 +85,29 @@ Release files must be downloadable without signing in, so the repository has to 
 | --- | --- |
 | ⌘K / Ctrl K, or `/` | Command bar: search everything, or type "new task tomorrow 5pm gym" |
 | Alt N | Capture an idea from anywhere |
+| D · W · M · Y, ← → · T | Calendar views, paging, today |
 | ⌥1 … ⌥7 / Alt 1 … Alt 7 | Today · Calendar · Notes · Ideas · Health · Insights · Afina |
 | ⌘, / Ctrl , | Settings |
 
 **Afina** works on every device with her built-in engine: planning your day, logging food, water, sleep and mood, creating tasks and events, breaking work into steps, and answering questions about your data in English or Russian. For free-form chat, install the on-device model from the Afina screen. It's a one-time download that runs offline and needs WebGPU (Chrome or Edge 113+, Safari 18+, or the desktop app).
 
-**Your data:** Settings → Your data exports a full backup (`.json`) and imports it on another device. Sample data from onboarding can be removed there with one click.
+**Profiles (accounts):** create as many profiles as you like (sidebar → your name, or Settings → Account). Each profile has its own name, avatar and completely separate data and settings, all on this device; there's no server account. A profile can have a PIN that's asked when the app opens, with optional auto-lock. The PIN keeps others out on a shared device; it isn't encryption. Forgot it? The lock screen can erase that profile and start it fresh.
+
+**Make it yours:** Settings → Appearance has accent palettes (Ocean, Violet, Forest, Sunset, Rose, Graphite or any custom color), background (Aurora, Still, Plain), glass (Frosted, Clear, Solid), fonts (System, Inter, Rounded, Serif, Mono, Hyperlegible) and motion. Settings → Afina changes how Afina looks (colors, glass/soft/ring style, animation) and how she talks (warm, brief, cheerful; by your name or not).
+
+**Connectors** (Settings → Connectors) link the planner to outside services, straight from your device:
+
+| Connector | What it does |
+| --- | --- |
+| Google, Outlook, iCloud or any `.ics` calendar | Shows that calendar's events next to yours (read-only), refreshed every 30 minutes |
+| Public holidays | Adds your country's holidays for this year and next |
+| Weather | Forecast widget on Today, a line in Afina's briefing, and answers to "what's the weather?" |
+| Webhooks | Sends tasks completed, events added, habits done and more to Zapier, Make, IFTTT, Discord, Slack or any URL |
+| Backup folder | Saves a daily backup into a folder you pick (e.g. one iCloud Drive, Dropbox or OneDrive syncs) — Chrome/Edge on a computer, or the desktop app |
+
+Some calendar and webhook services don't accept requests from web browsers. They always work in the desktop and Android apps; in a browser the app tells you when a service blocks it.
+
+**Your data:** Settings → Privacy & data exports a full backup (`.json`) of the current profile and imports it on another device. Sample data from onboarding can be removed there with one click.
 
 ## Project layout
 
@@ -100,7 +117,8 @@ src/
   ui/             shared components (Glass, TiltCard, Button, Sheet, charts, drag and drop…)
   lib/            db (Dexie), actions, natural-language parsing, settings, i18n (EN/RU), backup
   features/
-    today/  calendar/  planner/  notes/  ideas/  diet/  analytics/  afina/  onboarding/  settings/
+    today/  calendar/  planner/  notes/  ideas/  diet/  analytics/  afina/
+    account/  connectors/  onboarding/  settings/
 electron/         desktop shell and self-updater
 android/          Capacitor Android project
 public/brand/     logos and app icons
