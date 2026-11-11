@@ -1,9 +1,10 @@
 // Every change to user data goes through here, so screens and Afina behave identically.
 import { db, stamp, uid } from './db';
 import { dayKey, todayKey } from './dates';
-import type { CalEvent, Food, Goal, Habit, Idea, IdeaColumn, MealEntry, MealSlot, MoodLog, Note, Task } from './types';
+import type { CalEvent, Food, Goal, Habit, Idea, IdeaColumn, MealEntry, MealSlot, MoodLog, Note, Task, TaskStatus } from './types';
 import { useSettings } from './settings';
 import { emitAppEvent } from './events';
+import { nextTaskFor } from './repeat';
 import { loadDateParsers, parseQuickAdd, type QuickAdd } from './nlp';
 
 /* ---------- Tasks ---------- */
@@ -30,11 +31,21 @@ export async function createTask(t: NewTask) {
 export const updateTask = (id: string, patch: Partial<Task>) => db.tasks.update(id, { ...patch, updatedAt: Date.now() });
 
 export async function setTaskDone(id: string, done: boolean) {
-  await db.tasks.update(id, { done: done ? 1 : 0, doneAt: done ? Date.now() : undefined, updatedAt: Date.now() });
-  if (done) {
-    const t = await db.tasks.get(id);
-    if (t) emitAppEvent('task.completed', t.title, { id });
+  const t = await db.tasks.get(id);
+  if (!t) return;
+  const patch: Partial<Task> = { done: done ? 1 : 0, doneAt: done ? Date.now() : undefined, updatedAt: Date.now() };
+  if (done && t.rrule && !t.nextId) {
+    // A repeating task: schedule its next occurrence.
+    const next = nextTaskFor(t);
+    if (next) patch.nextId = (await createTask(next)).id;
+  } else if (!done && t.nextId) {
+    // Un-finished again: take back the occurrence it created, unless that one was already used.
+    const n = await db.tasks.get(t.nextId);
+    if (n && !n.done) await db.tasks.delete(n.id);
+    patch.nextId = undefined;
   }
+  await db.tasks.update(id, patch);
+  if (done) emitAppEvent('task.completed', t.title, { id });
 }
 
 export const deleteTask = (id: string) => db.tasks.delete(id);
@@ -71,13 +82,21 @@ export async function skipOccurrence(id: string, start: number) {
 /** Creates a task or event from a quick-add phrase. */
 export async function quickAdd(text: string, forceKind?: 'task' | 'event'): Promise<{ kind: 'task' | 'event'; parsed: QuickAdd; record: Task | CalEvent }> {
   await loadDateParsers();
+  const p = parseQuickAdd(text, new Date(), forceKind, useSettings.getState().eventMinutes);
+  return { kind: p.kind, parsed: p, record: await createFromParsed(p) };
+}
+
+/**
+ * Saves a parsed (and possibly corrected) quick-add phrase. `status` files an undated task in a
+ * list, e.g. "Someday".
+ */
+export async function createFromParsed(p: QuickAdd, status?: TaskStatus): Promise<Task | CalEvent> {
   const { eventMinutes, eventReminder } = useSettings.getState();
-  const p = parseQuickAdd(text, new Date(), forceKind, eventMinutes);
   if (p.kind === 'event' && p.start !== undefined) {
-    const record = await createEvent({ title: p.title, start: p.start, end: p.end!, allDay: p.allDay, rrule: p.rrule, reminder: p.allDay || eventReminder < 0 ? undefined : eventReminder });
-    return { kind: 'event', parsed: p, record };
+    const end = p.end ?? (p.hasTime ? p.start + (p.estimate ?? eventMinutes) * 60_000 : p.start + 86_400_000);
+    return createEvent({ title: p.title, start: p.start, end, allDay: !p.hasTime || undefined, rrule: p.rrule, reminder: !p.hasTime || eventReminder < 0 ? undefined : eventReminder });
   }
-  const record = await createTask({
+  return createTask({
     title: p.title,
     due: p.due,
     start: p.hasTime ? p.start : undefined,
@@ -86,8 +105,9 @@ export async function quickAdd(text: string, forceKind?: 'task' | 'event'): Prom
     priority: p.priority,
     tags: p.tags,
     remindAt: p.hasTime ? p.start : undefined,
+    rrule: p.rrule,
+    ...(status && !p.due ? { status, ...(status === 'today' ? { due: todayKey() } : {}) } : {}),
   });
-  return { kind: 'task', parsed: p, record };
 }
 
 /* ---------- Habits & goals ---------- */

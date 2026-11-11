@@ -1,7 +1,7 @@
 {
   "appId": "com.eternalinc.universalplanner",
   "appName": "Universal Planner",
-  "webDir": "dist-android",
+  "webDir": "dist-native",
   "backgroundColor": "#FFFFFF",
   "android": {
     "allowMixedContent": false,

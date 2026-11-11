@@ -57,6 +57,29 @@ function needsOnboarding() {
   return firstRunPromise;
 }
 
+/**
+ * Earlier versions filled new profiles with example tasks and events. Ask once whether to
+ * remove them, so the planner only shows what the user added.
+ */
+async function offerSampleCleanup() {
+  if (await getKV('sampleCleanupAsked')) return;
+  const { hasDemoData, removeDemoData } = await import('@/lib/demo');
+  if (!(await hasDemoData())) return;
+  await setKV('sampleCleanupAsked', Date.now());
+  const { confirm } = await import('@/ui/Confirm');
+  const { toast } = await import('@/ui/Toast');
+  if (
+    await confirm({
+      title: tNow('Remove the sample data?'),
+      body: tNow('Your planner still has the example tasks and events (like “Team standup”) that earlier versions added. Remove them? Everything you added yourself stays.'),
+      confirmLabel: tNow('Remove sample data'),
+    })
+  ) {
+    await removeDemoData();
+    toast(tNow('Sample data removed. Everything you added is still here.'));
+  }
+}
+
 const pages: Record<Route, React.ComponentType> = {
   today: TodayPage,
   calendar: lazy(() => import('@/features/calendar/CalendarPage')),
@@ -133,6 +156,13 @@ function useGlobalEffects() {
 
   useEffect(() => startReminders(), []);
   useEffect(() => startAutoLock(), []);
+  // Native widgets (iOS/Android apps only): keep them in step with tasks.
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+    void import('@/lib/widgets').then((m) => !cancelled && (stop = m.startWidgetSync()));
+    return () => ((cancelled = true), stop?.());
+  }, []);
   // Connectors (calendar feeds, weather, webhooks, backups) load after startup.
   useEffect(() => {
     let stop: (() => void) | undefined;
@@ -151,7 +181,12 @@ function useGlobalEffects() {
 export function Shell() {
   const reduced = useGlobalEffects();
   const [onboarding, setOnboarding] = useState(false);
-  useEffect(() => void needsOnboarding().then(setOnboarding), []);
+  useEffect(() => {
+    void needsOnboarding().then((first) => {
+      setOnboarding(first);
+      if (!first) void offerSampleCleanup();
+    });
+  }, []);
   useEffect(() => {
     const replay = () => setOnboarding(true);
     addEventListener('up:onboarding', replay);

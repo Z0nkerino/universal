@@ -1,6 +1,7 @@
 import { forwardRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarClock, Clock3, Flag, GripVertical, ListChecks, Target, Zap } from 'lucide-react';
+import { describeRepeat } from '@/lib/repeatLabel';
+import { CalendarClock, Clock3, Flag, GripVertical, ListChecks, Repeat, Target, Zap } from 'lucide-react';
 import type { Goal, Task } from '@/lib/types';
 import { Checkbox } from '@/ui/Checkbox';
 import { beginDrag } from '@/ui/dnd';
@@ -94,6 +95,7 @@ export const TaskRow = forwardRef<HTMLLIElement, { task: Task; goal?: Goal; drag
                   {due}
                 </span>
               )}
+              {task.rrule && <span className="flex items-center gap-1" title={describeRepeat(task.rrule, t.lang, task.start)}><Repeat size={12} aria-label={tNow('Repeats')} /></span>}
               {task.estimate && <span>{task.estimate >= 60 ? `${Math.round((task.estimate / 60) * 10) / 10} ${tNow('h')}` : `${task.estimate} ${tNow('min')}`}</span>}
               {task.energy && (
                 <span className="inline-flex items-center gap-0.5" title={`${t('Energy')}: ${task.energy}`}>

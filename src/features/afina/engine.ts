@@ -8,7 +8,7 @@ import { db } from '@/lib/db';
 import {
   addWater, createIdea, createGoal, createNote, createTask, deleteEvent, deleteIdea, deleteNote, deleteTask, logFood, logMood, logSleep, logWeight, quickAdd, setTaskDone, updateEvent, updateTask,
 } from '@/lib/actions';
-import { detectLang, type Lang } from '@/lib/nlp';
+import { detectLang, loadDateParsers, parseQuickAdd, type Lang } from '@/lib/nlp';
 import { dayKey, fmt, fmtTime, todayKey, fromDayKey } from '@/lib/dates';
 import { useSettings } from '@/lib/settings';
 import { mean, sum } from '@/lib/stats';
@@ -22,6 +22,7 @@ import { currentStreak } from '@/features/planner/habits';
 import { searchNotes } from '@/features/notes/search';
 import { eveningReflection, morningBriefing } from './briefing';
 import { getWeather, weatherSentence } from '@/features/connectors/weather';
+import { describeRepeat } from '@/lib/repeatLabel';
 import { parseFoodSentence } from './foodParse';
 
 export type ConfirmAction = { kind: 'delete_task' | 'delete_event' | 'delete_note' | 'delete_idea'; id: string; title: string };
@@ -518,7 +519,12 @@ const CREATE: Handler = async (text, lang) => {
   }
   const t = record as Task;
   const when = t.start ? `${fmt(t.start, 'EEE d MMM')}, ${fmtTime(t.start)}` : t.due ? fmt(new Date(t.due + 'T00:00'), 'EEEE d MMM') : null;
-  return { handled: true, text: L(lang, `Added the task “${t.title}”${when ? ` for ${when}` : ' to your inbox'}${parsed.priority === 3 ? ', high priority' : ''}.`, `Добавил задачу «${t.title}»${when ? ` на ${when}` : ' во входящие'}${parsed.priority === 3 ? ', высокий приоритет' : ''}.`), undo: () => deleteTask(t.id), chips: lang === 'ru' ? ['Разбей её на шаги'] : ['Break it into steps'] };
+  const repeat = t.rrule ? `, ${describeRepeat(t.rrule, lang, t.start ?? (t.due ? new Date(t.due + 'T00:00').getTime() : undefined)).toLowerCase()}` : '';
+  // An am/pm or "next Friday" guess is mentioned so it can be corrected.
+  const guess = parsed.alternatives[0];
+  const alt = guess ? (guess.start !== undefined ? (parsed.hasTime ? fmtTime(guess.start) : fmt(guess.start, 'EEE d MMM')) : guess.due ? fmt(new Date(guess.due + 'T00:00'), 'EEE d MMM') : '') : '';
+  const fix = alt ? L(lang, ` (Meant ${alt}? Tell me “move it to ${alt}”.)`, ` (Имел(а) в виду ${alt}? Скажи «перенеси на ${alt}».)`) : '';
+  return { handled: true, text: L(lang, `Added the task “${t.title}”${when ? ` for ${when}` : ' to your inbox'}${repeat}${parsed.priority === 3 ? ', high priority' : ''}.`, `Добавил задачу «${t.title}»${when ? ` на ${when}` : ' во входящие'}${repeat}${parsed.priority === 3 ? ', высокий приоритет' : ''}.`) + fix, undo: () => deleteTask(t.id), chips: lang === 'ru' ? ['Разбей её на шаги'] : ['Break it into steps'] };
 };
 
 /** Ordered rules: the first pattern that matches handles the message. */
@@ -632,7 +638,13 @@ export async function respond(input: string): Promise<AfinaReply> {
   const noMatch = [] as unknown as RegExpMatchArray;
   if (CREATE_TRIGGER.test(text)) return (await CREATE(text, lang, noMatch))!;
   // A statement with a date or time ("dentist friday 3pm") is most likely something to schedule.
-  if (!isQuestion(text) && (lang === 'ru' ? chronoRu.casual : chronoEn.casual).parse(text).length && text.split(/\s+/).length <= 14) return (await CREATE(text, lang, noMatch))!;
+  // The same parser as quick add: a date, a time or a repeat ("Pay rent on the 1st of every month",
+  // "Stretch every weekday") makes a statement something to schedule.
+  if (!isQuestion(text) && text.split(/\s+/).length <= 14) {
+    await loadDateParsers();
+    const p = parseQuickAdd(text);
+    if (p.start !== undefined || p.rrule) return (await CREATE(text, lang, noMatch))!;
+  }
   return { handled: false, text: '' };
 }
 

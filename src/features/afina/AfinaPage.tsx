@@ -14,6 +14,7 @@ import { Button, IconButton } from '@/ui/Button';
 import { confirm } from '@/ui/Confirm';
 import { toast } from '@/ui/Toast';
 import { cn } from '@/lib/cn';
+import { useSpeech } from '@/lib/speech';
 import { spring } from '@/lib/motion';
 import { AfinaOrb } from './AfinaOrb';
 import { runConfirmed, type ConfirmAction } from './engine';
@@ -21,8 +22,6 @@ import { postReply, sendToAfina, undos, useAfinaBusy } from './chat';
 import { MODELS, checkSupport, loadModel, switchModel, useLlm } from './llm';
 
 
-type SpeechRec = { lang: string; interimResults: boolean; continuous: boolean; start: () => void; stop: () => void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
-const SpeechRecognitionCtor = (window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
 
 function ModelCard() {
   const t = useT();
@@ -149,8 +148,6 @@ export default function AfinaPage() {
   const messages = useLiveQuery(() => db.chat.orderBy('at').toArray(), []) ?? [];
   const [text, setText] = useState('');
   const thinking = useAfinaBusy((s) => s.thinking);
-  const [listening, setListening] = useState(false);
-  const recRef = useRef<SpeechRec | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const status = useLlm((s) => s.status);
@@ -182,39 +179,14 @@ export default function AfinaPage() {
     else await postReply({ handled: true, text: t('Okay, I’ll leave it.') });
   };
 
-  const toggleMic = () => {
-    if (!SpeechRecognitionCtor) return toast(t('Voice input isn’t available in this browser.'), { tone: 'error' });
-    if (listening) return recRef.current?.stop();
-    const rec = new SpeechRecognitionCtor();
-    rec.lang = resolveLang(language) === 'ru' ? 'ru-RU' : 'en-US';
-    rec.interimResults = true;
-    rec.continuous = false;
-    let finalText = '';
-    rec.onresult = (e) => {
-      let interim = '';
-      for (let i = 0; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finalText += r[0].transcript;
-        else interim += r[0].transcript;
-      }
-      setText(finalText + interim);
-    };
-    rec.onerror = (e) => {
-      setListening(false);
-      if (e.error !== 'aborted' && e.error !== 'no-speech') toast(e.error === 'not-allowed' ? t('Microphone access was blocked.') : t('Voice input isn’t available here.'), { tone: 'error' });
-    };
-    rec.onend = () => {
-      setListening(false);
-      if (finalText.trim()) void send(finalText);
-    };
-    recRef.current = rec;
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      toast(t('Voice input isn’t available here.'), { tone: 'error' });
-    }
-  };
+  // The device's speech recognition (native in the iOS/Android apps); the transcript goes through
+  // Afina like typed text, so it gets the same parsing as quick add.
+  const { listening, toggle: toggleMic } = useSpeech({
+    lang: resolveLang(language),
+    onText: setText,
+    onDone: (heard) => heard && void send(heard),
+    onError: (e) => toast(e === 'denied' ? t('Microphone access was blocked.') : e === 'unsupported' ? t('Voice input isn’t available in this browser.') : t('Voice input isn’t available here.'), { tone: 'error' }),
+  });
 
   const starters = t.lang === 'ru'
     ? ['Спланируй мой день', 'Что у меня сегодня?', 'Съел шаурму и колу на обед', 'Как я спал на этой неделе?', 'Разбей «подготовить презентацию» на шаги', 'На что я потратил больше всего времени?']

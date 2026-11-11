@@ -5,5 +5,5 @@ dist
 dist-desktop
 release
 *.tsbuildinfo
-dist-android
+dist-native
 android-signing/

@@ -44,6 +44,8 @@ export default defineConfig({
         start_url: './',
         scope: './',
         categories: ['productivity', 'health', 'lifestyle'],
+        // Long-press the app icon (Android, Windows) for a straight-to-quick-add shortcut.
+        shortcuts: [{ name: 'Add a task', short_name: 'Add task', url: './#/add', icons: [{ src: 'brand/icon-192.png', sizes: '192x192' }] }],
         icons: [
           { src: 'brand/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'brand/icon-512.png', sizes: '512x512', type: 'image/png' },

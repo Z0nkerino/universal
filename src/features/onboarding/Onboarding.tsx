@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BarChart3, CalendarDays, Check, HeartPulse, Lightbulb, NotebookPen, Sparkles, type LucideIcon } from 'lucide-react';
-import { db, setKV } from '@/lib/db';
+import { setKV } from '@/lib/db';
 import { createGoal } from '@/lib/actions';
-import { seedDemoData } from '@/lib/demo';
 import { useSettings } from '@/lib/settings';
 import { useT } from '@/lib/i18n';
 import { useReducedMotion } from '@/lib/hooks';
 import { Button } from '@/ui/Button';
-import { Segmented, Switch } from '@/ui/Segmented';
+import { Segmented } from '@/ui/Segmented';
 import { AppIcon, EternalMark } from '@/ui/Logo';
 import { AfinaOrb } from '@/features/afina/AfinaOrb';
 import { cn } from '@/lib/cn';
@@ -64,14 +63,13 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const me = useActiveProfile();
   const [features, setFeatures] = useState<string[]>(s.features);
   const [goal, setGoal] = useState('');
-  const [sample, setSample] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  const finish = async (withSample: boolean) => {
+  // Nothing is added on your behalf: no sample data, only what you type (like the optional goal).
+  const finish = async () => {
     setBusy(true);
     s.set({ features });
     if (goal.trim()) await createGoal({ title: goal.trim() });
-    if (withSample && (await db.tasks.count()) === 0) await seedDemoData();
     await setKV('onboarded', Date.now());
     onDone();
   };
@@ -193,13 +191,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           <span key={c} className="glass rounded-full px-3.5 py-1.5 text-[14px]">{c}</span>
         ))}
       </div>
-      <label className="glass mt-6 flex w-full max-w-md items-center justify-between gap-3 rounded-[20px] p-4 text-left">
-        <span>
-          <span className="block text-[15px] font-semibold">{t('Start with sample data')}</span>
-          <span className="block text-[13px] text-fg/60">{t('See the app alive right away. Remove it in Settings with one click.')}</span>
-        </span>
-        <Switch label={t('Start with sample data')} checked={sample} onChange={setSample} />
-      </label>
+      <p className="mt-6 max-w-md text-[14px] text-fg/60">{t('You start with a clean slate — only what you add shows up. Want to look around first? Settings → Privacy & data → Add sample data.')}</p>
     </div>,
   ];
 
@@ -212,7 +204,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             <motion.span key={i} className="h-1.5 rounded-full bg-fg/20" animate={{ width: i === step ? 28 : 8, background: i <= step ? 'var(--blue)' : 'var(--track)' }} transition={spring} />
           ))}
         </div>
-        <Button variant="ghost" size="sm" onClick={() => void finish(true)} disabled={busy}>{t('Skip')}</Button>
+        <Button variant="ghost" size="sm" onClick={() => void finish()} disabled={busy}>{t('Skip')}</Button>
       </div>
       <div className="flex flex-1 items-center justify-center px-5 py-6">
         <div className="w-full max-w-xl">
@@ -235,7 +227,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         {step < screens.length - 1 ? (
           <Button variant="primary" size="lg" iconRight={ArrowRight} onClick={() => go(step + 1)}>{step === 0 ? t('Get started') : t('Continue')}</Button>
         ) : (
-          <Button variant="brand" size="lg" icon={Sparkles} disabled={busy} onClick={() => void finish(sample)}>{t('Let’s go')}</Button>
+          <Button variant="brand" size="lg" icon={Sparkles} disabled={busy} onClick={() => void finish()}>{t('Let’s go')}</Button>
         )}
       </div>
     </motion.div>

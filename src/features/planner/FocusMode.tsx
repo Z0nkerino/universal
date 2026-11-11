@@ -12,6 +12,7 @@ import { Checkbox } from '@/ui/Checkbox';
 import { toast } from '@/ui/Toast';
 import { useT } from '@/lib/i18n';
 import { useReducedMotion } from '@/lib/hooks';
+import { focusActivity } from '@/lib/widgets';
 import { cn } from '@/lib/cn';
 
 type Phase = 'focus' | 'break' | 'done';
@@ -76,6 +77,26 @@ function FocusSession({ taskId, initialMin, close }: { taskId?: string; initialM
     void playAmbient(ambient);
     return () => stopAmbient();
   }, [ambient]);
+
+  // Mirror the timer to the Live Activity / Dynamic Island (iOS) or ongoing notification (Android).
+  const activity = useRef<'off' | 'on' | 'ended'>('off');
+  const title = task?.title ?? (taskId ? undefined : t('Focus'));
+  useEffect(() => {
+    if (title === undefined || activity.current === 'ended') return;
+    if (phase === 'done') {
+      activity.current = 'ended';
+      void focusActivity.end(true);
+    } else if (activity.current === 'off') {
+      activity.current = 'on';
+      void focusActivity.start({ id: taskId, title, startedAt: Date.now(), endsAt });
+    } else if (pausedLeft !== null) void focusActivity.pause(pausedLeft);
+    else void focusActivity.resume(endsAt);
+  }, [phase, endsAt, pausedLeft, title]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => void (activity.current === 'on' && focusActivity.end(false)), []);
+  // Finished from the Live Activity's Done button (applied when the app comes back).
+  useEffect(() => {
+    if (task?.done && phase !== 'done') setPhase('done');
+  }, [task?.done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finish = async (markDone: boolean) => {
     accumulate();

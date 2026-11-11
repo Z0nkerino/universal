@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Bell, Link2, MapPin, Repeat, Trash2, X } from 'lucide-react';
 import { createEvent, deleteEvent, skipOccurrence, updateEvent } from '@/lib/actions';
-import { EVENT_COLORS, type EventColor, type Freq, type Recurrence } from '@/lib/types';
+import { EVENT_COLORS, type EventColor } from '@/lib/types';
+import { REPEAT_PRESETS, describeRepeat, repeatPreset } from '@/lib/repeatLabel';
 import { Sheet } from '@/ui/Sheet';
 import { Button, IconButton } from '@/ui/Button';
 import { Field, Input, Select, TextArea } from '@/ui/Field';
@@ -15,21 +16,6 @@ import { EVENT_HEX, EVENT_LABEL } from './colors';
 import { cn } from '@/lib/cn';
 import { useEventEditor, type Draft } from './editorStore';
 
-const REPEATS: { value: string; label: string; rule?: Recurrence }[] = [
-  { value: 'none', label: 'Does not repeat' },
-  { value: 'daily', label: 'Every day', rule: { freq: 'daily', interval: 1 } },
-  { value: 'weekdays', label: 'Every weekday (Mon–Fri)', rule: { freq: 'weekly', interval: 1, byDay: [1, 2, 3, 4, 5] } },
-  { value: 'weekly', label: 'Every week', rule: { freq: 'weekly', interval: 1 } },
-  { value: 'biweekly', label: 'Every 2 weeks', rule: { freq: 'weekly', interval: 2 } },
-  { value: 'monthly', label: 'Every month', rule: { freq: 'monthly', interval: 1 } },
-  { value: 'yearly', label: 'Every year', rule: { freq: 'yearly', interval: 1 } },
-];
-function repeatValue(r?: Recurrence) {
-  if (!r) return 'none';
-  if (r.freq === 'weekly' && r.byDay?.length === 5 && !r.byDay.includes(0) && !r.byDay.includes(6)) return 'weekdays';
-  if (r.freq === 'weekly' && r.interval === 2) return 'biweekly';
-  return r.freq as Freq;
-}
 const REMINDERS = [undefined, 0, 5, 10, 15, 30, 60, 120, 1440];
 
 const timeOf = (t: number) => new Date(t).toTimeString().slice(0, 5);
@@ -181,10 +167,11 @@ export function EventEditor() {
             <Field label={t('Repeat')} htmlFor="ev-repeat">
               <div className="relative">
                 <Repeat size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/60" aria-hidden />
-                <Select id="ev-repeat" className="pl-10" value={repeatValue(d.rrule)} onChange={(e) => set({ rrule: REPEATS.find((r) => r.value === e.target.value)?.rule })}>
-                  {REPEATS.map((r) => (
+                <Select id="ev-repeat" className="pl-10" value={repeatPreset(d.rrule)} onChange={(e) => e.target.value !== 'custom' && set({ rrule: REPEAT_PRESETS.find((r) => r.value === e.target.value)?.rule })}>
+                  {REPEAT_PRESETS.map((r) => (
                     <option key={r.value} value={r.value}>{t(r.label)}</option>
                   ))}
+                  {repeatPreset(d.rrule) === 'custom' && <option value="custom">{describeRepeat(d.rrule!, t.lang, d.start)}</option>}
                 </Select>
               </div>
             </Field>

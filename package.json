@@ -2,7 +2,7 @@
   "name": "universal-planner",
   "private": true,
   "version": "1.1.0",
-  "description": "Universal Planner by Eternal Inc. — an all-in-one, offline-first planner.",
+  "description": "Universal Planner by Eternal Inc. \u2014 an all-in-one, offline-first planner.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,10 +15,13 @@
     "dist:win": "npm run build:desktop && electron-builder --win nsis",
     "bundle": "npm run build:desktop && node scripts/make-update-bundle.cjs",
     "test": "vitest run",
-    "build:android": "UP_DESKTOP=1 vite build --outDir dist-android",
-    "android": "npm run build:android && cap sync android"
+    "android": "npm run build:native && cap sync android",
+    "build:native": "UP_DESKTOP=1 vite build --outDir dist-native",
+    "ios:project": "npm run build:native && cap copy ios && (cd ios/App && xcodegen generate) && cap update ios"
   },
   "dependencies": {
+    "@capacitor-community/speech-recognition": "6.0.1",
+    "@capacitor/app": "6.0.2",
     "@fontsource-variable/inter": "^5.1.1",
     "@fontsource-variable/jetbrains-mono": "5.2.6",
     "@fontsource-variable/nunito": "5.2.6",
@@ -56,6 +59,7 @@
     "@capacitor/assets": "3.0.5",
     "@capacitor/cli": "6.2.1",
     "@capacitor/core": "6.2.1",
+    "@capacitor/ios": "6.2.1",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
     "@types/three": "0.170.0",
@@ -79,7 +83,7 @@
   "build": {
     "appId": "com.eternalinc.universalplanner",
     "productName": "Universal Planner",
-    "copyright": "© 2026 Eternal Inc.",
+    "copyright": "\u00a9 2026 Eternal Inc.",
     "directories": {
       "output": "release",
       "buildResources": "build"

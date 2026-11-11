@@ -13,6 +13,10 @@
   --blue-2-rgb: 110 151 255;
   --pink-2-rgb: 255 140 196;
   --blue-soft: rgb(var(--blue-rgb) / 0.15);
+  /* Third stop of the spark gradient (blue → pink → yellow), used for quick-add highlights and progress. */
+  --sun: #ffb020;
+  --sun-rgb: 255 176 32;
+  --spark: linear-gradient(90deg, var(--blue), var(--pink), var(--sun));
   --track: rgb(127 127 127 / 0.25);
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Variable', Inter, system-ui, sans-serif;
   --glass-blur: 24px;
@@ -105,6 +109,20 @@ body {
 
 .text-brand {
   background: var(--brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Parts of a quick-add phrase the parser understood. No padding, so the overlay stays aligned. */
+.qa-mark {
+  color: inherit;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgb(var(--blue-rgb) / 0.16), rgb(var(--pink-rgb) / 0.16), rgb(var(--sun-rgb) / 0.22)),
+    var(--spark) bottom / 100% 2px no-repeat;
+}
+.text-spark {
+  background: var(--spark);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

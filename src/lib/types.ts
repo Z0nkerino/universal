@@ -42,6 +42,10 @@ export interface Task extends Base {
   top?: 0 | 1;
   order: number;
   remindAt?: number;
+  /** Repeating task: finishing it creates the next occurrence. */
+  rrule?: Recurrence;
+  /** The occurrence created when this one was finished (removed again if it's un-finished). */
+  nextId?: ID;
 }
 
 export type Freq = 'daily' | 'weekly' | 'monthly' | 'yearly';

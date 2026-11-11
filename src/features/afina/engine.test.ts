@@ -45,6 +45,19 @@ describe('Afina engine', () => {
     expect(ru.text).toMatch(/Добавил задачу «Купить хлеб»/);
   });
 
+  it('understands the same phrases as quick add, including repeats', async () => {
+    const rent = await ok('Pay rent on the 1st of every month');
+    expect(rent.text).toMatch(/Added the task “Pay rent”.*monthly on the 1st/);
+    const mom = await ok('Call mom every Sunday at 6');
+    expect(mom.text).toMatch(/Added the task “Call mom”.*every sunday/);
+    expect(mom.text).toMatch(/Meant 6:00 AM\?/);
+    const task = (await db.tasks.orderBy('createdAt').last())!;
+    expect(task.rrule).toEqual({ freq: 'weekly', interval: 1, byDay: [0] });
+    expect(new Date(task.start!).getHours()).toBe(18);
+    const ru = await ok('Зарядка по будням');
+    expect(ru.text).toMatch(/Добавил задачу «Зарядка».*по будням/);
+  });
+
   it('plans the day and breaks tasks down', async () => {
     await ok('plan my day');
     const r = await ok('break down write the quarterly report into steps');

@@ -8,6 +8,7 @@ import type { Energy, Priority, Task, TaskStatus } from '@/lib/types';
 import { Sheet } from '@/ui/Sheet';
 import { Button, IconButton } from '@/ui/Button';
 import { Chip, Field, Input, Select, TextArea } from '@/ui/Field';
+import { REPEAT_PRESETS, describeRepeat, repeatPreset } from '@/lib/repeatLabel';
 import { Segmented } from '@/ui/Segmented';
 import { Checkbox } from '@/ui/Checkbox';
 import { confirm } from '@/ui/Confirm';
@@ -130,6 +131,14 @@ export function TaskEditor() {
                 {ESTIMATES.map((m) => (
                   <option key={m} value={m}>{m >= 60 ? `${m / 60} ${tNow('h')}` : `${m} ${tNow('min')}`}</option>
                 ))}
+              </Select>
+            </Field>
+            <Field label={t('Repeat')} htmlFor="task-repeat" hint={draft.rrule ? t('Finishing it schedules the next one.') : undefined}>
+              <Select id="task-repeat" value={repeatPreset(draft.rrule)} onChange={(e) => e.target.value !== 'custom' && patch({ rrule: REPEAT_PRESETS.find((r) => r.value === e.target.value)?.rule })}>
+                {REPEAT_PRESETS.map((r) => (
+                  <option key={r.value} value={r.value}>{t(r.label)}</option>
+                ))}
+                {repeatPreset(draft.rrule) === 'custom' && <option value="custom">{describeRepeat(draft.rrule!, t.lang, draft.start ?? (draft.due ? fromDayKey(draft.due).getTime() : undefined))}</option>}
               </Select>
             </Field>
             <Field label={t('Goal')} htmlFor="task-goal">

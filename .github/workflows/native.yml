@@ -1,0 +1,48 @@
+name: Native builds
+
+# Compiles the iOS app (with its widget extension and Live Activity) and the Android app on
+# every push, so native code is checked even when no release is being made.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, claude/universal-planner]
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: command -v xcodegen || brew install xcodegen
+      - run: npm run ios:project
+      # Simulator build without signing: proves the app, widgets and intents compile.
+      - run: |
+          set -o pipefail
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tail -n 80
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npm run android
+      - run: ./gradlew assembleDebug --no-daemon
+        working-directory: android
