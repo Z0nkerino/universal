@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A determinate ring: the progress layer's level draws the arc in the spark gradient. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:innerRadiusRatio="2.7" android:shape="ring" android:thicknessRatio="9" android:useLevel="false">
+            <solid android:color="@color/widget_track" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <rotate android:fromDegrees="270" android:pivotX="50%" android:pivotY="50%" android:toDegrees="270">
+            <shape android:innerRadiusRatio="2.7" android:shape="ring" android:thicknessRatio="9" android:useLevel="true">
+                <gradient android:centerColor="#FFFF4FA3" android:endColor="#FFFFB020" android:startColor="#FF2F6BFF" android:type="sweep" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

@@ -18,7 +18,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- universalplanner://quickadd from the widget opens quick add. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="universalplanner" />
+            </intent-filter>
         </activity>
+
+        <receiver android:name=".TodayWidgetProvider" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/today_widget_info" />
+        </receiver>
+        <receiver android:name=".FocusActionReceiver" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -32,6 +47,10 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The focus countdown notification (Android 13+ asks first). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Voice input for quick add and Afina. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Weather connector: "Use my location" (approximate is enough). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 </manifest>

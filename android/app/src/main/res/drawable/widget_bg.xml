@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Liquid-glass card: frosted surface with a hairline rim and a soft spark tint. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="24dp" />
+            <solid android:color="@color/widget_bg" />
+            <stroke android:width="1dp" android:color="@color/widget_rim" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="24dp" />
+            <gradient android:angle="315" android:startColor="#142F6BFF" android:centerColor="#00FFFFFF" android:endColor="#14FF4FA3" />
+        </shape>
+    </item>
+</layer-list>

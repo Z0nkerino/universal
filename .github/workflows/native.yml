@@ -28,7 +28,9 @@ jobs:
           set -o pipefail
           xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build 2>&1 | tail -n 80
+            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1 || { grep -E "error:" build.log | sort -u | head -50; tail -n 60 build.log; exit 1; }
+          echo "Warnings in our code:"; grep -E "warning:" build.log | grep -E "ios/App/(App|Shared|Widgets)/" | sort -u || echo "none"
+          grep -E "UniversalWidgets.appex|BUILD SUCCEEDED" build.log | tail -n 5
 
   android:
     runs-on: ubuntu-latest
