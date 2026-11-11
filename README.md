@@ -23,7 +23,7 @@ Every release is on the [Releases page](https://github.com/Z0nkerino/universal/r
 
 **Android:** open the `.apk` on your phone and allow your browser to install apps when asked.
 
-**iPhone:** a native App Store app needs a paid Apple Developer account. The web app installed from Safari works offline, has its own icon and keeps your data on the device.
+**iPhone:** the native app (with Home and Lock Screen widgets, a Live Activity and the Dynamic Island) is built from `ios/` in Xcode. See [iOS app](#ios-app-widgets-and-live-activity) below. Distributing it needs a paid Apple Developer account. Until then, the web app installed from Safari works offline, has its own icon and keeps your data on the device.
 
 ## Develop
 
@@ -45,6 +45,36 @@ npm run dist:mac    # on a Mac: release/Universal-Planner-<version>-mac.dmg
 npm run dist:win    # on Windows: release/Universal-Planner-<version>-windows-setup.exe
 npm run android     # build the web app into the Android project (then open android/ in Android Studio)
 ```
+
+## iOS app, widgets and Live Activity
+
+The iPhone/iPad app wraps the same web app (Capacitor) and adds native pieces in Swift:
+
+| Piece | Where |
+| --- | --- |
+| Home Screen widgets: small (next task + ring), medium (next 3 with checkboxes), large (today with times) | `ios/App/Widgets/TodayWidget.swift` |
+| Lock Screen widgets: progress ring, next task | `ios/App/Widgets/LockScreenWidgets.swift` |
+| Live Activity + Dynamic Island for a running task or focus session, with Done | `ios/App/Widgets/FocusLiveActivity.swift` |
+| Check-off and Done actions (App Intents) | `ios/App/Shared/WidgetIntents.swift` |
+| Shared store (App Group) and snapshot format | `ios/App/Shared/WidgetData.swift`, `src/lib/widgets.ts` |
+| Bridge the web app calls | `ios/App/App/UniversalWidgetsPlugin.swift` |
+
+**One-time setup on a Mac** (Xcode 16 or newer):
+
+1. `brew install xcodegen cocoapods`
+2. `npm install && npm run ios:project`. This builds the web app, generates `ios/App/App.xcodeproj` from `ios/App/project.yml` and installs the pods. Run it again after pulling changes.
+3. `open ios/App/App.xcworkspace`
+4. For **both** targets (**App** and **UniversalWidgets**), open **Signing & Capabilities**, pick your **Team** and keep "Automatically manage signing" on. Xcode registers the bundle IDs and the App Group for you:
+   - App: `com.eternalinc.universalplanner`
+   - Widgets: `com.eternalinc.universalplanner.widgets`
+   - App Group (both): `group.com.eternalinc.universalplanner`
+
+   If a bundle ID is taken, change both IDs in `project.yml`. If you change the App Group, update it in `App/App.entitlements`, `Widgets/UniversalWidgets.entitlements` and `Shared/WidgetData.swift`.
+5. Run on an iPhone with iOS 17 or later (widgets and the Live Activity need iOS 17; the app itself runs on iOS 15+).
+
+App Groups need a **paid** Apple Developer account; a free personal team can't sign them, so widgets won't install with one. Live Activities can be turned off per app in iOS Settings → Universal Planner. CI (`.github/workflows/native.yml`) compiles the app and widgets on every push, without signing.
+
+**How the widgets stay current:** whenever tasks change, the app writes a small snapshot of today's and tomorrow's tasks into the App Group and asks WidgetKit to redraw. Checking a task off in a widget updates it right away and queues the change; the app applies the queue as soon as it's opened or comes back to the front. Widgets also redraw on their own at each task's start time and at midnight.
 
 ## Releasing
 
@@ -107,6 +137,12 @@ Release files must be downloadable without signing in, so the repository has to 
 
 Some calendar and webhook services don't accept requests from web browsers. They always work in the desktop and Android apps; in a browser the app tells you when a service blocks it.
 
+**Quick add** (the field on Today → Tasks, the **+** button, ⌘K, or **Add** in a widget) understands phrases such as "Gym tomorrow 7pm", "Call mom every Sunday at 6", "Pay rent on the 1st of every month" and "Read 20 min tonight !high", in English and Russian. It highlights what it understood as you type and previews the task. If something is ambiguous ("at 6", "next Friday"), it makes a sensible guess and offers the other reading as a one-tap chip; repeat, priority and duration are one tap too. Saving is never blocked. The mic button dictates with the device's own speech recognition. Afina understands the same phrases. Repeating tasks schedule their next occurrence when you finish them.
+
+**Widgets:** iOS has Home and Lock Screen widgets plus a Live Activity (see above). On Android, long-press the home screen → Widgets → Universal Planner. The widget resizes from a progress ring with your next task to today's list with checkboxes. Focus sessions show an ongoing notification with a countdown and **Done** (Android 13+ asks for notification permission the first time).
+
+**Only what you add:** new profiles start empty. Sample data is never added automatically; Settings → Privacy & data → **Add sample data** adds it if you want to look around first.
+
 **Your data:** Settings → Privacy & data exports a full backup (`.json`) of the current profile and imports it on another device. Sample data from onboarding can be removed there with one click.
 
 ## Project layout
@@ -120,7 +156,8 @@ src/
     today/  calendar/  planner/  notes/  ideas/  diet/  analytics/  afina/
     account/  connectors/  onboarding/  settings/
 electron/         desktop shell and self-updater
-android/          Capacitor Android project
+android/          Capacitor Android project, home screen widget, focus notification
+ios/App/          iOS app: project.yml (XcodeGen), widget extension, Live Activity, App Intents
 public/brand/     logos and app icons
 ```
 
