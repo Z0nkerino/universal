@@ -61,7 +61,7 @@ jobs:
   mac:
     needs: version
     if: needs.version.outputs.release == 'true'
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
