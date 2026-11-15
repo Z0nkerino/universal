@@ -11,7 +11,7 @@ import { QuickAdd } from '@/features/planner/QuickAdd';
 import { useIsDesktop } from '@/lib/hooks';
 import { useT } from '@/lib/i18n';
 import { springSnappy } from '@/lib/motion';
-import { useRouter } from './router';
+import { setHash, useRouter } from './router';
 
 type Kind = 'idea' | 'task' | 'note';
 export const useCapture = create<{ open: boolean; kind: Kind; show: (kind?: Kind) => void; hide: () => void }>((set) => ({
@@ -41,7 +41,7 @@ export function QuickCapture() {
   useEffect(() => {
     const fromHash = () => {
       if (!/^#\/add\b/.test(location.hash)) return;
-      history.replaceState(null, '', '#/today');
+      setHash('#/today', true);
       useRouter.setState({ route: 'today' });
       show('task');
     };

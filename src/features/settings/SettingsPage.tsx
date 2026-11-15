@@ -41,7 +41,7 @@ import { useT } from '@/lib/i18n';
 import { downloadBackup, importBackup, wipeAllData } from '@/lib/backup';
 import { useInstall, platform } from '@/lib/install';
 import { appUpdater, useUpdates } from '@/lib/desktop';
-import { useRouter } from '@/app/router';
+import { setHash, useRouter } from '@/app/router';
 import { hasDemoData, removeDemoData, seedDemoData } from '@/lib/demo';
 import { requestNotificationPermission } from '@/lib/reminders';
 import { deleteProfile, lockNow, pinSupported, removePin, switchProfile, updateProfile, useActiveProfile, useProfiles, checkPin } from '@/lib/profiles';
@@ -761,7 +761,7 @@ function scrollToSection(id: string) {
   const el = document.getElementById(`s-${id}`);
   if (!el) return;
   el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-  history.replaceState(null, '', `#/settings/${id}`);
+  setHash(`#/settings/${id}`, true);
 }
 
 export default function SettingsPage() {

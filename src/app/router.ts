@@ -15,11 +15,20 @@ interface RouterState {
   go: (r: Route, sub?: string) => void;
 }
 
+/** Updates the address bar; some embeds (e.g. a sandboxed frame) refuse, which is fine. */
+export function setHash(hash: string, replace = false) {
+  try {
+    if (location.hash !== hash) history[replace ? 'replaceState' : 'pushState'](null, '', hash);
+  } catch {
+    /* navigation still works through the router's state */
+  }
+}
+
 export const useRouter = create<RouterState>((set) => ({
   route: fromHash(),
   go: (route, sub) => {
     const hash = `#/${route}${sub ? `/${sub}` : ''}`;
-    if (location.hash !== hash) history.pushState(null, '', hash);
+    setHash(hash);
     set({ route });
     if (sub) dispatchEvent(new Event('up:subroute'));
   },
